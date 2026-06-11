@@ -15,6 +15,7 @@ export const playgroundDemos = {
   canvas,
   spawnPaintableSphere,
   spawnShaderSphere,
+  spawnDissolveCube
 }
 
 
@@ -188,6 +189,28 @@ function spawnShaderSphere(pos: Vector3) {
   }, 50);
 }
 
+// create a cube and attach shadercode new/
+async function spawnDissolveCube(pos: Vector3) {
+
+  const cube = spawnPrimitive.cube(pos, new Vector3(1,1,1), Quaternion.fromEuler(new Vector3((Math.PI / 6), 0, 0)), new Color(0.1,0.5,0.1), 1, true, 'Static', undefined);
+
+  const nodeId = cube.mesh.nodeID ?? -1;
+  Godot.shader.applyToMesh(nodeId, shaderCodeNew);
+  
+  Async.setInterval(() => {
+    const playerPos = Player.position.get();
+    if (playerPos) {
+      const distance = playerPos.distanceTo(pos);
+      // Map distance: 1.0 (white) at sphere surface (0.5m) down to 0.0 (black) at 8.0m
+      // if difference is above 10 cap it at 10, if below 2 cap it at 2
+      const proximityMinMax = Math.max(2, Math.min(10, distance));
+
+      const nodeId = cube.mesh.nodeID ?? -1;
+      Godot.shader.updateNumber(nodeId, 'dissolve', proximityMinMax);
+    }
+  }, 50);
+}
+
 //The color on this needs to be 100% bright after the avg is determined
 const shaderCodeSpiral = `
   shader_type spatial;
@@ -213,5 +236,61 @@ const shaderCodeSpiral = `
 
     ALBEDO = vec3(result);
     ALPHA = 1.0;
+  }
+`;
+
+//The color on this needs to be 100% bright after the avg is determined
+const shaderCodeNew = `
+  shader_type spatial;
+
+  uniform float dissolve : hint_range(0.0, 1.0) = 0.0;
+  uniform float noise_scale = 50.0;
+
+  float hash(vec3 p) {
+      p = fract(p * 0.3183099 + vec3(0.1));
+      p *= 17.0;
+      return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+  }
+
+  float noise3d(vec3 p) {
+      vec3 i = floor(p);
+      vec3 f = fract(p);
+
+      f = f * f * (3.0 - 2.0 * f);
+
+      float n000 = hash(i + vec3(0,0,0));
+      float n100 = hash(i + vec3(1,0,0));
+      float n010 = hash(i + vec3(0,1,0));
+      float n110 = hash(i + vec3(1,1,0));
+      float n001 = hash(i + vec3(0,0,1));
+      float n101 = hash(i + vec3(1,0,1));
+      float n011 = hash(i + vec3(0,1,1));
+      float n111 = hash(i + vec3(1,1,1));
+
+      return mix(
+          mix(
+              mix(n000, n100, f.x),
+              mix(n010, n110, f.x),
+              f.y
+          ),
+          mix(
+              mix(n001, n101, f.x),
+              mix(n011, n111, f.x),
+              f.y
+          ),
+          f.z
+      );
+  }
+
+  void fragment() {
+      float n = noise3d(VERTEX * noise_scale);
+
+      // Equivalent to Blender's Less Than node
+      if (n >= dissolve) {
+          discard;
+      }
+
+      ALBEDO = vec3(1.0);
+      EMISSION = vec3(1.0);
   }
 `;
