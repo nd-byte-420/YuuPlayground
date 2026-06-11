@@ -208,10 +208,10 @@ async function spawnDissolveCube(pos: Vector3) {
       if (distance <= 2) {
         normalizedDistance = 0;
       }
-      if (distance >= 10) {
+      if (distance >= 5) {
         normalizedDistance = 1;
       }
-      if (distance <= 6) {
+      if (distance <= 3) {
         normalizedDistance= 0.125 * (distance - 2);
       } else {
         normalizedDistance= 0.5 + 0.125 * (distance - 6);
