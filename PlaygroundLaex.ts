@@ -402,7 +402,7 @@ void vertex() {
 
 void fragment() {
     // --- Sub-Graph 1 & 2: Voxel Grid Bounds (Separate XYZ & Math 0-10) ---
-float grid_scale = 10.0; 
+float grid_scale = 2.0; 
     vec3 fract_pos = fract(obj_pos * grid_scale);
 
     // Note: The Blender JSON exported identical default values (0.5) for both Less Than and Greater Than inputs.
