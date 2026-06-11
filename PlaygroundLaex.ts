@@ -374,10 +374,11 @@ const shaderCodeNew = `
 
 const shaderGrid = `
 shader_type spatial;
-// cull_disabled allows the camera to go inside the box without it turning invisible
 render_mode blend_mix, depth_draw_opaque, cull_disabled, unshaded;
 
-// Standard 3D pseudo-random noise function
+uniform vec3 camera_coords = vec3(0.0, 0.0, 0.0);
+varying vec3 obj_pos;
+
 float hash(vec3 p) {
     return fract(sin(dot(p, vec3(12.9898, 78.233, 144.7272))) * 43758.5453);
 }
@@ -392,7 +393,6 @@ float noise(vec3 p) {
                    mix(hash(i + vec3(0.0,1.0,1.0)), hash(i + vec3(1.0,1.0,1.0)), f.x), f.y), f.z);
 }
 
-// Helper function: Calculates where the camera's ray enters and exits a Godot BoxMesh
 vec2 intersectAABB(vec3 rayOrigin, vec3 rayDir, vec3 boxMin, vec3 boxMax) {
     vec3 tMin = (boxMin - rayOrigin) / rayDir;
     vec3 tMax = (boxMax - rayOrigin) / rayDir;
@@ -404,40 +404,32 @@ vec2 intersectAABB(vec3 rayOrigin, vec3 rayDir, vec3 boxMin, vec3 boxMax) {
 }
 
 void fragment() {
-    // 1. Setup the Ray: Where is the camera, and what direction is it looking? (Object Space)
     vec3 ro = (inverse(MODEL_MATRIX) * vec4(INV_VIEW_MATRIX[3].xyz, 1.0)).xyz;
     vec3 pixel_pos_obj = (inverse(MODEL_MATRIX) * vec4(INV_VIEW_MATRIX * vec4(VERTEX, 1.0))).xyz;
     vec3 rd = normalize(pixel_pos_obj - ro);
 
-    // 2. Find where the ray enters and exits the standard Godot BoxMesh (-0.5 to 0.5)
     vec2 hit = intersectAABB(ro, rd, vec3(-0.5), vec3(0.5));
     float tNear = hit.x;
     float tFar = hit.y;
 
-    // If the ray entirely misses the box, throw the pixel away
     if (tNear > tFar || tFar < 0.0) {
         discard;
     }
 
-    // Don't draw behind the camera if we are standing inside the box
     tNear = max(tNear, 0.0);
 
-    // 3. RAYMARCHING CONFIGURATION
-    // Higher MAX_STEPS = better quality/sharper voxels, but costs more GPU.
+    // INCREASED STEPS: We need smaller steps so the ray stops exactly on the voxel face
     int MAX_STEPS = 32; 
     float step_size = (tFar - tNear) / float(MAX_STEPS);
     float t = tNear;
 
-    float accumulated_alpha = 0.0;
-    vec3 accumulated_emission = vec3(0.0);
+    float hit_alpha = 0.0;
+    vec3 final_color = vec3(0.0);
     float fade_distance = 30.0;
 
-    // 4. Step through the 3D volume
     for(int i = 0; i < MAX_STEPS; i++) {
-        // Find the exact 3D coordinate of our current step
         vec3 sample_pos = ro + rd * t; 
 
-        // --- Your Voxel Math ---
         float grid_scale = 10.0; 
         vec3 fract_pos = fract((sample_pos * grid_scale) + vec3(0.5));
 
@@ -455,59 +447,64 @@ void fragment() {
 
         float math10 = (math2 * math5) * math8;
 
-        // If we are currently inside the bounds of a voxel, calculate the noise/camera distance
         if (math10 > 0.0) {
-            
-            // Get view space position of this specific inner voxel
             vec3 view_pos = (VIEW_MATRIX * MODEL_MATRIX * vec4(sample_pos, 1.0)).xyz;
             vec3 scaled_vertex = view_pos / fade_distance;
 
-            float math11 = abs(scaled_vertex.x);
-            float math12 = abs(scaled_vertex.y);
-            float math13 = abs(scaled_vertex.z);
+            float m11 = abs(scaled_vertex.x);
+            float m12 = abs(scaled_vertex.y);
+            float m13 = abs(scaled_vertex.z);
 
-            float math14 = pow(math11, 0.5);
-            float math15 = pow(math12, 0.5);
-            float math16 = pow(math13, 0.5);
-
-            float math19 = pow((math14 + math15) + math16, 0.5);
-            float math20 = (math19 < 2.0) ? 1.0 : 0.0;
+            float m19 = pow(pow(m11, 0.5) + pow(m12, 0.5) + pow(m13, 0.5), 0.5);
+            float math20 = (m19 < 2.0) ? 1.0 : 0.0;
 
             float n_val = noise(sample_pos * 50.0); 
-            float map_range = clamp(math19, 0.0, 1.0); 
+            float map_range = clamp(m19, 0.0, 1.0); 
             float math21 = (n_val > map_range) ? 1.0 : 0.0;
 
-            float math24 = math20 * math21 * 0.5;
-
-            // If the noise allows this voxel to exist, accumulate density!
-            if (math24 > 0.0) {
-                // Adjust this to make the voxels more solid or more ghost-like
-                float density_per_step = 0.15; 
+            if (math20 * math21 > 0.0) {
+                // WE HIT A SOLID VOXEL! 
                 
-                accumulated_alpha += density_per_step;
-                accumulated_emission += vec3(0.0, 0.4, 0.6) * density_per_step;
+                // 1. Mathematically determine which side of the cube we hit
+                vec3 center_dist = fract_pos - vec3(0.5);
+                vec3 abs_dist = abs(center_dist);
+                vec3 normal = vec3(0.0);
+                
+                if (abs_dist.x >= abs_dist.y && abs_dist.x >= abs_dist.z) {
+                    normal = vec3(sign(center_dist.x), 0.0, 0.0);
+                } else if (abs_dist.y >= abs_dist.x && abs_dist.y >= abs_dist.z) {
+                    normal = vec3(0.0, sign(center_dist.y), 0.0);
+                } else {
+                    normal = vec3(0.0, 0.0, sign(center_dist.z));
+                }
+
+                // 2. FAKE LIGHTING: Shine a light diagonally down onto the voxels
+                vec3 light_dir = normalize(vec3(0.5, 0.8, 0.5));
+                
+                // Base light (0.1 acts as ambient shadow)
+                float lighting = max(dot(normal, light_dir), 0.1); 
+                
+                // Add a little fake bounce light coming from below
+                float bounce = max(dot(normal, vec3(0.0, -1.0, 0.0)), 0.0) * 0.2;
+
+                // Apply the calculated light to the base color
+                vec3 base_color = vec3(0.0, 0.8, 1.0);
+                final_color = base_color * (lighting + bounce);
+                
+                hit_alpha = 1.0;
+                break; // STOP THE RAY! We found the surface, don't look any deeper.
             }
         }
-
-        // Early exit: If the pixel is already fully opaque, stop doing math
-        if (accumulated_alpha >= 1.0) {
-            accumulated_alpha = 1.0;
-            break;
-        }
-
-        // Move the ray forward
         t += step_size;
     }
 
-    // Clean up empty space so it doesn't render dark artifacts
-    if (accumulated_alpha <= 0.01) {
+    if (hit_alpha < 0.5) {
         discard; 
     }
 
-    // Final Output
-    ALBEDO = vec3(0.0, 0.8, 1.0);
-    EMISSION = accumulated_emission;
-    ALPHA = accumulated_alpha;
+    ALBEDO = final_color;
+    ALPHA = hit_alpha;
+}
 }`
 
 const shaderBest = `
