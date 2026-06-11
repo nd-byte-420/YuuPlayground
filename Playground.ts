@@ -11,6 +11,7 @@ async function start() {
   playgroundDemos.canvas(new Vector3(0, 0.85, -4), Quaternion.one, Vector3.one);
   lexy.spawnDrawSettingButtons(new Vector3(0, 2.05, -4.15));
   playgroundDemos.colorPicker(new Vector3(1, 1.5, -3.5), Quaternion.fromEuler(new Vector3(0, -Math.PI / 4, 0)), new Vector3(0.35, 1, 0.35));
+  playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));
 
   // Come back to this to get water shader working
   // playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));

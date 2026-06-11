@@ -138,172 +138,80 @@ function spawnPaintableSphere(pos: Vector3) {
 }
 
 function spawnShaderSphere(pos: Vector3) {
-  const shaderSphere = spawnPrimitive.sphere(16, 16, pos, 1, Quaternion.fromEuler(new Vector3(0, 180, 0)), Color.white, 1, 'None', 'Static', undefined);
+  const shaderSphere = spawnPrimitive.sphere(32, 32, pos, 2, Quaternion.fromEuler(new Vector3(0, 180, 0)), Color.white, 1, 'None', 'Static', undefined);
 
   shaderSphere.trigger.initialize(1, undefined);
   shaderSphere.trigger.setOccupiedFunction((occupiedTriggerPayload) => {
     Player.position.set(occupiedTriggerPayload.pos.add(new Vector3(0, 5, 0)));
   });
 
+  const texture2 = new Texture(8, 8);
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      const isLeft = x < 4;
+      const isTop = y < 4;
+      let r = 0, g = 0, b = 0;
+      if (isTop && isLeft)       { r = 1; g = 0; b = 0; } // top-left: red
+      else if (isTop && !isLeft) { r = 0; g = 1; b = 0; } // top-right: green
+      else if (!isTop && isLeft) { r = 0; g = 0; b = 1; } // bottom-left: blue
+      else                       { r = 1; g = 1; b = 1; } // bottom-right: white
+      Godot.image.setPixelsColor(texture2.imageID, new Int32Array([x, y]), r, g, b, 1.0);
+    }
+  }
+
+  Godot.image.updateTexture(texture2.imageID);
+  shaderSphere.mesh.texture.set(texture2, false);
+  shaderSphere.mesh.texture.setMipMaps(false);
+
   Godot.shader.applyToMesh(shaderSphere.mesh.nodeID ?? -1, shaderCodeSpiral);
 
-  let hue = 0;
+  const initialPlayerPos = Player.position.get();
+  if (initialPlayerPos) {
+    const nodeId = shaderSphere.mesh.nodeID ?? -1;
+    Godot.shader.updateColor(nodeId, 'player_pos', initialPlayerPos.x, initialPlayerPos.y, initialPlayerPos.z);
+    Godot.shader.updateColor(nodeId, 'sphere_pos', pos.x, pos.y, pos.z);
+  }
 
   Async.setInterval(() => {
-    hue = (hue + 0.005) % 1;
-    const color = Color.fromHSV(hue, 1, 1);
-    Godot.shader.updateColor(shaderSphere.mesh.nodeID ?? -1, 'line_color', color.r, color.g, color.b);
-  }, 100);
+    const playerPos = Player.position.get();
+    if (playerPos) {
+      const distance = playerPos.distanceTo(pos);
+      // Map distance: 1.0 (white) at sphere surface (0.5m) down to 0.0 (black) at 8.0m
+      // if difference is above 10 cap it at 10, if below 2 cap it at 2
+      const proximityMinMax = Math.max(2, Math.min(10, distance));
+
+      const nodeId = shaderSphere.mesh.nodeID ?? -1;
+      Godot.shader.updateNumber(nodeId, 'proximity', proximityMinMax);
+      Godot.shader.updateColor(nodeId, 'player_pos', playerPos.x, playerPos.y, playerPos.z);
+      Godot.shader.updateColor(nodeId, 'sphere_pos', pos.x, pos.y, pos.z);
+    }
+  }, 50);
 }
 
 //The color on this needs to be 100% bright after the avg is determined
 const shaderCodeSpiral = `
   shader_type spatial;
 
-  uniform vec2 resolution = vec2(1920.0,1080.0);
-  uniform vec3 line_color: source_color = vec3(0.0,1.0,0.0);
-  uniform float direction: hint_range(-1.0, 1.0, 0.01) = 0.5;
-  uniform float brightness: hint_range(0.0, 30.0, 0.01) = 15.0;
-  uniform float speed: hint_range(0.0, 10.0, 0.01) = 1.0;
-  uniform float octaves: hint_range(1.0, 200.0, 0.1) = 100.0;
-  uniform float shift: hint_range(0.0, 10.0, 0.01) = 1.0;
-  uniform float stretch: hint_range(1.0, 100.0, 0.1) = 10.0;
-  uniform float alpha_threshold: hint_range(0.0, 1.0, 0.01) = 1.0;
-
-  mat2 rotate(float a) {
-    float sa = sin(a);
-    float ca = cos(a);
-    return mat2(vec2(ca, sa), vec2(-sa,ca));
-  }
-
-  vec3 fbm(vec3 ray) { //fbm = fractal brownian motion
-    vec3 result = vec3(0.0);
-    float time = TIME * speed;
-    for (float i = 0.0; i < octaves; i++) {
-      vec3 p = result;
-      p.z += time + i * shift * 0.01;
-      p.z /= stretch * 1.0;
-      p.xy *= rotate(p.z);
-      result += length(sin(p.yx + time) + cos(p.xz + time)) * ray;
-    }
-    return result;
-  }
+  uniform float proximity;
 
   void fragment() {
-    vec2 uv = UV - 0.5; //moves coordinate origin to center
-    uv.x *= resolution.x / resolution.y;
-    vec3 ray = vec3(uv, direction);
-    vec3 result = fbm(ray);
-    vec3 color = vec3(brightness / length(result)) * line_color;
-    float avg = (color.r + color.g + color.b) / 3.0;
-    
-    
-    ALBEDO = color;
-    ALPHA = clamp(avg * 3.0 - 0.5, 0.0, 1.0);
-    // ALPHA = avg <= alpha_threshold ? 0.0 : 1.0;
-  }
-`;
+    vec2 uv = UV - 0.5;
+    uv *= proximity;
 
-const shaderCodeWater = `
-  shader_type spatial;
+    float fracX = fract(uv.x);
+    float fracY = fract(uv.y);
 
-  uniform sampler2D DEPTH_TEXTURE : hint_depth_texture, filter_linear_mipmap;
-  uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
+    float blenderX = abs(fracX - 0.5);
+    float blenderY = abs(fracY - 0.5);
 
-  uniform vec3 albedo : source_color;
-  uniform vec3 albedo2 : source_color;
-  uniform float metallic : hint_range(0.0, 0.1) = 0;
-  uniform float roughness : hint_range(0.0, 1.0) = 0.02;
-  uniform sampler2D wave;
-  uniform sampler2D texture_normal;
-  uniform sampler2D texture_normal2;
-  uniform vec2 wave_direction = vec2(2.0, 0.0);
-  uniform vec2 wave_direction2 = vec2(0.0, 1.0);
-  uniform float time_scale : hint_range(0.0, 0.2, 0.005) = 0.025;
-  uniform float noise_scale = 10.0;
-  uniform float height_scale = 0.15;
+    float maxUV = max(blenderX, blenderY);
 
-  uniform vec4 color_deep : source_color; // Deep depth color
-  uniform vec4 color_shallow : source_color; // Shallow depth color
-  uniform float beers_law = 2.0; // Beer's law application
-  uniform float depth_offset = -0.75; // Offset
+    float mulled = maxUV * 0.5;
+    mulled -= 0.25;
 
-  uniform float edge_scale = 0.1;
-  uniform float near = 1.0;
-  uniform float far = 100.0;
-  uniform vec3 edge_color : source_color;
+    float result = abs(mulled); 
 
-
-
-
-  // Varying Variables
-  varying float height;
-  varying vec3 world_pos;
-
-
-  float fresnel(float amount, vec3 normal, vec3 view)
-  {
-    return pow((1.0 - clamp(dot(normalize(normal), normalize(view)), 0.0, 1.0)), amount);
-  }
-  float edge(float depth){
-    depth = 1.0 - 2.0 * depth;
-    return near * far / (far + depth * (near - far));
-  }
-
-  void vertex() {
-    world_pos = (MODEL_MATRIX * vec4(VERTEX,1.0)).xyz;
-    height = texture(wave,world_pos.xz / noise_scale + TIME * time_scale).r;
-    VERTEX.y += height * height_scale;
-  }
-
-
-  void fragment() {
-    //Depth variables and calc
-    float depth_texture = texture(DEPTH_TEXTURE, SCREEN_UV).r  * 2.0 - 1.0;
-    float depth = PROJECTION_MATRIX[3][2] / (depth_texture + PROJECTION_MATRIX[2][2]);
-    float depth_blend = exp((depth+VERTEX.z + depth_offset) * -beers_law);
-    depth_blend = clamp(1.0 - depth_blend, 0.0, 1.0);
-    float depth_blend_power = clamp(pow(depth_blend, 2.5), 0.0, 1.0);
-    
-    vec3 screen_color = textureLod(SCREEN_TEXTURE, SCREEN_UV, depth_blend_power * 2.5).rgb;
-    vec3 depth_color = mix(color_shallow.rgb, color_deep.rgb, depth_blend_power);
-    vec3 color = mix(screen_color * depth_color, depth_color * 0.25, depth_blend_power * 0.5);
-    
-    // Getting edge depth call
-    float z_depth = edge(texture(DEPTH_TEXTURE, SCREEN_UV).x);
-    float z_pos = edge(FRAGCOORD.z);
-    float z_dif = z_depth - z_pos;
-    
-    
-    // Time calculations for wave(normal map) movement
-    vec2 time = (TIME * wave_direction) * time_scale; //movement rate of first wave
-    vec2 time2 = (TIME * wave_direction2) * time_scale; //movement rate of second wave
-    
-    // Blend normal maps into one
-    vec3 normal_blend = mix(texture(texture_normal,world_pos.xz + time).rgb, 
-    texture(texture_normal2,world_pos.xz + time2).rgb, 0.5);
-    
-    // Calculate Fresnel
-    float fresnel = fresnel(5.0,NORMAL,VIEW);
-    vec3 surface_color = mix(albedo,albedo2,fresnel); // Interpolate albedo values by fresnel
-    
-    vec3 depth_color_adj = mix(edge_color, color, step(edge_scale, z_dif));
-    
-    
-    ALBEDO = clamp(surface_color + depth_color_adj,vec3(0.0),vec3(1.0));
-    METALLIC = metallic;
-    ROUGHNESS = roughness;
-    NORMAL_MAP = normal_blend;
-    
-  }
-`;
-
-const shaderCodeMirror = `
-  shader_type spatial;
-
-  void fragment() {
-  ROUGHNESS = 0.0;
-  METALLIC = 1.0;
-  ALBEDO = vec3(1.0, 1.0, 1.0);
+    ALBEDO = vec3(result);
+    ALPHA = 1.0;
   }
 `;
