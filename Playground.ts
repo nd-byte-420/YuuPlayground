@@ -155,9 +155,9 @@ async function start() {
     for (let y = 0; y < 5; y++) {
       for (let z = 0; z < 5; z++) {
         playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25), 2.5 - (y * 0.25), 3 - (z * 0.25)));
-        playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25) + 0.25, 2.5 - (y * 0.25), 3 - (z * 0.25)));
-        playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25) + 0.5, 2.5 - (y * 0.25), 3 - (z * 0.25)));
-        playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25) + 0.75, 2.5 - (y * 0.25), 3 - (z * 0.25)));
+        // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25) + 0.25, 2.5 - (y * 0.25), 3 - (z * 0.25)));
+        // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25) + 0.5, 2.5 - (y * 0.25), 3 - (z * 0.25)));
+        // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25) + 0.75, 2.5 - (y * 0.25), 3 - (z * 0.25)));
       }
     }
   }
