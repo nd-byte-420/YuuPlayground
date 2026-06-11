@@ -297,8 +297,9 @@ const shaderCodeNew = `
   void fragment() {
       float n = noise3d(VERTEX * noise_scale);
 
+      float dist = smoothstep(0.0, 2.0, dissolve);
       // Equivalent to Blender's Less Than node
-      if (n >= dissolve) {
+      if (n >= dist) {
           discard;
       }
 
