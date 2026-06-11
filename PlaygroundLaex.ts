@@ -424,7 +424,7 @@ void fragment() {
 
     // 3. RAYMARCHING CONFIGURATION
     // Higher MAX_STEPS = better quality/sharper voxels, but costs more GPU.
-    int MAX_STEPS = 64; 
+    int MAX_STEPS = 8; 
     float step_size = (tFar - tNear) / float(MAX_STEPS);
     float t = tNear;
 
