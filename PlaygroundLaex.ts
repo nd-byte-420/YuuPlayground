@@ -194,6 +194,8 @@ async function spawnDissolveCube(pos: Vector3) {
 
   const cube = spawnPrimitive.cube(pos, new Vector3(1,1,1), Quaternion.fromEuler(new Vector3((Math.PI / 6), 0, 0)), new Color(0.1,0.5,0.1), 1, true, 'Static', undefined);
 
+  cube.collidable.set(false)
+
   const nodeId = cube.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, shaderCodeNew);
   
