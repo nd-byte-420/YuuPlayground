@@ -203,17 +203,10 @@ async function spawnDissolveCube(pos: Vector3) {
     const playerPos = Player.position.get();
     if (playerPos) {
       const distance = playerPos.distanceTo(pos);
-      let normalizedDistance = 0;
-
-      if (distance <= 5) {
-        normalizedDistance = 0;
-      }else if (distance >= 15) {
-        normalizedDistance = 1;
-      }else if (distance <= 10) {
-        normalizedDistance= 0.125 * (distance - 20);
-      } else {
-        normalizedDistance= 0.5 + 0.125 * (distance - 6);
-      }
+      const normalizedDistance =
+        distance <= 5 ? 0 :
+          distance >= 6 ? 1 :
+            distance - 5;
 
       const nodeId = cube.mesh.nodeID ?? -1;
       Godot.shader.updateNumber(nodeId, 'dissolve', normalizedDistance);
