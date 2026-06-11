@@ -373,112 +373,206 @@ const shaderCodeNew = `
 
 const shaderBest = `
 shader_type spatial;
-render_mode blend_add, depth_draw_opaque, cull_disabled, unshaded;
+render_mode blend_mix, depth_draw_opaque, cull_disabled, unshaded;
 
-// Colors pulled directly from your Principled Volume node
-uniform vec3 volume_color : source_color = vec3(0.0, 0.8, 1.0);
-uniform vec3 emission_color : source_color = vec3(0.0, 0.4, 0.6);
+// Replaces the "Camera" vector from Blender's Texture Coordinate node
+uniform vec3 camera_coords = vec3(0.0, 0.0, 0.0);
 
-// NEW: Your custom camera/target coordinate
-uniform vec3 custom_camera_pos = vec3(0.0, 0.0, 0.0);
+varying vec3 obj_pos;
 
-varying vec3 local_pos;
-varying vec3 world_pos; // We need this to compare against your custom uniform
+// Standard 3D pseudo-random noise function to mimic Blender's Noise Texture
+float hash(vec3 p) {
+    return fract(sin(dot(p, vec3(12.9898, 78.233, 144.7272))) * 43758.5453);
+}
+
+float noise(vec3 p) {
+    vec3 i = floor(p);
+    vec3 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(mix(hash(i + vec3(0.0,0.0,0.0)), hash(i + vec3(1.0,0.0,0.0)), f.x),
+                   mix(hash(i + vec3(0.0,1.0,0.0)), hash(i + vec3(1.0,1.0,0.0)), f.x), f.y),
+               mix(mix(hash(i + vec3(0.0,0.0,1.0)), hash(i + vec3(1.0,0.0,1.0)), f.x),
+                   mix(hash(i + vec3(0.0,1.0,1.0)), hash(i + vec3(1.0,1.0,1.0)), f.x), f.y), f.z);
+}
 
 void vertex() {
-    local_pos = VERTEX;
-    // Get the absolute world position of the vertex
-    world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-}
-
-// ----------------------------------------------------
-// FBM Noise (Unchanged)
-// ----------------------------------------------------
-float hash(vec3 p) {
-    p = fract(p * 0.3183099 + 0.1);
-    p *= 17.0;
-    return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
-}
-
-float noise(vec3 x) {
-    vec3 i = floor(x);
-    vec3 f = fract(x);
-    f = f * f * (3.0 - 2.0 * f);
-    return mix(mix(mix(hash(i + vec3(0, 0, 0)), hash(i + vec3(1, 0, 0)), f.x),
-                   mix(hash(i + vec3(0, 1, 0)), hash(i + vec3(1, 1, 0)), f.x), f.y),
-               mix(mix(hash(i + vec3(0, 0, 1)), hash(i + vec3(1, 0, 1)), f.x),
-                   mix(hash(i + vec3(0, 1, 1)), hash(i + vec3(1, 1, 1)), f.x), f.y), f.z);
-}
-
-float fbm(vec3 x) {
-    float v = 0.0;
-    float a = 0.5;
-    vec3 shift = vec3(100.0);
-    for (int i = 0; i < 3; ++i) { 
-        v += a * noise(x);
-        x = x * 2.0 + shift;
-        a *= 0.5;
-    }
-    return v;
+    // Recreates the "Object" vector from Blender's Texture Coordinate node
+    obj_pos = VERTEX;
 }
 
 void fragment() {
-    // ========================================================
-    // BRANCH 1: Object Coordinates & Voxel Logic 
-    // ========================================================
-    vec3 frac_obj = fract(local_pos);
+    // --- Sub-Graph 1 & 2: Voxel Grid Bounds (Separate XYZ & Math 0-10) ---
+    vec3 fract_pos = fract(obj_pos);
 
-    float math_x = (frac_obj.x < 0.5) ? 1.0 : 0.0;
-    float math_001_x = (frac_obj.x > 0.5) ? 1.0 : 0.0;
-    // Note: Change '*' to '+' here if the grid is invisible
-    float math_002_x = math_x * math_001_x; 
+    // Note: The Blender JSON exported identical default values (0.5) for both Less Than and Greater Than inputs.
+    // Strictly translating this means (x < 0.5) * (x > 0.5), which evaluates to 0. 
+    // To see your voxels, you will likely need to adjust these to create a bounding box (e.g., 0.1 and 0.9).
+    float math_x  = (fract_pos.x < 0.5) ? 1.0 : 0.0;
+    float math1_x = (fract_pos.x > 0.5) ? 1.0 : 0.0;
+    float math2   = math_x * math1_x;
 
-    float math_y = (frac_obj.y < 0.5) ? 1.0 : 0.0;
-    float math_004_y = (frac_obj.y > 0.5) ? 1.0 : 0.0;
-    float math_005_y = math_y * math_004_y;
+    float math3_y = (fract_pos.y < 0.5) ? 1.0 : 0.0;
+    float math4_y = (fract_pos.y > 0.5) ? 1.0 : 0.0;
+    float math5   = math3_y * math4_y;
 
-    float math_z = (frac_obj.z < 0.5) ? 1.0 : 0.0;
-    float math_007_z = (frac_obj.z > 0.5) ? 1.0 : 0.0;
-    float math_008_z = math_z * math_007_z;
+    float math6_z = (fract_pos.z < 0.5) ? 1.0 : 0.0;
+    float math7_z = (fract_pos.z > 0.5) ? 1.0 : 0.0;
+    float math8   = math6_z * math7_z;
 
-    float math_009 = math_002_x * math_005_y;
-    float math_010 = math_009 * math_008_z;
+    float math9  = math2 * math5;
+    float math10 = math9 * math8;
 
-    // ========================================================
-    // BRANCH 2: Camera Distance Logic (UPDATED FOR UNIFORM)
-    // ========================================================
-    // Calculate the vector from the pixel to your custom coordinate
-    vec3 cam_coord = world_pos - custom_camera_pos;
+    // --- Sub-Graph 3: Camera Distance/Falloff (Separate XYZ.001 & Math 11-20) ---
+    float math11 = abs(camera_coords.x);
+    float math12 = abs(camera_coords.y);
+    float math13 = abs(camera_coords.z);
+
+    // Power operations with default exponent 0.5 (square root)
+    float math14 = pow(math11, 0.5);
+    float math15 = pow(math12, 0.5);
+    float math16 = pow(math13, 0.5);
+
+    float math17 = math14 + math15;
+    float math18 = math17 + math16;
+    float math19 = pow(math18, 0.5);
+
+    float math20 = (math19 < 0.5) ? 1.0 : 0.0;
+
+    // --- Sub-Graph 4: Noise Texture & Map Range ---
+    // Noise Scale set to 50.0 based on Blender node properties
+    float n_val = noise(obj_pos * 50.0); 
     
-    float abs_x = abs(cam_coord.x);
-    float abs_y = abs(cam_coord.y);
-    float abs_z = abs(cam_coord.z);
+    // Map Range [0.0, 1.0] to [0.0, 1.0] simplifies to a clamp function
+    float map_range = clamp(math19, 0.0, 1.0); 
 
-    float pow_x = pow(abs_x, 0.5);
-    float pow_y = pow(abs_y, 0.5);
-    float pow_z = pow(abs_z, 0.5);
+    float math21 = (n_val > map_range) ? 1.0 : 0.0;
 
-    float math_017 = pow_x + pow_y;
-    float math_018 = math_017 + pow_z;
-    float math_019 = pow(math_018, 0.5);
+    // --- Sub-Graph 5: Final Mixes ---
+    float math22 = math20 * math21;
+    float math23 = math10 * math22;
+    
+    // Math.024 multiplied by default input of 0.5
+    float math24 = math23 * 0.5;
 
-    float math_020 = (math_019 < 0.5) ? 1.0 : 0.0;
+    // --- Principled Volume Output ---
+    vec3 vol_color = vec3(0.0, 0.8, 1.0);
+    vec3 vol_emission = vec3(0.0, 0.4, 0.6);
 
-    // ========================================================
-    // BRANCH 3: Noise 
-    // ========================================================
-    float noise_val = fbm(local_pos * 50.0);
-    float map_res = clamp(math_019, 0.0, 1.0);
-    float math_021 = (noise_val > map_res) ? 1.0 : 0.0;
-
-    // ========================================================
-    // FINAL MIX
-    // ========================================================
-    float math_022 = math_020 * math_021;
-    float math_023 = math_010 * math_022;
-    float math_024 = math_023 * 0.5;
-
-    ALBEDO = volume_color; 
-    ALPHA = math_024;
-    EMISSION = emission_color * math_024;
+    ALBEDO = vol_color;
+    EMISSION = vol_emission * math24;
+    
+    // Alpha controls the volumetric masking/density
+    ALPHA = math24;
 }`
+
+// const shaderBest = `
+// shader_type spatial;
+// render_mode blend_add, depth_draw_opaque, cull_disabled, unshaded;
+
+// // Colors pulled directly from your Principled Volume node
+// uniform vec3 volume_color : source_color = vec3(0.0, 0.8, 1.0);
+// uniform vec3 emission_color : source_color = vec3(0.0, 0.4, 0.6);
+
+// // NEW: Your custom camera/target coordinate
+// uniform vec3 custom_camera_pos = vec3(0.0, 0.0, 0.0);
+
+// varying vec3 local_pos;
+// varying vec3 world_pos; // We need this to compare against your custom uniform
+
+// void vertex() {
+//     local_pos = VERTEX;
+//     // Get the absolute world position of the vertex
+//     world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+// }
+
+// // ----------------------------------------------------
+// // FBM Noise (Unchanged)
+// // ----------------------------------------------------
+// float hash(vec3 p) {
+//     p = fract(p * 0.3183099 + 0.1);
+//     p *= 17.0;
+//     return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+// }
+
+// float noise(vec3 x) {
+//     vec3 i = floor(x);
+//     vec3 f = fract(x);
+//     f = f * f * (3.0 - 2.0 * f);
+//     return mix(mix(mix(hash(i + vec3(0, 0, 0)), hash(i + vec3(1, 0, 0)), f.x),
+//                    mix(hash(i + vec3(0, 1, 0)), hash(i + vec3(1, 1, 0)), f.x), f.y),
+//                mix(mix(hash(i + vec3(0, 0, 1)), hash(i + vec3(1, 0, 1)), f.x),
+//                    mix(hash(i + vec3(0, 1, 1)), hash(i + vec3(1, 1, 1)), f.x), f.y), f.z);
+// }
+
+// float fbm(vec3 x) {
+//     float v = 0.0;
+//     float a = 0.5;
+//     vec3 shift = vec3(100.0);
+//     for (int i = 0; i < 3; ++i) { 
+//         v += a * noise(x);
+//         x = x * 2.0 + shift;
+//         a *= 0.5;
+//     }
+//     return v;
+// }
+
+// void fragment() {
+//     // ========================================================
+//     // BRANCH 1: Object Coordinates & Voxel Logic 
+//     // ========================================================
+//     vec3 frac_obj = fract(local_pos);
+
+//     float math_x = (frac_obj.x < 0.5) ? 1.0 : 0.0;
+//     float math_001_x = (frac_obj.x > 0.5) ? 1.0 : 0.0;
+//     // Note: Change '*' to '+' here if the grid is invisible
+//     float math_002_x = math_x * math_001_x; 
+
+//     float math_y = (frac_obj.y < 0.5) ? 1.0 : 0.0;
+//     float math_004_y = (frac_obj.y > 0.5) ? 1.0 : 0.0;
+//     float math_005_y = math_y * math_004_y;
+
+//     float math_z = (frac_obj.z < 0.5) ? 1.0 : 0.0;
+//     float math_007_z = (frac_obj.z > 0.5) ? 1.0 : 0.0;
+//     float math_008_z = math_z * math_007_z;
+
+//     float math_009 = math_002_x * math_005_y;
+//     float math_010 = math_009 * math_008_z;
+
+//     // ========================================================
+//     // BRANCH 2: Camera Distance Logic (UPDATED FOR UNIFORM)
+//     // ========================================================
+//     // Calculate the vector from the pixel to your custom coordinate
+//     vec3 cam_coord = world_pos - custom_camera_pos;
+    
+//     float abs_x = abs(cam_coord.x);
+//     float abs_y = abs(cam_coord.y);
+//     float abs_z = abs(cam_coord.z);
+
+//     float pow_x = pow(abs_x, 0.5);
+//     float pow_y = pow(abs_y, 0.5);
+//     float pow_z = pow(abs_z, 0.5);
+
+//     float math_017 = pow_x + pow_y;
+//     float math_018 = math_017 + pow_z;
+//     float math_019 = pow(math_018, 0.5);
+
+//     float math_020 = (math_019 < 0.5) ? 1.0 : 0.0;
+
+//     // ========================================================
+//     // BRANCH 3: Noise 
+//     // ========================================================
+//     float noise_val = fbm(local_pos * 50.0);
+//     float map_res = clamp(math_019, 0.0, 1.0);
+//     float math_021 = (noise_val > map_res) ? 1.0 : 0.0;
+
+//     // ========================================================
+//     // FINAL MIX
+//     // ========================================================
+//     float math_022 = math_020 * math_021;
+//     float math_023 = math_010 * math_022;
+//     float math_024 = math_023 * 0.5;
+
+//     ALBEDO = volume_color; 
+//     ALPHA = math_024;
+//     EMISSION = emission_color * math_024;
+// }`
