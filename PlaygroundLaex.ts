@@ -422,9 +422,14 @@ void fragment() {
     float math9  = math2 * math5;
     float math10 = math9 * math8;
 
-float math11 = abs(VERTEX.x);
-    float math12 = abs(VERTEX.y);
-    float math13 = abs(VERTEX.z);
+// NEW: We divide the view coordinates to stretch out the dissolve effect.
+    // Set this to 20.0, 50.0, or 100.0 depending on how far you want to see it!
+    float fade_distance = 30.0; 
+    vec3 scaled_vertex = VERTEX / fade_distance;
+
+    float math11 = abs(scaled_vertex.x);
+    float math12 = abs(scaled_vertex.y);
+    float math13 = abs(scaled_vertex.z);
 
     float math14 = pow(math11, 0.5);
     float math15 = pow(math12, 0.5);
@@ -434,17 +439,17 @@ float math11 = abs(VERTEX.x);
     float math18 = math17 + math16;
     float math19 = pow(math18, 0.5);
 
-    // INCREASE THIS THRESHOLD. 0.5 is incredibly small in Godot space.
-    // Try 5.0, 10.0, or 20.0 until it covers your desired view distance.
-    float math20 = (math19 < 10.0) ? 1.0 : 0.0;
+    // Hard cutoff boundary (expanded slightly to account for the scale)
+    float math20 = (math19 < 2.0) ? 1.0 : 0.0;
 
     // --- Sub-Graph 4: Noise Texture & Map Range ---
     // Noise Scale set to 50.0 based on Blender node properties
     float n_val = noise(obj_pos * 50.0); 
     
-    // Map Range [0.0, 1.0] to [0.0, 1.0] simplifies to a clamp function
+    // Now math19 will slowly rise to 1.0 as you reach "fade_distance"
     float map_range = clamp(math19, 0.0, 1.0); 
 
+    // The voxels will slowly dissolve into noise as you back away
     float math21 = (n_val > map_range) ? 1.0 : 0.0;
 
     // --- Sub-Graph 5: Final Mixes ---
