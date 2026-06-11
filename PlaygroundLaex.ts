@@ -505,7 +505,7 @@ void fragment() {
     ALBEDO = final_color;
     ALPHA = hit_alpha;
 }
-}`
+`
 
 const shaderBest = `
 shader_type spatial;
