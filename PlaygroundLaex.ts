@@ -280,7 +280,7 @@ async function spawnDissolveCubeBest(pos: Vector3) {
   Async.setInterval(() => {
     const playerPos = Player.position.get();
     if (playerPos) {
-      Godot.shader.updateColor(nodeId, 'custom_camera_pos', pos.x, pos.y, pos.z);
+      Godot.shader.updateColor(nodeId, 'camera_coords', pos.x, pos.y, pos.z);
 
     }
   }, 50);
