@@ -201,9 +201,9 @@ async function spawnDissolveCube(pos: Vector3) {
     const playerPos = Player.position.get();
     if (playerPos) {
       const distance = playerPos.distanceTo(pos);
-      // Map distance: 1.0 (white) at sphere surface (0.5m) down to 0.0 (black) at 8.0m
-      // if difference is above 10 cap it at 10, if below 2 cap it at 2
-      const proximityMinMax = Math.max(2, Math.min(10, distance));
+
+      // distance should be a value between 0 and 1, when we are close it should be closer to 0 when we are far it should be 1 at max 10 meters
+      const proximityMinMax = Math.max(0, Math.min(1, distance/10));
 
       const nodeId = cube.mesh.nodeID ?? -1;
       Godot.shader.updateNumber(nodeId, 'dissolve', proximityMinMax);
