@@ -30,47 +30,139 @@ async function start() {
 
 
 
-  playgroundDemos.spawnDissolveCube(new Vector3(-11, 2.5, 3));
-  playgroundDemos.spawnDissolveCube(new Vector3(-10, 2.5, 3));
-  playgroundDemos.spawnDissolveCube(new Vector3(-9, 2.5, 3));
-  playgroundDemos.spawnDissolveCube(new Vector3(-8, 2.5, 3));
-  playgroundDemos.spawnDissolveCube(new Vector3(-7, 2.5, 3));
-  playgroundDemos.spawnDissolveCube(new Vector3(-6, 2.5, 3));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-11, 2.5, 3));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-10, 2.5, 3));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-9, 2.5, 3));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-8, 2.5, 3));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-7, 2.5, 3));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-6, 2.5, 3));
 
-  playgroundDemos.spawnDissolveCube(new Vector3(-11, 1.5, 3));
-  playgroundDemos.spawnDissolveCube(new Vector3(-10, 1.5, 3));
-  playgroundDemos.spawnDissolveCube(new Vector3(-9, 1.5, 3));
-  playgroundDemos.spawnDissolveCube(new Vector3(-8, 1.5, 3));
-  playgroundDemos.spawnDissolveCube(new Vector3(-7, 1.5, 3));
-  playgroundDemos.spawnDissolveCube(new Vector3(-6, 1.5, 3));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-11, 1.5, 3));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-10, 1.5, 3));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-9, 1.5, 3));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-8, 1.5, 3));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-7, 1.5, 3));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-6, 1.5, 3));
 
-  playgroundDemos.spawnDissolveCube(new Vector3(-11, 2.5, 2));
-  playgroundDemos.spawnDissolveCube(new Vector3(-10, 2.5, 2));
-  playgroundDemos.spawnDissolveCube(new Vector3(-9, 2.5, 2));
-  playgroundDemos.spawnDissolveCube(new Vector3(-8, 2.5, 2));
-  playgroundDemos.spawnDissolveCube(new Vector3(-7, 2.5, 2));
-  playgroundDemos.spawnDissolveCube(new Vector3(-6, 2.5, 2));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-11, 2.5, 2));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-10, 2.5, 2));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-9, 2.5, 2));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-8, 2.5, 2));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-7, 2.5, 2));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-6, 2.5, 2));
 
-  playgroundDemos.spawnDissolveCube(new Vector3(-11, 1.5, 2));
-  playgroundDemos.spawnDissolveCube(new Vector3(-10, 1.5, 2));
-  playgroundDemos.spawnDissolveCube(new Vector3(-9, 1.5, 2));
-  playgroundDemos.spawnDissolveCube(new Vector3(-8, 1.5, 2));
-  playgroundDemos.spawnDissolveCube(new Vector3(-7, 1.5, 2));
-  playgroundDemos.spawnDissolveCube(new Vector3(-6, 1.5, 2));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-11, 1.5, 2));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-10, 1.5, 2));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-9, 1.5, 2));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-8, 1.5, 2));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-7, 1.5, 2));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-6, 1.5, 2));
 
-  playgroundDemos.spawnDissolveCube(new Vector3(-11, 2.5, 1));
-  playgroundDemos.spawnDissolveCube(new Vector3(-10, 2.5, 1));
-  playgroundDemos.spawnDissolveCube(new Vector3(-9, 2.5, 1));
-  playgroundDemos.spawnDissolveCube(new Vector3(-8, 2.5, 1));
-  playgroundDemos.spawnDissolveCube(new Vector3(-7, 2.5, 1));
-  playgroundDemos.spawnDissolveCube(new Vector3(-6, 2.5, 1));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-11, 2.5, 1));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-10, 2.5, 1));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-9, 2.5, 1));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-8, 2.5, 1));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-7, 2.5, 1));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-6, 2.5, 1));
 
-  playgroundDemos.spawnDissolveCube(new Vector3(-11, 1.5, 1));
-  playgroundDemos.spawnDissolveCube(new Vector3(-10, 1.5, 1));
-  playgroundDemos.spawnDissolveCube(new Vector3(-9, 1.5, 1));
-  playgroundDemos.spawnDissolveCube(new Vector3(-8, 1.5, 1));
-  playgroundDemos.spawnDissolveCube(new Vector3(-7, 1.5, 1));
-  playgroundDemos.spawnDissolveCube(new Vector3(-6, 1.5, 1));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-11, 1.5, 1));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-10, 1.5, 1));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-9, 1.5, 1));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-8, 1.5, 1));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-7, 1.5, 1));
+  // playgroundDemos.spawnDissolveCube(new Vector3(-6, 1.5, 1));
+
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11, 2.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-10, 2.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-9, 2.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-8, 2.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-7, 2.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-6, 2.5, 3));
+
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11, 2.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-10, 2.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-9, 2.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-8, 2.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-7, 2.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-6, 2.25, 3));
+
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11, 2.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-10, 2.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-9, 2.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-8, 2.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-7, 2.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-6, 2.0, 3));
+
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11, 1.75, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-10, 1.75, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-9, 1.75, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-8, 1.75, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-7, 1.75, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-6, 1.75, 3));
+
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11, 1.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-10, 1.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-9, 1.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-8, 1.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-7, 1.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-6, 1.5, 3));
+
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11, 1.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-10, 1.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-9, 1.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-8, 1.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-7, 1.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-6, 1.25, 3));
+
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11, 1.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-10, 1.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-9, 1.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-8, 1.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-7, 1.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-6, 1.0, 3));
+
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11, 0.75, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-10, 0.75, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-9, 0.75, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-8, 0.75, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-7, 0.75, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-6, 0.75, 3));
+
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11, 0.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-10, 0.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-9, 0.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-8, 0.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-7, 0.5, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-6, 0.5, 3));
+
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11, 0.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-10, 0.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-9, 0.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-8, 0.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-7, 0.25, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-6, 0.25, 3));
+
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11, 0.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-10, 0.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-9, 0.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-8, 0.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-7, 0.0, 3));
+  // playgroundDemos.spawnDissolveCubeSmall(new Vector3(-6, 0.0, 3));
+
+  // write a function to spawn a 5x5x5 grid of small cubes
+
+  for (let x = 0; x < 5; x++) {
+    for (let y = 0; y < 5; y++) {
+      for (let z = 0; z < 5; z++) {
+        playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25), 2.5 - (y * 0.25), 3 - (z * 0.25)));
+        playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25) + 0.25, 2.5 - (y * 0.25), 3 - (z * 0.25)));
+        playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25) + 0.5, 2.5 - (y * 0.25), 3 - (z * 0.25)));
+        playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25) + 0.75, 2.5 - (y * 0.25), 3 - (z * 0.25)));
+      }
+    }
+  }
+
+
 
 
   playgroundDemos.spawnDissolveCubeBig(new Vector3(6, 1.5, 1));

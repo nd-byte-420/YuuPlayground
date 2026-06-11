@@ -16,7 +16,8 @@ export const playgroundDemos = {
   spawnPaintableSphere,
   spawnShaderSphere,
   spawnDissolveCube,
-  spawnDissolveCubeBig
+  spawnDissolveCubeBig,
+  spawnDissolveCubeSmall
 }
 
 
@@ -211,6 +212,30 @@ async function spawnDissolveCube(pos: Vector3) {
 
       const nodeId = cube.mesh.nodeID ?? -1;
       Godot.shader.updateNumber(nodeId, 'dissolve', normalizedDistance);
+    }
+  }, 50);
+}
+
+// create a cube and attach shadercode new/
+async function spawnDissolveCubeSmall(pos: Vector3) {
+
+  const cube = spawnPrimitive.cube(pos, new Vector3(0.25,0.25,0.25), Quaternion.one, new Color(0.1,0.5,0.1), 1, true, 'Static', undefined);
+
+  cube.collidable.set(false)
+
+  const nodeId = cube.mesh.nodeID ?? -1;
+  Godot.shader.applyToMesh(nodeId, shaderCodeNew);
+  
+  Async.setInterval(() => {
+    const playerPos = Player.position.get();
+    if (playerPos) {
+      const distance = playerPos.distanceTo(pos);
+      const normalized = distance <= 2 ? 0 :
+        distance >= 3 ? 1 :
+          distance - 2;
+
+      const nodeId = cube.mesh.nodeID ?? -1;
+      Godot.shader.updateNumber(nodeId, 'dissolve', normalized);
     }
   }, 50);
 }
