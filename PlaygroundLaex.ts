@@ -201,12 +201,22 @@ async function spawnDissolveCube(pos: Vector3) {
     const playerPos = Player.position.get();
     if (playerPos) {
       const distance = playerPos.distanceTo(pos);
+      let normalizedDistance = 0;
 
-      // distance should be a value between 0 and 1, when we are close it should be closer to 0 when we are far it should be 1 at max 10 meters
-      const proximityMinMax = Math.max(0, Math.min(1, distance/10));
+      if (distance <= 2) {
+        normalizedDistance = 0;
+      }
+      if (distance >= 10) {
+        normalizedDistance = 1;
+      }
+      if (distance <= 6) {
+        normalizedDistance= 0.125 * (distance - 2);
+      } else {
+        normalizedDistance= 0.5 + 0.125 * (distance - 6);
+      }
 
       const nodeId = cube.mesh.nodeID ?? -1;
-      Godot.shader.updateNumber(nodeId, 'dissolve', proximityMinMax);
+      Godot.shader.updateNumber(nodeId, 'dissolve', normalizedDistance);
     }
   }, 50);
 }
