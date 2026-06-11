@@ -419,7 +419,7 @@ void fragment() {
     tNear = max(tNear, 0.0);
 
     // INCREASED STEPS: We need smaller steps so the ray stops exactly on the voxel face
-    int MAX_STEPS = 32; 
+    int MAX_STEPS = 128; 
     float step_size = (tFar - tNear) / float(MAX_STEPS);
     float t = tNear;
 
