@@ -205,11 +205,11 @@ async function spawnDissolveCube(pos: Vector3) {
       const distance = playerPos.distanceTo(pos);
       let normalizedDistance = 0;
 
-      if (distance <= 20) {
+      if (distance <= 5) {
         normalizedDistance = 0;
-      }else if (distance >= 40) {
+      }else if (distance >= 15) {
         normalizedDistance = 1;
-      }else if (distance <= 30) {
+      }else if (distance <= 10) {
         normalizedDistance= 0.125 * (distance - 20);
       } else {
         normalizedDistance= 0.5 + 0.125 * (distance - 6);
