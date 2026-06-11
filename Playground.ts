@@ -20,6 +20,58 @@ async function start() {
   playgroundDemos.spawnDissolveCube(new Vector3(-7, 2.5, 4));
   playgroundDemos.spawnDissolveCube(new Vector3(-6, 2.5, 4));
 
+  playgroundDemos.spawnDissolveCube(new Vector3(-11, 1.5, 4));
+  playgroundDemos.spawnDissolveCube(new Vector3(-10, 1.5, 4));
+  playgroundDemos.spawnDissolveCube(new Vector3(-9, 1.5, 4));
+  playgroundDemos.spawnDissolveCube(new Vector3(-8, 1.5, 4));
+  playgroundDemos.spawnDissolveCube(new Vector3(-7, 1.5, 4));
+  playgroundDemos.spawnDissolveCube(new Vector3(-6, 1.5, 4));
+
+
+
+
+  playgroundDemos.spawnDissolveCube(new Vector3(-11, 2.5, 3));
+  playgroundDemos.spawnDissolveCube(new Vector3(-10, 2.5, 3));
+  playgroundDemos.spawnDissolveCube(new Vector3(-9, 2.5, 3));
+  playgroundDemos.spawnDissolveCube(new Vector3(-8, 2.5, 3));
+  playgroundDemos.spawnDissolveCube(new Vector3(-7, 2.5, 3));
+  playgroundDemos.spawnDissolveCube(new Vector3(-6, 2.5, 3));
+
+  playgroundDemos.spawnDissolveCube(new Vector3(-11, 1.5, 3));
+  playgroundDemos.spawnDissolveCube(new Vector3(-10, 1.5, 3));
+  playgroundDemos.spawnDissolveCube(new Vector3(-9, 1.5, 3));
+  playgroundDemos.spawnDissolveCube(new Vector3(-8, 1.5, 3));
+  playgroundDemos.spawnDissolveCube(new Vector3(-7, 1.5, 3));
+  playgroundDemos.spawnDissolveCube(new Vector3(-6, 1.5, 3));
+
+  playgroundDemos.spawnDissolveCube(new Vector3(-11, 2.5, 2));
+  playgroundDemos.spawnDissolveCube(new Vector3(-10, 2.5, 2));
+  playgroundDemos.spawnDissolveCube(new Vector3(-9, 2.5, 2));
+  playgroundDemos.spawnDissolveCube(new Vector3(-8, 2.5, 2));
+  playgroundDemos.spawnDissolveCube(new Vector3(-7, 2.5, 2));
+  playgroundDemos.spawnDissolveCube(new Vector3(-6, 2.5, 2));
+
+  playgroundDemos.spawnDissolveCube(new Vector3(-11, 1.5, 2));
+  playgroundDemos.spawnDissolveCube(new Vector3(-10, 1.5, 2));
+  playgroundDemos.spawnDissolveCube(new Vector3(-9, 1.5, 2));
+  playgroundDemos.spawnDissolveCube(new Vector3(-8, 1.5, 2));
+  playgroundDemos.spawnDissolveCube(new Vector3(-7, 1.5, 2));
+  playgroundDemos.spawnDissolveCube(new Vector3(-6, 1.5, 2));
+
+  playgroundDemos.spawnDissolveCube(new Vector3(-11, 2.5, 1));
+  playgroundDemos.spawnDissolveCube(new Vector3(-10, 2.5, 1));
+  playgroundDemos.spawnDissolveCube(new Vector3(-9, 2.5, 1));
+  playgroundDemos.spawnDissolveCube(new Vector3(-8, 2.5, 1));
+  playgroundDemos.spawnDissolveCube(new Vector3(-7, 2.5, 1));
+  playgroundDemos.spawnDissolveCube(new Vector3(-6, 2.5, 1));
+
+  playgroundDemos.spawnDissolveCube(new Vector3(-11, 1.5, 1));
+  playgroundDemos.spawnDissolveCube(new Vector3(-10, 1.5, 1));
+  playgroundDemos.spawnDissolveCube(new Vector3(-9, 1.5, 1));
+  playgroundDemos.spawnDissolveCube(new Vector3(-8, 1.5, 1));
+  playgroundDemos.spawnDissolveCube(new Vector3(-7, 1.5, 1));
+  playgroundDemos.spawnDissolveCube(new Vector3(-6, 1.5, 1));
+
   // Come back to this to get water shader working
   // playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));
 }
