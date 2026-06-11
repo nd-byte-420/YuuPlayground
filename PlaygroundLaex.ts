@@ -402,12 +402,13 @@ void vertex() {
 
 void fragment() {
     // --- Sub-Graph 1 & 2: Voxel Grid Bounds (Separate XYZ & Math 0-10) ---
-float grid_scale = 0.25; 
-    vec3 fract_pos = fract(obj_pos * grid_scale);
+// --- Sub-Graph 1 & 2: Voxel Grid Bounds (Separate XYZ & Math 0-10) ---
+    float grid_scale = 10.0; 
+    
+    // THE FIX: We add + 0.5 offset so the solid voxels intersect the Godot mesh faces
+    vec3 fract_pos = fract((obj_pos * grid_scale) + vec3(0.5));
 
-    // Note: The Blender JSON exported identical default values (0.5) for both Less Than and Greater Than inputs.
-    // Strictly translating this means (x < 0.5) * (x > 0.5), which evaluates to 0. 
-    // To see your voxels, you will likely need to adjust these to create a bounding box (e.g., 0.1 and 0.9).
+    // To see your voxels, you will likely need to adjust these to create a bounding box.
     float math_x  = (fract_pos.x < 0.9) ? 1.0 : 0.0;
     float math1_x = (fract_pos.x > 0.1) ? 1.0 : 0.0;
     float math2   = math_x * math1_x;
