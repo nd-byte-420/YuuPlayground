@@ -151,9 +151,9 @@ async function start() {
 
   // write a function to spawn a 5x5x5 grid of small cubes
 
-  for (let x = 0; x < 10; x++) {
+  for (let x = 0; x < 20; x++) {
     for (let y = 0; y < 5; y++) {
-      for (let z = 0; z < 10; z++) {
+      for (let z = 0; z < 20; z++) {
         playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25), 2.5 - (y * 0.25), 3 - (z * 0.25)));
 
       }
