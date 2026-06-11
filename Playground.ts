@@ -151,19 +151,20 @@ async function start() {
 
   // write a function to spawn a 5x5x5 grid of small cubes
 
-  for (let x = 0; x < 20; x++) {
-    for (let y = 0; y < 5; y++) {
-      for (let z = 0; z < 20; z++) {
-        playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25), 2.5 - (y * 0.25), 3 - (z * 0.25)));
+  // // literally the limit at 20x20x5
+  // for (let x = 0; x < 20; x++) {
+  //   for (let y = 0; y < 5; y++) {
+  //     for (let z = 0; z < 20; z++) {
+  //       playgroundDemos.spawnDissolveCubeSmall(new Vector3(-11 + (x * 0.25), 2.5 - (y * 0.25), 3 - (z * 0.25)));
 
-      }
-    }
-  }
+  //     }
+  //   }
+  // }
 
 
 
 
-  playgroundDemos.spawnDissolveCubeBig(new Vector3(6, 1.5, 1));
+  playgroundDemos.spawnDissolveCubeBest(new Vector3(6, 1.5, 1));
 
   // Come back to this to get water shader working
   // playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));
