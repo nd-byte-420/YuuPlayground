@@ -407,16 +407,16 @@ void fragment() {
     // Note: The Blender JSON exported identical default values (0.5) for both Less Than and Greater Than inputs.
     // Strictly translating this means (x < 0.5) * (x > 0.5), which evaluates to 0. 
     // To see your voxels, you will likely need to adjust these to create a bounding box (e.g., 0.1 and 0.9).
-    float math_x  = (fract_pos.x < 0.5) ? 1.0 : 0.0;
-    float math1_x = (fract_pos.x > 0.5) ? 1.0 : 0.0;
+    float math_x  = (fract_pos.x < 0.9) ? 1.0 : 0.0;
+    float math1_x = (fract_pos.x > 0.1) ? 1.0 : 0.0;
     float math2   = math_x * math1_x;
 
-    float math3_y = (fract_pos.y < 0.5) ? 1.0 : 0.0;
-    float math4_y = (fract_pos.y > 0.5) ? 1.0 : 0.0;
+    float math3_y = (fract_pos.y < 0.9) ? 1.0 : 0.0;
+    float math4_y = (fract_pos.y > 0.1) ? 1.0 : 0.0;
     float math5   = math3_y * math4_y;
 
-    float math6_z = (fract_pos.z < 0.5) ? 1.0 : 0.0;
-    float math7_z = (fract_pos.z > 0.5) ? 1.0 : 0.0;
+    float math6_z = (fract_pos.z < 0.9) ? 1.0 : 0.0;
+    float math7_z = (fract_pos.z > 0.1) ? 1.0 : 0.0;
     float math8   = math6_z * math7_z;
 
     float math9  = math2 * math5;
