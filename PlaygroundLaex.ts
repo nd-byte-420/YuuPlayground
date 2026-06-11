@@ -422,12 +422,10 @@ void fragment() {
     float math9  = math2 * math5;
     float math10 = math9 * math8;
 
-    // --- Sub-Graph 3: Camera Distance/Falloff (Separate XYZ.001 & Math 11-20) ---
-    float math11 = abs(camera_coords.x);
-    float math12 = abs(camera_coords.y);
-    float math13 = abs(camera_coords.z);
+float math11 = abs(VERTEX.x);
+    float math12 = abs(VERTEX.y);
+    float math13 = abs(VERTEX.z);
 
-    // Power operations with default exponent 0.5 (square root)
     float math14 = pow(math11, 0.5);
     float math15 = pow(math12, 0.5);
     float math16 = pow(math13, 0.5);
@@ -436,7 +434,9 @@ void fragment() {
     float math18 = math17 + math16;
     float math19 = pow(math18, 0.5);
 
-    float math20 = (math19 < 0.5) ? 1.0 : 0.0;
+    // INCREASE THIS THRESHOLD. 0.5 is incredibly small in Godot space.
+    // Try 5.0, 10.0, or 20.0 until it covers your desired view distance.
+    float math20 = (math19 < 10.0) ? 1.0 : 0.0;
 
     // --- Sub-Graph 4: Noise Texture & Map Range ---
     // Noise Scale set to 50.0 based on Blender node properties
