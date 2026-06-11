@@ -14,6 +14,11 @@ async function start() {
   playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));
 
   playgroundDemos.spawnDissolveCube(new Vector3(-11, 2.5, 4));
+  playgroundDemos.spawnDissolveCube(new Vector3(-10, 2.5, 4));
+  playgroundDemos.spawnDissolveCube(new Vector3(-9, 2.5, 4));
+  playgroundDemos.spawnDissolveCube(new Vector3(-8, 2.5, 4));
+  playgroundDemos.spawnDissolveCube(new Vector3(-7, 2.5, 4));
+  playgroundDemos.spawnDissolveCube(new Vector3(-6, 2.5, 4));
 
   // Come back to this to get water shader working
   // playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));
