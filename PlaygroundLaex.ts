@@ -19,7 +19,8 @@ export const playgroundDemos = {
   spawnDissolveCubeBig,
   spawnDissolveCubeSmall,
   spawnDissolveCubeBest,
-  spawnDissolveCubeRm
+  spawnDissolveCubeRm,
+  spawnDissolveCubeRm1
 }
 
 
@@ -296,6 +297,25 @@ async function spawnDissolveCubeRm(pos: Vector3) {
 
   const nodeId = cube.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, shader33);
+  
+  Async.setInterval(() => {
+    const playerPos = Player.position.get();
+    if (playerPos) {
+      Godot.shader.updateColor(nodeId, 'player_position', playerPos.x, playerPos.y, playerPos.z);
+
+    }
+  }, 50);
+}
+
+// create a cube and attach shadercode new/
+async function spawnDissolveCubeRm1(pos: Vector3) {
+
+  const cube = spawnPrimitive.cube(pos, new Vector3(1,1,1), Quaternion.one, new Color(0.1,0.5,0.1), 1, true, 'Static', undefined);
+
+  cube.collidable.set(false)
+
+  const nodeId = cube.mesh.nodeID ?? -1;
+  Godot.shader.applyToMesh(nodeId, shader34);
   
   Async.setInterval(() => {
     const playerPos = Player.position.get();
@@ -998,3 +1018,119 @@ void fragment() {
     ALPHA_SCISSOR_THRESHOLD = 0.5;
 }
 `
+
+const shader34 = `
+shader_type spatial;
+render_mode depth_draw_opaque, cull_disabled;
+
+// Material Properties
+uniform vec4 base_color : source_color = vec4(0.8, 0.8, 0.8, 1.0);
+uniform float metallic = 0.0;
+uniform float roughness = 0.5;
+
+// Proximity/Bubble Properties
+uniform vec3 player_position = vec3(0.0, 0.0, 0.0);
+uniform float bubble_inner_radius = 1.0; 
+uniform float bubble_outer_radius = 5.0; 
+
+// Internal Solid Cube Properties
+uniform vec4 grid_color : source_color = vec4(0.0, 1.0, 0.8, 1.0);
+uniform float grid_scale = 2.0;
+uniform float cube_fill = 0.6; // How much of the 3D cell the solid cube takes up (0.0 to 1.0)
+uniform int grid_steps = 64; 
+
+
+varying vec3 world_pos;
+varying vec3 local_pos;
+
+// White Noise generation function
+float random(vec2 uv) {
+    return fract(sin(dot(uv.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
+void vertex() {
+    world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+    local_pos = VERTEX;
+}
+
+void fragment() {
+    float range_diff = max(bubble_outer_radius - bubble_inner_radius, 0.0001); 
+    float noise = random(FRAGCOORD.xy);
+    
+    if (FRONT_FACING) {
+        // --- OUTSIDE THE OBJECT ---
+        float dist_to_player = length(world_pos - player_position);
+        float mapped_dist = clamp((dist_to_player - bubble_inner_radius) / range_diff, 0.0, 1.0);
+        float alpha_clip = (mapped_dist > noise) ? 1.0 : 0.0;
+        
+        ALBEDO = base_color.rgb;
+        METALLIC = metallic;
+        ROUGHNESS = roughness;
+        ALPHA = alpha_clip;
+        
+    } else {
+        // --- INSIDE THE OBJECT (SOLID CUBE RAYMARCHING) ---
+        vec3 local_ro = (inverse(MODEL_MATRIX) * vec4(CAMERA_POSITION_WORLD, 1.0)).xyz;
+        vec3 local_rd = normalize(local_pos - local_ro);
+        
+        float ray_length = length(local_pos - local_ro);
+        float step_size = ray_length / float(grid_steps);
+        
+        float hit = 0.0;
+        vec3 p = local_ro; 
+        vec3 hit_normal = vec3(0.0);
+        
+        for (int i = 0; i < grid_steps; i++) {
+            p += local_rd * step_size;
+            vec3 world_p = (MODEL_MATRIX * vec4(p, 1.0)).xyz;
+            float hit_dist_to_player = length(world_p - player_position);
+            
+            // Only evaluate if we are inside the bubble boundary
+            if (hit_dist_to_player <= bubble_outer_radius) {
+                
+                // 3D Solid Cube Math
+                vec3 cell_pos = fract(p * grid_scale) - 0.5;
+                vec3 abs_pos = abs(cell_pos);
+                
+                // Check if the current point is inside the cube's volume
+                if (max(max(abs_pos.x, abs_pos.y), abs_pos.z) < (cube_fill * 0.5)) {
+                    
+                    float hit_mapped_dist = clamp((hit_dist_to_player - bubble_inner_radius) / range_diff, 0.0, 1.0);
+                    
+                    // Screen-door dither check
+                    if (hit_mapped_dist > noise) {
+                        hit = 1.0;
+                        
+                        // Depth Correction
+                        vec4 hit_view = VIEW_MATRIX * vec4(world_p, 1.0);
+                        vec4 hit_clip = PROJECTION_MATRIX * hit_view;
+                        DEPTH = hit_clip.z / hit_clip.w;
+                        
+                        // Calculate normal for the specific face of the cube we hit
+                        vec3 n = step(max(abs_pos.yzx, abs_pos.zxy), abs_pos.xyz) * sign(cell_pos);
+                        
+                        // Transform the local normal to View Space for Godot's lighting engine
+                        // (w = 0.0 ensures we don't apply translations, only rotations)
+                        hit_normal = normalize((VIEW_MATRIX * MODEL_MATRIX * vec4(n, 0.0)).xyz);
+                        
+                        break; 
+                    }
+                }
+            }
+        }
+        
+        ALBEDO = grid_color.rgb;
+        EMISSION = grid_color.rgb * 0.2; // Lowered emission slightly so directional lighting is visible
+        METALLIC = 0.0;
+        ROUGHNESS = 0.8;
+        ALPHA = hit;
+        
+        // Apply the calculated normal if we hit a solid face
+        if (hit > 0.0) {
+            NORMAL = hit_normal;
+        }
+    }
+    
+    // Discard empty space and dithered holes
+    ALPHA_SCISSOR_THRESHOLD = 0.5;
+}`
