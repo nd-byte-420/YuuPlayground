@@ -295,7 +295,7 @@ async function spawnDissolveCubeRm(pos: Vector3) {
   cube.collidable.set(false)
 
   const nodeId = cube.mesh.nodeID ?? -1;
-  Godot.shader.applyToMesh(nodeId, rmshader);
+  Godot.shader.applyToMesh(nodeId, shader33);
   
   Async.setInterval(() => {
     const playerPos = Player.position.get();
@@ -824,10 +824,7 @@ void fragment() {
                 t += step_size;
                 vec3 p = local_ro + local_rd * t;
                 vec3 world_p = (MODEL_MATRIX * vec4(p, 1.0)).xyz;
-            float hit_dist_to_player = length(world_p - player_position);
-            
-            // Only evaluate if we are inside the bubble boundary
-            if (hit_dist_to_player <= bubble_outer_radius) {
+                float hit_dist_to_player = length(world_p - player_position);
                 
                 // 3D Solid Cube Math
                 vec3 cell_pos = fract(p * grid_scale) - 0.5;
@@ -835,7 +832,6 @@ void fragment() {
                 
                 // Check if the current point is inside the cube's volume
                 if (max(max(abs_pos.x, abs_pos.y), abs_pos.z) < (cube_fill * 0.5)) {
-                    
                     float hit_mapped_dist = clamp((hit_dist_to_player - bubble_inner_radius) / range_diff, 0.0, 1.0);
                     
                     // Screen-door dither check
@@ -851,14 +847,12 @@ void fragment() {
                         vec3 n = step(max(abs_pos.yzx, abs_pos.zxy), abs_pos.xyz) * sign(cell_pos);
                         
                         // Transform the local normal to View Space for Godot's lighting engine
-                        // (w = 0.0 ensures we don't apply translations, only rotations)
                         hit_normal = normalize((VIEW_MATRIX * MODEL_MATRIX * vec4(n, 0.0)).xyz);
                         
                         break; 
                     }
                 }
             }
-        }
         }
         
         ALBEDO = grid_color.rgb;
@@ -957,10 +951,7 @@ void fragment() {
                 t += step_size;
                 vec3 p = local_ro + local_rd * t;
                 vec3 world_p = (MODEL_MATRIX * vec4(p, 1.0)).xyz;
-            float hit_dist_to_player = length(world_p - player_position);
-            
-            // Only evaluate if we are inside the bubble boundary
-            if (hit_dist_to_player <= bubble_outer_radius) {
+                float hit_dist_to_player = length(world_p - player_position);
                 
                 // 3D Solid Cube Math
                 vec3 cell_pos = fract(p * grid_scale) - 0.5;
@@ -968,7 +959,6 @@ void fragment() {
                 
                 // Check if the current point is inside the cube's volume
                 if (max(max(abs_pos.x, abs_pos.y), abs_pos.z) < (cube_fill * 0.5)) {
-                    
                     float hit_mapped_dist = clamp((hit_dist_to_player - bubble_inner_radius) / range_diff, 0.0, 1.0);
                     
                     // Screen-door dither check
@@ -984,14 +974,12 @@ void fragment() {
                         vec3 n = step(max(abs_pos.yzx, abs_pos.zxy), abs_pos.xyz) * sign(cell_pos);
                         
                         // Transform the local normal to View Space for Godot's lighting engine
-                        // (w = 0.0 ensures we don't apply translations, only rotations)
                         hit_normal = normalize((VIEW_MATRIX * MODEL_MATRIX * vec4(n, 0.0)).xyz);
                         
                         break; 
                     }
                 }
             }
-        }
         }
         
         ALBEDO = grid_color.rgb;
