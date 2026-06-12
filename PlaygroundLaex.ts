@@ -295,7 +295,7 @@ async function spawnDissolveCubeRm(pos: Vector3) {
   cube.collidable.set(false)
 
   const nodeId = cube.mesh.nodeID ?? -1;
-  Godot.shader.applyToMesh(nodeId, rmshader);
+  Godot.shader.applyToMesh(nodeId, shader33);
   
   Async.setInterval(() => {
     const playerPos = Player.position.get();
