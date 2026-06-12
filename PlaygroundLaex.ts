@@ -773,6 +773,17 @@ float random(vec2 uv) {
     return fract(sin(dot(uv.xy, vec2(12.9898, 78.233))) * 43758.5453123);
 }
 
+// Helper function: Calculates where the camera's ray enters and exits a Godot BoxMesh
+vec2 intersectAABB(vec3 rayOrigin, vec3 rayDir, vec3 boxMin, vec3 boxMax) {
+    vec3 tMin = (boxMin - rayOrigin) / rayDir;
+    vec3 tMax = (boxMax - rayOrigin) / rayDir;
+    vec3 t1 = min(tMin, tMax);
+    vec3 t2 = max(tMin, tMax);
+    float tNear = max(max(t1.x, t1.y), t1.z);
+    float tFar = min(min(t2.x, t2.y), t2.z);
+    return vec2(tNear, tFar);
+}
+
 void vertex() {
     world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
     local_pos = VERTEX;
@@ -798,16 +809,21 @@ void fragment() {
         vec3 local_ro = (inverse(MODEL_MATRIX) * vec4(CAMERA_POSITION_WORLD, 1.0)).xyz;
         vec3 local_rd = normalize(local_pos - local_ro);
         
-        float ray_length = length(local_pos - local_ro);
-        float step_size = ray_length / float(grid_steps);
+        vec2 bounds = intersectAABB(local_ro, local_rd, vec3(-0.5), vec3(0.5));
+        float tNear = max(bounds.x, 0.0);
+        float tFar = bounds.y;
         
         float hit = 0.0;
-        vec3 p = local_ro; 
         vec3 hit_normal = vec3(0.0);
         
-        for (int i = 0; i < grid_steps; i++) {
-            p += local_rd * step_size;
-            vec3 world_p = (MODEL_MATRIX * vec4(p, 1.0)).xyz;
+        if (tNear < tFar) {
+            float step_size = (tFar - tNear) / float(grid_steps);
+            float t = tNear;
+            
+            for (int i = 0; i < grid_steps; i++) {
+                t += step_size;
+                vec3 p = local_ro + local_rd * t;
+                vec3 world_p = (MODEL_MATRIX * vec4(p, 1.0)).xyz;
             float hit_dist_to_player = length(world_p - player_position);
             
             // Only evaluate if we are inside the bubble boundary
@@ -842,6 +858,7 @@ void fragment() {
                     }
                 }
             }
+        }
         }
         
         ALBEDO = grid_color.rgb;
@@ -889,6 +906,17 @@ float random(vec2 uv) {
     return fract(sin(dot(uv.xy, vec2(12.9898, 78.233))) * 43758.5453123);
 }
 
+// Helper function: Calculates where the camera's ray enters and exits a Godot BoxMesh
+vec2 intersectAABB(vec3 rayOrigin, vec3 rayDir, vec3 boxMin, vec3 boxMax) {
+    vec3 tMin = (boxMin - rayOrigin) / rayDir;
+    vec3 tMax = (boxMax - rayOrigin) / rayDir;
+    vec3 t1 = min(tMin, tMax);
+    vec3 t2 = max(tMin, tMax);
+    float tNear = max(max(t1.x, t1.y), t1.z);
+    float tFar = min(min(t2.x, t2.y), t2.z);
+    return vec2(tNear, tFar);
+}
+
 void vertex() {
     world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
     local_pos = VERTEX;
@@ -914,16 +942,21 @@ void fragment() {
         vec3 local_ro = (inverse(MODEL_MATRIX) * vec4(CAMERA_POSITION_WORLD, 1.0)).xyz;
         vec3 local_rd = normalize(local_pos - local_ro);
         
-        float ray_length = length(local_pos - local_ro);
-        float step_size = ray_length / float(grid_steps);
+        vec2 bounds = intersectAABB(local_ro, local_rd, vec3(-0.5), vec3(0.5));
+        float tNear = max(bounds.x, 0.0);
+        float tFar = bounds.y;
         
         float hit = 0.0;
-        vec3 p = local_ro; 
         vec3 hit_normal = vec3(0.0);
         
-        for (int i = 0; i < grid_steps; i++) {
-            p += local_rd * step_size;
-            vec3 world_p = (MODEL_MATRIX * vec4(p, 1.0)).xyz;
+        if (tNear < tFar) {
+            float step_size = (tFar - tNear) / float(grid_steps);
+            float t = tNear;
+            
+            for (int i = 0; i < grid_steps; i++) {
+                t += step_size;
+                vec3 p = local_ro + local_rd * t;
+                vec3 world_p = (MODEL_MATRIX * vec4(p, 1.0)).xyz;
             float hit_dist_to_player = length(world_p - player_position);
             
             // Only evaluate if we are inside the bubble boundary
@@ -958,6 +991,7 @@ void fragment() {
                     }
                 }
             }
+        }
         }
         
         ALBEDO = grid_color.rgb;
