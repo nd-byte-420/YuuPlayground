@@ -755,8 +755,8 @@ uniform float roughness = 0.5;
 
 // Proximity/Bubble Properties
 uniform vec3 player_position = vec3(0.0, 0.0, 0.0);
-uniform float bubble_inner_radius = 1.0; 
-uniform float bubble_outer_radius = 2.0; 
+uniform float bubble_inner_radius = 2.0; 
+uniform float bubble_outer_radius = 5.0; 
 
 // Internal Solid Cube Properties
 uniform vec4 grid_color : source_color = vec4(0.0, 1.0, 0.8, 1.0);
