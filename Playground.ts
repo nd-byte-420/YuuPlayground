@@ -166,7 +166,7 @@ async function start() {
 
   // playgroundDemos.spawnDissolveCubeBest(new Vector3(6, 1.5, 1));
 
-  playgroundDemos.spawnDissolveCubeRm(new Vector3(-6, 1.5, 3));
+  // playgroundDemos.spawnDissolveCubeRm(new Vector3(-6, 1.5, 3));
   playgroundDemos.spawnDissolveCubeRm1(new Vector3(6, 1.5, 3));
   playgroundDemos.spawnDissolveCube(new Vector3(6, 1.5, 4));
 
