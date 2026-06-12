@@ -20,7 +20,8 @@ export const playgroundDemos = {
   spawnDissolveCubeSmall,
   spawnDissolveCubeBest,
   spawnDissolveCubeRm,
-  spawnDissolveCubeRm1
+  spawnDissolveCubeRm1,
+  spawnDissolveCubeRm2
 }
 
 
