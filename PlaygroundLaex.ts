@@ -368,7 +368,7 @@ uniform float bubble_outer_radius = 5.0;
 uniform vec4 grid_color : source_color = vec4(0.0, 1.0, 0.8, 1.0);
 uniform float grid_scale = 2.0;
 uniform float cube_fill = 0.6; // How much of the 3D cell the solid cube takes up (0.0 to 1.0)
-uniform int grid_steps = 16; 
+uniform int grid_steps = 64; 
 
 // ---> NEW: Add the scale uniform here
 uniform vec3 object_scale = vec3(1.0, 1.0, 1.0);
