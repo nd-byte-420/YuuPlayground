@@ -147,31 +147,79 @@ async function rainbowWave(pos: Vector3) {
   const rw = spawnPrimitive.rainbowWaveLoop2(pos, new Vector3(2, 2, 2), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
 
   const nodeId = rw.mesh.nodeID ?? -1;
-  Godot.shader.applyToMesh(nodeId, rainbowShader);
+  Godot.shader.applyToMesh(nodeId, shaderCodeNew);
   
-
-  const initialPlayerPos = Player.position.get();
-  if (initialPlayerPos) {
-    const nodeId = rw.mesh.nodeID ?? -1;
-    Godot.shader.updateColor(nodeId, 'player_pos', initialPlayerPos.x, initialPlayerPos.y, initialPlayerPos.z);
-    Godot.shader.updateColor(nodeId, 'sphere_pos', pos.x, pos.y, pos.z);
-  }
 
   Async.setInterval(() => {
     const playerPos = Player.position.get();
     if (playerPos) {
       const distance = playerPos.distanceTo(pos);
-      // Map distance: 1.0 (white) at sphere surface (0.5m) down to 0.0 (black) at 8.0m
-      // if difference is above 10 cap it at 10, if below 2 cap it at 2
-      const proximityMinMax = Math.max(2, Math.min(10, distance));
+      const normalizedDistance =
+        distance <= 5 ? 0 :
+          distance >= 6 ? 1 :
+            distance - 5;
 
       const nodeId = rw.mesh.nodeID ?? -1;
-      Godot.shader.updateNumber(nodeId, 'proximity', proximityMinMax);
-      Godot.shader.updateColor(nodeId, 'player_pos', playerPos.x, playerPos.y, playerPos.z);
-      Godot.shader.updateColor(nodeId, 'sphere_pos', pos.x, pos.y, pos.z);
+      Godot.shader.updateNumber(nodeId, 'dissolve', normalizedDistance);
     }
   }, 50);
 }
+
+
+const shaderCodeNew = `
+  shader_type spatial;
+
+  uniform float dissolve : hint_range(0.0, 1.0) = 0.0;
+  uniform float noise_scale = 50.0;
+
+  float hash(vec3 p) {
+      p = fract(p * 0.3183099 + vec3(0.1));
+      p *= 17.0;
+      return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+  }
+
+  float noise3d(vec3 p) {
+      vec3 i = floor(p);
+      vec3 f = fract(p);
+
+      f = f * f * (3.0 - 2.0 * f);
+
+      float n000 = hash(i + vec3(0,0,0));
+      float n100 = hash(i + vec3(1,0,0));
+      float n010 = hash(i + vec3(0,1,0));
+      float n110 = hash(i + vec3(1,1,0));
+      float n001 = hash(i + vec3(0,0,1));
+      float n101 = hash(i + vec3(1,0,1));
+      float n011 = hash(i + vec3(0,1,1));
+      float n111 = hash(i + vec3(1,1,1));
+
+      return mix(
+          mix(
+              mix(n000, n100, f.x),
+              mix(n010, n110, f.x),
+              f.y
+          ),
+          mix(
+              mix(n001, n101, f.x),
+              mix(n011, n111, f.x),
+              f.y
+          ),
+          f.z
+      );
+  }
+
+  void fragment() {
+      float n = noise3d(VERTEX * noise_scale);
+
+      // Equivalent to Blender's Less Than node
+      if (n >= dissolve) {
+          discard;
+      }
+
+      ALBEDO = vec3(1.0);
+      EMISSION = vec3(1.0);
+  }
+`;
 
 const rainbowShader = `
 shader_type spatial;
