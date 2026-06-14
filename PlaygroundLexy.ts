@@ -223,7 +223,8 @@ const shaderCodeNew = `
 
 const rainbowShader = `
 shader_type spatial;
-render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
+// Removed "blend_mix" and "depth_draw_opaque" to force a solid, opaque material
+render_mode cull_back, diffuse_burley, specular_schlick_ggx;
 
 // Controls how fast the spiral animates
 uniform float time_scale = 1.0;
@@ -261,6 +262,9 @@ void fragment() {
     
     // 6. Set the final surface color
     ALBEDO = final_color;
+    
+    // 7. Explicitly force the material to be fully opaque
+    ALPHA = 1.0;
 }
 `
 
