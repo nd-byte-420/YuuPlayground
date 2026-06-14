@@ -145,10 +145,71 @@ function cycleDrawSetting(isIncrease: boolean, settingType: string, textEntity: 
 function sierPlane(pos: Vector3){
   const plane = spawnPrimitive.plane('Front', pos, new Vector3(1, 1, 1), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
   const nodeId = plane.mesh.nodeID ?? -1;
-  Godot.shader.applyToMesh(nodeId, cleansier);
+  Godot.shader.applyToMesh(nodeId, dvdsier);
 
 }
 
+
+const dvdsier = `
+// Change to 'shader_type canvas_item;' if you are using this in 2D
+shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
+
+// From the initial "Vector Math (SCALE)" node
+uniform float scale = 6.0;
+
+// Variables pulled from your inner "Value" nodes inside the Group
+uniform float bottom_edge_value = 0.0;
+uniform float triangle_height = 0.866025404;   
+uniform float value_sqrt3 = 1.732050807;
+
+// --- DVD BOUNCE UNIFORMS ---
+// Different speeds for X and Y prevent the pattern from just repeating the exact same diagonal
+uniform float speed_x = 0.31;
+uniform float speed_y = 0.43;
+
+// The maximum distance the pattern is allowed to travel in UV space (0.0 to 1.0).
+// Tweak these if your triangles are clipping over the edge of your mesh!
+uniform float bounce_range_x = 0.5;
+uniform float bounce_range_y = 0.5;
+
+// This function perfectly replicates the internal logic of your "Group" nodes
+float equilateral_triangle(vec2 uv) {
+    float x = uv.x - 0.5;
+    float y = uv.y - 0.5;
+    
+    float mask_bottom = step(bottom_edge_value, y);
+    float mask_sides = step(y, triangle_height - abs(x) * value_sqrt3);
+    
+    return mask_bottom * mask_sides;
+}
+
+void fragment() {
+    // 1. Calculate the ping-pong bounce effect (returns a value bouncing between 0.0 and 1.0)
+    // Using mod(..., 2.0) - 1.0 gives a range from -1.0 to 1.0. 
+    // Taking the absolute value folds the negative half up, creating a perfect V-shaped wave.
+    float bounce_x = abs(mod(TIME * speed_x, 2.0) - 1.0);
+    float bounce_y = abs(mod(TIME * speed_y, 2.0) - 1.0);
+    
+    // 2. Multiply by our ranges to define the "box" it's allowed to bounce within
+    vec2 bounce_offset = vec2(bounce_x * bounce_range_x, bounce_y * bounce_range_y);
+    
+    // 3. Subtract the offset from the UV *before* scaling so it moves across the mesh
+    vec2 base_uv = (UV - bounce_offset) * scale;
+    
+    float mask = 0.0;
+    
+    // The main tree sequence: adding displaced triangles together.
+    mask += equilateral_triangle(base_uv + vec2(-1.0, -1.29999995));
+    mask += equilateral_triangle(base_uv + vec2(-0.5, -0.4330127));
+    mask += equilateral_triangle(base_uv + vec2(-1.5, -0.4330127));
+    
+    // Clamp to prevent values from blowing out where triangles overlap
+    mask = clamp(mask, 0.0, 1.0);
+    
+    // Connect to "Material Output" (Surface)
+    ALBEDO = vec3(mask);
+}`
 
 const cleansier =`
 // Change to 'shader_type canvas_item;' if you are using this in 2D
