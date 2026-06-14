@@ -171,7 +171,7 @@ async function rainbowWave2(pos: Vector3) {
   const rw = spawnPrimitive.rainbowWaveLoop2(pos, new Vector3(2, 2, 2), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
 
   const nodeId = rw.mesh.nodeID ?? -1;
-  Godot.shader.applyToMesh(nodeId, rainbowShader);
+  Godot.shader.applyToMesh(nodeId, rs2);
   
 
   // Async.setInterval(() => {
