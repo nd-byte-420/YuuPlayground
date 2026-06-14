@@ -15,7 +15,8 @@ import { Texture } from "./Yuu API/Texture";
 export const lexy = {
   spawnDrawSettingButtons,
   rainbowWave,
-  rainbowWave2
+  rainbowWave2,
+  sierPlane
 }
 
 function spawnDrawSettingButtons(pos: Vector3) {
@@ -140,6 +141,69 @@ function cycleDrawSetting(isIncrease: boolean, settingType: string, textEntity: 
 
 
 //OLD CODE:
+
+function sierPlane(pos: Vector3){
+  const plane = spawnPrimitive.plane('Front', pos, new Vector3(10, 10, 10), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
+  const nodeId = plane.mesh.nodeID ?? -1;
+  Godot.shader.applyToMesh(nodeId, sier);
+
+}
+
+
+const sier = `
+// Change to 'shader_type canvas_item;' if you are using this in 2D
+shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
+
+// From the initial "Vector Math (SCALE)" node
+uniform float scale = 6.0;
+
+// Variables pulled from your inner "Value" nodes inside the Group
+uniform float bottom_edge_value = 0.0;
+uniform float value_2h3 = 0.577350269;   // "2h/3" node: roughly sqrt(3)/3
+uniform float value_sqrt3 = 1.732050807; // "sqrt(3)" node
+
+// This function perfectly replicates the internal logic of your "Group" nodes
+float equilateral_triangle(vec2 uv) {
+    // Separate XYZ -> Subtract 0.5 (Defaults on the Math subtract nodes)
+    float x = uv.x - 0.5;
+    float y = uv.y - 0.5;
+    
+    // Math.003 (Greater Than): (Y - 0.5) > Bottom Edge Value
+    float mask_bottom = step(bottom_edge_value, y);
+    
+    // Math.002 (Absolute): abs(X - 0.5)
+    // Math.004 (Multiply): abs(X - 0.5) * sqrt(3)
+    // Math.005 (Subtract): 2h/3 - (abs(X - 0.5) * sqrt(3))
+    // Math.006 (Less Than): (Y - 0.5) < Math.005
+    float mask_sides = step(y, value_2h3 - abs(x) * value_sqrt3);
+    
+    // Math.007 (Multiply): Intersect the two masks
+    return mask_bottom * mask_sides;
+}
+
+void fragment() {
+    // "Texture Coordinate" -> "Vector Math" (Scale)
+    vec2 base_uv = UV * scale;
+    
+    float mask = 0.0;
+    
+    // The main tree sequence: adding displaced triangles together.
+    // These specific vectors match the Vector Math (ADD) values from your JSON.
+    mask += equilateral_triangle(base_uv + vec2(-1.0, -1.29999995));
+    mask += equilateral_triangle(base_uv + vec2(-0.5, -0.4330127));
+    mask += equilateral_triangle(base_uv + vec2(-1.5, -0.4330127));
+    
+    // Note: If your graph has more groups than shown in the primary snippet, 
+    // simply copy the line above and paste the corresponding X and Y Vector Math ADD values.
+    
+    // Clamp to prevent values from blowing out where triangles might overlap
+    mask = clamp(mask, 0.0, 1.0);
+    
+    // Connect to "Material Output" (Surface)
+    ALBEDO = vec3(mask);
+}`
+
 
 
 

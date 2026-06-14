@@ -14,7 +14,8 @@ async function start() {
 
   lexy.rainbowWave(new Vector3(-25,0,0));
   lexy.rainbowWave2(new Vector3(25,0,0));
-
+  lexy.sierPlane(new Vector3(0,0,20));
+  lexy.sierPlane(new Vector3(0,0,-20));
   // Come back to this to get water shader working
   // playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));
 }
