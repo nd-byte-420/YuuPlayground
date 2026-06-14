@@ -149,12 +149,27 @@ async function rainbowWave(pos: Vector3) {
   const nodeId = rw.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, rainbowShader);
   
-  let i = 0
+
+  const initialPlayerPos = Player.position.get();
+  if (initialPlayerPos) {
+    const nodeId = rw.mesh.nodeID ?? -1;
+    Godot.shader.updateColor(nodeId, 'player_pos', initialPlayerPos.x, initialPlayerPos.y, initialPlayerPos.z);
+    Godot.shader.updateColor(nodeId, 'sphere_pos', pos.x, pos.y, pos.z);
+  }
 
   Async.setInterval(() => {
-      i++;
+    const playerPos = Player.position.get();
+    if (playerPos) {
+      const distance = playerPos.distanceTo(pos);
+      // Map distance: 1.0 (white) at sphere surface (0.5m) down to 0.0 (black) at 8.0m
+      // if difference is above 10 cap it at 10, if below 2 cap it at 2
+      const proximityMinMax = Math.max(2, Math.min(10, distance));
+
       const nodeId = rw.mesh.nodeID ?? -1;
-      Godot.shader.updateNumber(nodeId, 'custom_value', i);
+      Godot.shader.updateNumber(nodeId, 'proximity', proximityMinMax);
+      Godot.shader.updateColor(nodeId, 'player_pos', playerPos.x, playerPos.y, playerPos.z);
+      Godot.shader.updateColor(nodeId, 'sphere_pos', pos.x, pos.y, pos.z);
+    }
   }, 50);
 }
 
@@ -210,6 +225,33 @@ void fragment() {
     ALPHA = 0.5;
 }`
 
+//The color on this needs to be 100% bright after the avg is determined
+const shaderCodeSpiral = `
+  shader_type spatial;
+
+  uniform float proximity;
+
+  void fragment() {
+    vec2 uv = UV - 0.5;
+    uv *= proximity;
+
+    float fracX = fract(uv.x);
+    float fracY = fract(uv.y);
+
+    float blenderX = abs(fracX - 0.5);
+    float blenderY = abs(fracY - 0.5);
+
+    float maxUV = max(blenderX, blenderY);
+
+    float mulled = maxUV * 0.5;
+    mulled -= 0.25;
+
+    float result = abs(mulled); 
+
+    ALBEDO = vec3(result);
+    ALPHA = 1.0;
+  }
+`;
 
 
 
