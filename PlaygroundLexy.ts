@@ -160,7 +160,7 @@ async function rainbowWave(pos: Vector3) {
             distance - 5;
 
       const nodeId = rw.mesh.nodeID ?? -1;
-      Godot.shader.updateNumber(nodeId, 'dissolve', normalizedDistance);
+      Godot.shader.updateNumber(nodeId, 'input_value', normalizedDistance);
     }
   }, 50);
 }
@@ -223,55 +223,63 @@ const shaderCodeNew = `
 
 const rainbowShader = `
 shader_type spatial;
-render_mode unshaded; // Mirrors the Color Ramp bypassing a BSDF node
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
 
-// --- Uniforms ---
-uniform float custom_value = 1.0;      // Maps to the "Value" node
-uniform float math4_divisor = 1.0;     // Default denominator for Math.004 (Divide)
-uniform sampler2D color_ramp_001;      // Assign a GradientTexture1D in Godot's inspector
+// Represents the "Value" node from your Blender graph
+uniform float input_value = 0.0;
 
-// Mapping Node parameters
-uniform vec3 mapping_location = vec3(0.0);
-uniform vec3 mapping_rotation = vec3(0.0); // Euler angles in radians
-uniform vec3 mapping_scale    = vec3(1.0);
+// Optional: Toggle to use TIME instead of a static value to animate the spiral automatically
+uniform bool animate_with_time = false;
+uniform float time_scale = 1.0;
 
-// Passed from vertex to fragment for local Object-space coordinates
+// Varying to pass local vertex position from vertex to fragment shader
 varying vec3 local_pos;
 
 void vertex() {
-    // VERTEX in the vertex shader represents local object coordinates
+    // Equivalent to Blender's Texture Coordinate -> Object
     local_pos = VERTEX;
 }
 
-// Helper function to convert Hue/Saturation/Value to RGB
+// Custom HSV to RGB function to replace the Color Ramp
 vec3 hsv2rgb(vec3 c) {
     vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
     vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
-// Replicates Blender's Math "Wrap" function (Value, Min, Max)
-// Assumes defaults Min=0.0, Max=1.0 based on typical node usage
-float wrap_blender(float val, float min_val, float max_val) {
-    float range = max_val - min_val;
-    return (range == 0.0) ? min_val : val - (range * floor((val - min_val) / range));
-}
-
 void fragment() {
-
-
-    // 11. Separate XYZ.001
-    float sep1_z = mapped.z;
-
-    // 12. Procedural Color Ramp
-    // Instead of a texture, we use sep1_z as the Hue (0.0 to 1.0)
-    // Saturation = 1.0, Value = 1.0
-    vec3 procedural_rainbow = hsv2rgb(vec3(sep1_z, 1.0, 1.0));
-
-    // 13. Material Output
-    ALBEDO = procedural_rainbow;
-    ALPHA = 0.5;
-}`
+    // 1. Vector Math (Add [0,0,0]) - Passthrough
+    vec3 pos = local_pos;
+    
+    // 2. Separate XYZ -> Math (Wrap)
+    // fract() acts as Blender's Wrap node between 0.0 and 1.0 limits
+    float z_wrap = fract(pos.z);
+    
+    // 3. Value -> Math (Divide 1.0) -> Math (Wrap)
+    float val = input_value;
+    if (animate_with_time) {
+        val = TIME * time_scale;
+    }
+    float val_wrap = fract(val);
+    
+    // 4. Math (Add) -> Math (Wrap)
+    // Combines the wrapped Z coordinate with the wrapped input value
+    float combined_z = fract(z_wrap + val_wrap);
+    
+    // 5. Combine XYZ -> Mapping -> Separate XYZ
+    // Since the Mapping node in the JSON has default values (Loc: 0, Rot: 0, Scale: 1), 
+    // it functions as a passthrough. The resulting Z is just our combined_z.
+    float final_factor = combined_z;
+    
+    // 6. Color Ramp (HSV mapped)
+    // We plug the final factor into the Hue (X) of our HSV vector. 
+    // Saturation (Y) and Value (Z) are kept at 1.0.
+    vec3 final_color = hsv2rgb(vec3(final_factor, 1.0, 1.0));
+    
+    // 7. Material Output
+    ALBEDO = final_color;
+}
+`
 
 //The color on this needs to be 100% bright after the avg is determined
 const shaderCodeSpiral = `
