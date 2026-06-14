@@ -15,7 +15,7 @@ import { Texture } from "./Yuu API/Texture";
 export const lexy = {
   spawnDrawSettingButtons,
   rainbowWave,
-  rainbowWave2,
+  nissanGtr,
   sierPlane
 }
 
@@ -345,9 +345,9 @@ async function rainbowWave(pos: Vector3) {
   // }, 50);
 }
 
-async function rainbowWave2(pos: Vector3) {
+async function nissanGtr(pos: Vector3) {
 
-  const rw = spawnPrimitive.rainbowWaveLoop2(pos, new Vector3(2, 2, 2), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
+  const rw = spawnPrimitive.nissanGtr32Exp(pos, new Vector3(2, 2, 2), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
 
   const nodeId = rw.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, rs2);
@@ -367,6 +367,32 @@ async function rainbowWave2(pos: Vector3) {
   //   }
   // }, 50);
 }
+
+
+async function nissan(pos: Vector3) {
+
+  const rw = spawnPrimitive.(pos, new Vector3(2, 2, 2), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
+
+  const nodeId = rw.mesh.nodeID ?? -1;
+  Godot.shader.applyToMesh(nodeId, rs2);
+  
+
+  // Async.setInterval(() => {
+  //   const playerPos = Player.position.get();
+  //   if (playerPos) {
+  //     const distance = playerPos.distanceTo(pos);
+  //     const normalizedDistance =
+  //       distance <= 5 ? 0 :
+  //         distance >= 6 ? 1 :
+  //           distance - 5;
+
+  //     const nodeId = rw.mesh.nodeID ?? -1;
+  //     Godot.shader.updateNumber(nodeId, 'input_value', normalizedDistance);
+  //   }
+  // }, 50);
+}
+
+
 
 
 const shaderCodeNew = `

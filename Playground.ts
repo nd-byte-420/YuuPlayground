@@ -17,7 +17,9 @@ async function start() {
   playgroundDemos.spawnDissolveCubeEfficient(new Vector3(5, 2.5, 0))
 
   lexy.rainbowWave(new Vector3(-25,0,0));
-  lexy.rainbowWave2(new Vector3(25,0,0));
+
+
+  lexy.nissanGtr(new Vector3(25,0,0));
   lexy.sierPlane(new Vector3(0,0,20));
   lexy.sierPlane(new Vector3(0,2,-20));
   // Come back to this to get water shader working

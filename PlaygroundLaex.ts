@@ -587,6 +587,8 @@ shader_type spatial;
   }`
 
 
+
+// when you get closer it appears
 const shaderEfficient = `
 shader_type spatial;
 
