@@ -180,6 +180,13 @@ void vertex() {
     local_pos = VERTEX;
 }
 
+// Helper function to convert Hue/Saturation/Value to RGB
+vec3 hsv2rgb(vec3 c) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
 // Replicates Blender's Math "Wrap" function (Value, Min, Max)
 // Assumes defaults Min=0.0, Max=1.0 based on typical node usage
 float wrap_blender(float val, float min_val, float max_val) {
@@ -247,6 +254,18 @@ void fragment() {
     // 13. Material Output
     ALBEDO = ramp_color.rgb;
     ALPHA = ramp_color.a;
+
+    // 11. Separate XYZ.001
+    float sep1_z = mapped.z;
+
+    // 12. Procedural Color Ramp
+    // Instead of a texture, we use sep1_z as the Hue (0.0 to 1.0)
+    // Saturation = 1.0, Value = 1.0
+    vec3 procedural_rainbow = hsv2rgb(vec3(sep1_z, 1.0, 1.0));
+
+    // 13. Material Output
+    ALBEDO = procedural_rainbow;
+    ALPHA = 1.0;
 }`
 
 
