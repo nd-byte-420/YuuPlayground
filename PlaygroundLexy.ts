@@ -14,7 +14,8 @@ import { Texture } from "./Yuu API/Texture";
 
 export const lexy = {
   spawnDrawSettingButtons,
-  rainbowWave
+  rainbowWave,
+  rainbowWave2
 }
 
 function spawnDrawSettingButtons(pos: Vector3) {
@@ -165,6 +166,29 @@ async function rainbowWave(pos: Vector3) {
   // }, 50);
 }
 
+async function rainbowWave2(pos: Vector3) {
+
+  const rw = spawnPrimitive.rainbowWaveLoop2(pos, new Vector3(2, 2, 2), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
+
+  const nodeId = rw.mesh.nodeID ?? -1;
+  Godot.shader.applyToMesh(nodeId, rainbowShader);
+  
+
+  // Async.setInterval(() => {
+  //   const playerPos = Player.position.get();
+  //   if (playerPos) {
+  //     const distance = playerPos.distanceTo(pos);
+  //     const normalizedDistance =
+  //       distance <= 5 ? 0 :
+  //         distance >= 6 ? 1 :
+  //           distance - 5;
+
+  //     const nodeId = rw.mesh.nodeID ?? -1;
+  //     Godot.shader.updateNumber(nodeId, 'input_value', normalizedDistance);
+  //   }
+  // }, 50);
+}
+
 
 const shaderCodeNew = `
   shader_type spatial;
@@ -220,6 +244,53 @@ const shaderCodeNew = `
       EMISSION = vec3(1.0);
   }
 `;
+
+const rs2 = `
+shader_type spatial;
+// Removed "blend_mix" and "depth_draw_opaque" to force a solid, opaque material
+render_mode cull_back, diffuse_burley, specular_schlick_ggx;
+
+// Controls how fast the spiral animates
+uniform float time_scale = 1.0;
+
+// Varying to pass local vertex position from vertex to fragment shader
+varying vec3 local_pos;
+
+void vertex() {
+    // Equivalent to Blender's Texture Coordinate -> Object
+    local_pos = VERTEX;
+}
+
+// Custom HSV to RGB function
+vec3 hsv2rgb(vec3 c) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+void fragment() {
+    // 1. Get the local position of the object
+    vec3 pos = local_pos;
+    
+    // 2. Isolate the Y-axis (Vertical) and wrap it
+    float y_wrap = fract(pos.y);
+    
+    // 3. Drive the value purely with Godot's built-in TIME and wrap it
+    float val_wrap = fract(TIME * time_scale);
+    
+    // 4. Combine the object's Y data with the continuous time data
+    float final_factor = fract(y_wrap + val_wrap);
+    
+    // 5. Output to the color ramp replacement (HSV Hue mapping)
+    vec3 final_color = hsv2rgb(vec3(final_factor, 1.0, 1.0));
+    
+    // 6. Set the final surface color
+    ALBEDO = final_color;
+    
+    // 7. Explicitly force the material to be fully opaque
+    ALPHA = 1.0;
+}
+`
 
 const rainbowShader = `
 shader_type spatial;

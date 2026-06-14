@@ -12,7 +12,8 @@ async function start() {
   playgroundDemos.colorPicker(new Vector3(1, 1.5, -3.5), Quaternion.fromEuler(new Vector3(0, -Math.PI / 4, 0)), new Vector3(0.35, 1, 0.35));
   playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));
 
-  lexy.rainbowWave(new Vector3(-10,0,0));
+  lexy.rainbowWave(new Vector3(-25,0,0));
+  lexy.rainbowWave2(new Vector3(25,0,0));
 
   // Come back to this to get water shader working
   // playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));
