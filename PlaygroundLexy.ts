@@ -155,25 +155,25 @@ const dvdsier = `
 shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
 
-// From the initial "Vector Math (SCALE)" node
 uniform float scale = 6.0;
 
-// Variables pulled from your inner "Value" nodes inside the Group
 uniform float bottom_edge_value = 0.0;
 uniform float triangle_height = 0.866025404;   
 uniform float value_sqrt3 = 1.732050807;
 
 // --- DVD BOUNCE UNIFORMS ---
-// Different speeds for X and Y prevent the pattern from just repeating the exact same diagonal
 uniform float speed_x = 0.31;
 uniform float speed_y = 0.43;
 
-// The maximum distance the pattern is allowed to travel in UV space (0.0 to 1.0).
-// Tweak these if your triangles are clipping over the edge of your mesh!
-uniform float bounce_range_x = 0.5;
-uniform float bounce_range_y = 0.5;
+// The "radius" or total size of the bounding rectangle around your triangles (in 0.0 to 1.0 space)
+// Tweak these until the shape perfectly hits the right and top edges.
+uniform float rect_size_x = 0.35;
+uniform float rect_size_y = 0.35;
 
-// This function perfectly replicates the internal logic of your "Group" nodes
+// Because your triangles have hardcoded offsets (like -1.0, -1.5), they might not 
+// naturally start in the exact bottom-left corner. Use this to shift the starting position.
+uniform vec2 start_offset = vec2(-0.05, -0.05);
+
 float equilateral_triangle(vec2 uv) {
     float x = uv.x - 0.5;
     float y = uv.y - 0.5;
@@ -185,29 +185,29 @@ float equilateral_triangle(vec2 uv) {
 }
 
 void fragment() {
-    // 1. Calculate the ping-pong bounce effect (returns a value bouncing between 0.0 and 1.0)
-    // Using mod(..., 2.0) - 1.0 gives a range from -1.0 to 1.0. 
-    // Taking the absolute value folds the negative half up, creating a perfect V-shaped wave.
+    // 1. Calculate maximum travel distance (1.0 is the full quad, minus the size of the shape)
+    float max_travel_x = 1.0 - rect_size_x;
+    float max_travel_y = 1.0 - rect_size_y;
+
+    // 2. Calculate the ping-pong bounce effect (0.0 to 1.0)
     float bounce_x = abs(mod(TIME * speed_x, 2.0) - 1.0);
     float bounce_y = abs(mod(TIME * speed_y, 2.0) - 1.0);
     
-    // 2. Multiply by our ranges to define the "box" it's allowed to bounce within
-    vec2 bounce_offset = vec2(bounce_x * bounce_range_x, bounce_y * bounce_range_y);
+    // 3. Multiply by max travel and add the starting offset to keep it inside the quad
+    vec2 bounce_offset = vec2(bounce_x * max_travel_x, bounce_y * max_travel_y) + start_offset;
     
-    // 3. Subtract the offset from the UV *before* scaling so it moves across the mesh
+    // 4. Apply the offset to the UV before scaling
     vec2 base_uv = (UV - bounce_offset) * scale;
     
     float mask = 0.0;
     
-    // The main tree sequence: adding displaced triangles together.
+    // The main tree sequence
     mask += equilateral_triangle(base_uv + vec2(-1.0, -1.29999995));
     mask += equilateral_triangle(base_uv + vec2(-0.5, -0.4330127));
     mask += equilateral_triangle(base_uv + vec2(-1.5, -0.4330127));
     
-    // Clamp to prevent values from blowing out where triangles overlap
     mask = clamp(mask, 0.0, 1.0);
     
-    // Connect to "Material Output" (Surface)
     ALBEDO = vec3(mask);
 }`
 
