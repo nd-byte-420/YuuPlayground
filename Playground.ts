@@ -18,7 +18,7 @@ async function start() {
   playgroundDemos.colorPicker(new Vector3(1, 1.5, -3.5), Quaternion.fromEuler(new Vector3(0, -Math.PI / 4, 0)), new Vector3(0.35, 1, 0.35));
   playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));
 
-  rainbowWave(new Vector3(-3, 5, -4));
+  rainbowWave(new Vector3(0,0,0));
 
   // Come back to this to get water shader working
   // playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));
@@ -34,16 +34,16 @@ async function rainbowWave(pos: Vector3) {
 
   const rw = spawnPrimitive.rainbowWaveLoop2(new Vector3(0, 0, 0), new Vector3(2, 2, 2), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
 
-  const nodeId = rw.mesh.nodeID ?? -1;
-  Godot.shader.applyToMesh(nodeId, rainbowShader);
+  // const nodeId = rw.mesh.nodeID ?? -1;
+  // Godot.shader.applyToMesh(nodeId, rainbowShader);
   
-  let i = 0
+  // let i = 0
 
-  Async.setInterval(() => {
-      i++;
-      const nodeId = rw.mesh.nodeID ?? -1;
-      Godot.shader.updateNumber(nodeId, 'custom_value', i);
-  }, 50);
+  // Async.setInterval(() => {
+  //     i++;
+  //     const nodeId = rw.mesh.nodeID ?? -1;
+  //     Godot.shader.updateNumber(nodeId, 'custom_value', i);
+  // }, 50);
 }
 
 const rainbowShader = `
