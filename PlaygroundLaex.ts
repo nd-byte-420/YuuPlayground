@@ -22,6 +22,7 @@ export const playgroundDemos = {
   spawnDissolveCubeRm,
   spawnDissolveCubeRm1,
   spawnDissolveCubeRm2,
+  spawnDissolveCubeRm3,
   spawnDissolveCubeEfficient
 }
 
@@ -376,6 +377,97 @@ async function spawnDissolveCubeRm2(pos: Vector3) {
     }
   }, 50);
 }
+
+// create a cube and attach shadercode new/
+async function spawnDissolveCubeRm3(pos: Vector3) {
+
+  const cube = spawnPrimitive.cubeScaled(pos, new Vector3(5,5,5), Quaternion.one, new Color(0.1,0.5,0.1), 1, true, 'Static', undefined);
+
+  cube.collidable.set(false)
+
+  const nodeId = cube.mesh.nodeID ?? -1;
+  Godot.shader.applyToMesh(nodeId, shader36);
+
+  
+  Async.setInterval(() => {
+    const playerPos = Player.position.get();
+    const scale = cube.scale;
+    if (playerPos) {
+      Godot.shader.updateColor(nodeId, 'player_position', playerPos.x, playerPos.y, playerPos.z);
+      Godot.shader.updateColor(nodeId, 'object_scale', scale.x, scale.y, scale.z);
+
+    }
+  }, 50);
+}
+
+const shader36 = `
+shader_type spatial;
+
+// Exposed parameters
+uniform float dissolve_start_distance = 5.0; // Distance where it starts fading out (solid here)
+uniform float dissolve_end_distance = 1.0;   // Distance where it is completely gone (transparent here)
+uniform float noise_scale = 50.0;
+
+varying vec3 local_pos;
+
+float hash(vec3 p) {
+    p = fract(p * 0.3183099 + vec3(0.1));
+    p *= 17.0;
+    return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+
+float noise3d(vec3 p) {
+    vec3 i = floor(p);
+    vec3 f = fract(p);
+
+    f = f * f * (3.0 - 2.0 * f);
+
+    float n000 = hash(i + vec3(0,0,0));
+    float n100 = hash(i + vec3(1,0,0));
+    float n010 = hash(i + vec3(0,1,0));
+    float n110 = hash(i + vec3(1,1,0));
+    float n001 = hash(i + vec3(0,0,1));
+    float n101 = hash(i + vec3(1,0,1));
+    float n011 = hash(i + vec3(0,1,1));
+    float n111 = hash(i + vec3(1,1,1));
+
+    return mix(
+        mix(
+            mix(n000, n100, f.x),
+            mix(n010, n110, f.x),
+            f.y
+        ),
+        mix(
+            mix(n001, n101, f.x),
+            mix(n011, n111, f.x),
+            f.y
+        ),
+        f.z
+    );
+}
+
+void vertex() {
+    local_pos = VERTEX;
+}
+
+void fragment() {
+    float n = noise3d(local_pos * noise_scale);
+
+    float distance_to_player = length(VERTEX); 
+      
+    // INVERTED LOGIC:
+    // If distance is >= 5.0 (start_distance), visibility is 1.0 (Solid)
+    // If distance is <= 1.0 (end_distance), visibility is 0.0 (Dissolved)
+    float visibility = smoothstep(dissolve_end_distance, dissolve_start_distance, distance_to_player);
+
+    // If the noise value is higher than our current visibility, discard the pixel
+    if (n >= visibility) {
+        discard;
+    }
+
+    ALBEDO = vec3(1.0);
+    EMISSION = vec3(1.0);
+}`
 
 const shader35 = `
 shader_type spatial;
