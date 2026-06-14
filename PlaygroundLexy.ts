@@ -147,22 +147,22 @@ async function rainbowWave(pos: Vector3) {
   const rw = spawnPrimitive.rainbowWaveLoop2(pos, new Vector3(2, 2, 2), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
 
   const nodeId = rw.mesh.nodeID ?? -1;
-  Godot.shader.applyToMesh(nodeId, shaderCodeNew);
+  Godot.shader.applyToMesh(nodeId, rainbowShader);
   
 
-  Async.setInterval(() => {
-    const playerPos = Player.position.get();
-    if (playerPos) {
-      const distance = playerPos.distanceTo(pos);
-      const normalizedDistance =
-        distance <= 5 ? 0 :
-          distance >= 6 ? 1 :
-            distance - 5;
+  // Async.setInterval(() => {
+  //   const playerPos = Player.position.get();
+  //   if (playerPos) {
+  //     const distance = playerPos.distanceTo(pos);
+  //     const normalizedDistance =
+  //       distance <= 5 ? 0 :
+  //         distance >= 6 ? 1 :
+  //           distance - 5;
 
-      const nodeId = rw.mesh.nodeID ?? -1;
-      Godot.shader.updateNumber(nodeId, 'input_value', normalizedDistance);
-    }
-  }, 50);
+  //     const nodeId = rw.mesh.nodeID ?? -1;
+  //     Godot.shader.updateNumber(nodeId, 'input_value', normalizedDistance);
+  //   }
+  // }, 50);
 }
 
 
