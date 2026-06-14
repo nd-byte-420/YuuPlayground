@@ -144,7 +144,7 @@ function cycleDrawSetting(isIncrease: boolean, settingType: string, textEntity: 
 
 async function rainbowWave(pos: Vector3) {
 
-  const rw = spawnPrimitive.rainbowWaveLoop2(new Vector3(0, 0, 0), new Vector3(2, 2, 2), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
+  const rw = spawnPrimitive.rainbowWaveLoop2(pos, new Vector3(2, 2, 2), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
 
   const nodeId = rw.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, rainbowShader);
