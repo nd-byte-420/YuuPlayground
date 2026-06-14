@@ -18,8 +18,10 @@ async function start() {
 
   lexy.rainbowWave(new Vector3(-25,0,0));
 
-
+  console.log('rain')
   lexy.nissanGtr(new Vector3(25,0,0));
+  console.log('nissan')
+
   lexy.sierPlane(new Vector3(0,0,20));
   lexy.sierPlane(new Vector3(0,2,-20));
   // Come back to this to get water shader working
