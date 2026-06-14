@@ -149,13 +149,13 @@ async function rainbowWave(pos: Vector3) {
   const nodeId = rw.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, rainbowShader);
   
-  // let i = 0
+  let i = 0
 
-  // Async.setInterval(() => {
-  //     i++;
-  //     const nodeId = rw.mesh.nodeID ?? -1;
-  //     Godot.shader.updateNumber(nodeId, 'custom_value', i);
-  // }, 50);
+  Async.setInterval(() => {
+      i++;
+      const nodeId = rw.mesh.nodeID ?? -1;
+      Godot.shader.updateNumber(nodeId, 'custom_value', i);
+  }, 50);
 }
 
 const rainbowShader = `
