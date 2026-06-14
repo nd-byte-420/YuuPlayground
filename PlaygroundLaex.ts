@@ -203,7 +203,7 @@ async function spawnDissolveCube(pos: Vector3) {
   cube.collidable.set(false)
 
   const nodeId = cube.mesh.nodeID ?? -1;
-  Godot.shader.applyToMesh(nodeId, shaderCodeNew);
+  Godot.shader.applyToMesh(nodeId, shaderCodeStatic);
   
   Async.setInterval(() => {
     const playerPos = Player.position.get();
@@ -495,6 +495,69 @@ const shaderCodeSpiral = `
     ALPHA = 1.0;
   }
 `;
+
+const shaderCodeStatic = `
+shader_type spatial;
+
+  uniform float dissolve : hint_range(0.0, 1.0) = 0.0;
+  uniform float noise_scale = 50.0;
+
+  // 1. Declare a varying to pass the local position from the vertex shader
+  varying vec3 local_pos;
+
+  float hash(vec3 p) {
+      p = fract(p * 0.3183099 + vec3(0.1));
+      p *= 17.0;
+      return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+  }
+
+  float noise3d(vec3 p) {
+      vec3 i = floor(p);
+      vec3 f = fract(p);
+
+      f = f * f * (3.0 - 2.0 * f);
+
+      float n000 = hash(i + vec3(0,0,0));
+      float n100 = hash(i + vec3(1,0,0));
+      float n010 = hash(i + vec3(0,1,0));
+      float n110 = hash(i + vec3(1,1,0));
+      float n001 = hash(i + vec3(0,0,1));
+      float n101 = hash(i + vec3(1,0,1));
+      float n011 = hash(i + vec3(0,1,1));
+      float n111 = hash(i + vec3(1,1,1));
+
+      return mix(
+          mix(
+              mix(n000, n100, f.x),
+              mix(n010, n110, f.x),
+              f.y
+          ),
+          mix(
+              mix(n001, n101, f.x),
+              mix(n011, n111, f.x),
+              f.y
+          ),
+          f.z
+      );
+  }
+
+  void vertex() {
+      // 2. Capture the local vertex position. 
+      // Inside vertex(), VERTEX is in Object Space.
+      local_pos = VERTEX;
+  }
+
+  void fragment() {
+      // 3. Use 'local_pos' instead of 'VERTEX' for the noise generation
+      float n = noise3d(local_pos * noise_scale);
+
+      if (n >= dissolve) {
+          discard;
+      }
+
+      ALBEDO = vec3(1.0);
+      EMISSION = vec3(1.0);
+  }`
 
 //The color on this needs to be 100% bright after the avg is determined
 const shaderCodeNew = `
