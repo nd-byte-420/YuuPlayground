@@ -143,7 +143,7 @@ function cycleDrawSetting(isIncrease: boolean, settingType: string, textEntity: 
 //OLD CODE:
 
 function sierPlane(pos: Vector3){
-  const plane = spawnPrimitive.plane('Front', pos, new Vector3(10, 10, 10), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
+  const plane = spawnPrimitive.plane('Front', pos, new Vector3(1, 1, 1), Quaternion.one, Color.white, 1, 'Concave', 'Static', undefined);
   const nodeId = plane.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, sier);
 
