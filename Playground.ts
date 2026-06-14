@@ -14,6 +14,7 @@ async function start() {
 
 
   playgroundDemos.spawnDissolveCubeRm2(new Vector3(5, 2.5, -4));
+  playgroundDemos.spawnDissolveCubeEfficient(new Vector3(5, 2.5, 0))
 
   lexy.rainbowWave(new Vector3(-25,0,0));
   lexy.rainbowWave2(new Vector3(25,0,0));
