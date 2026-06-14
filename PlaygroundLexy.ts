@@ -225,11 +225,7 @@ const rainbowShader = `
 shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
 
-// Represents the "Value" node from your Blender graph
-uniform float input_value = 0.0;
-
-// Optional: Toggle to use TIME instead of a static value to animate the spiral automatically
-uniform bool animate_with_time = false;
+// Controls how fast the spiral animates
 uniform float time_scale = 1.0;
 
 // Varying to pass local vertex position from vertex to fragment shader
@@ -240,7 +236,7 @@ void vertex() {
     local_pos = VERTEX;
 }
 
-// Custom HSV to RGB function to replace the Color Ramp
+// Custom HSV to RGB function
 vec3 hsv2rgb(vec3 c) {
     vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
     vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
@@ -248,35 +244,22 @@ vec3 hsv2rgb(vec3 c) {
 }
 
 void fragment() {
-    // 1. Vector Math (Add [0,0,0]) - Passthrough
+    // 1. Get the local position of the object
     vec3 pos = local_pos;
     
-    // 2. Separate XYZ -> Math (Wrap)
-    // fract() acts as Blender's Wrap node between 0.0 and 1.0 limits
+    // 2. Isolate the Z-axis and wrap it (fract behaves like Blender's Wrap)
     float z_wrap = fract(pos.z);
     
-    // 3. Value -> Math (Divide 1.0) -> Math (Wrap)
-    float val = input_value;
-    if (animate_with_time) {
-        val = TIME * time_scale;
-    }
-    float val_wrap = fract(val);
+    // 3. Drive the value purely with Godot's built-in TIME and wrap it
+    float val_wrap = fract(TIME * time_scale);
     
-    // 4. Math (Add) -> Math (Wrap)
-    // Combines the wrapped Z coordinate with the wrapped input value
-    float combined_z = fract(z_wrap + val_wrap);
+    // 4. Combine the object's Z data with the continuous time data
+    float final_factor = fract(z_wrap + val_wrap);
     
-    // 5. Combine XYZ -> Mapping -> Separate XYZ
-    // Since the Mapping node in the JSON has default values (Loc: 0, Rot: 0, Scale: 1), 
-    // it functions as a passthrough. The resulting Z is just our combined_z.
-    float final_factor = combined_z;
-    
-    // 6. Color Ramp (HSV mapped)
-    // We plug the final factor into the Hue (X) of our HSV vector. 
-    // Saturation (Y) and Value (Z) are kept at 1.0.
+    // 5. Output to the color ramp replacement (HSV Hue mapping)
     vec3 final_color = hsv2rgb(vec3(final_factor, 1.0, 1.0));
     
-    // 7. Material Output
+    // 6. Set the final surface color
     ALBEDO = final_color;
 }
 `
