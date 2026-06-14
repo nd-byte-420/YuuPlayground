@@ -13,17 +13,13 @@ async function start() {
   playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));
 
 
-  playgroundDemos.spawnDissolveCubeRm2(new Vector3(5, 2.5, -4));
+  // playgroundDemos.spawnDissolveCubeRm2(new Vector3(5, 2.5, -4));
   playgroundDemos.spawnDissolveCubeEfficient(new Vector3(5, 2.5, 0))
 
   lexy.rainbowWave(new Vector3(-25,0,0));
-
-  console.log('rain')
   lexy.nissanGtr(new Vector3(25,0,0));
-  console.log('nissan')
 
   lexy.sierPlane(new Vector3(0,0,20));
-  lexy.sierPlane(new Vector3(0,2,-20));
   // Come back to this to get water shader working
   // playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));
 }

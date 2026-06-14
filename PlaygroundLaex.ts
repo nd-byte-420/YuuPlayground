@@ -275,9 +275,9 @@ async function spawnDissolveCubeBig(pos: Vector3) {
 // create a cube and attach shadercode new/
 async function spawnDissolveCubeEfficient(pos: Vector3) {
 
-  const cube = spawnPrimitive.cube(pos, new Vector3(1,1,1), Quaternion.one, new Color(0.1,0.5,0.1), 1, true, 'Static', undefined);
+  const cube = spawnPrimitive.cube(pos, new Vector3(1,1,10), Quaternion.one, new Color(0.1,0.5,0.1), 1, true, 'Static', undefined);
 
-  cube.collidable.set(false)
+  cube.collidable.set(true)
 
   const nodeId = cube.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, shaderEfficient);
