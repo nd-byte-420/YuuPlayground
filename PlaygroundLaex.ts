@@ -381,7 +381,7 @@ async function spawnDissolveCubeRm2(pos: Vector3) {
 // create a cube and attach shadercode new/
 async function spawnDissolveCubeRm3(pos: Vector3) {
 
-  const cube = spawnPrimitive.cubeScaled(pos, new Vector3(5,5,5), Quaternion.one, new Color(0.1,0.5,0.1), 1, true, 'Static', undefined);
+  const cube = spawnPrimitive.cubeScaled(pos, new Vector3(10,10,1), Quaternion.one, new Color(0.1,0.5,0.1), 1, true, 'Static', undefined);
 
   cube.collidable.set(false)
 

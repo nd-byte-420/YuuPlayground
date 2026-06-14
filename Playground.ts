@@ -10,8 +10,8 @@ async function start() {
   playgroundDemos.spawnShaderSphere(new Vector3(-5, 2.5, -4));
 
   // playgroundDemos.spawnDissolveCubeRm2(new Vector3(5, 2.5, -4));
-  playgroundDemos.spawnDissolveCubeEfficient(new Vector3(2.5, 2.5, 0))
-  playgroundDemos.spawnDissolveCubeEfficient(new Vector3(-2.5, 2.5, 0))
+  playgroundDemos.spawnDissolveCubeEfficient(new Vector3(4.5, 2.5, 0))
+  playgroundDemos.spawnDissolveCubeEfficient(new Vector3(-4.5, 2.5, 0))
   playgroundDemos.spawnDissolveCubeRm3(new Vector3(0, 2.5, -7))
   playgroundDemos.spawnDissolveCubeRm3(new Vector3(0, 2.5, 7))
 
