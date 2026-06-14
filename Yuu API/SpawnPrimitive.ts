@@ -3,6 +3,7 @@ import { Quaternion } from "./Basic Types/Quaternion";
 import { Vector2 } from "./Basic Types/Vector2";
 import { Vector3 } from "./Basic Types/Vector3";
 import { Entity } from "./Entity";
+import { getRainbowWaveLoop2 } from "./rainbowWaveLoop2Model";
 
 
 export const spawnPrimitive = {
@@ -10,7 +11,8 @@ export const spawnPrimitive = {
   plane,
   sphere,
   cone,
-  cubeScaled
+  cubeScaled,
+  rainbowWaveLoop2
 }
 
 /**
@@ -512,4 +514,32 @@ function getCone(columns: number): [Vector3[], Vector2[], number[]] {
 
     return [verts, uvs, triangles];
   }
+}
+
+
+/**
+ * Create A RainbowWaveLoop2 Entity
+ * @param pos to be created at
+ * @param scale to start at
+ * @param rot to start at
+ * @param color to tint
+ * @param alphaTransparency 0 is invisible, 1 is solid
+ * @param colliderType collider type
+ * @param type for animation and physics
+ * @returns Entity created
+ */
+function rainbowWaveLoop2(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alphaTransparency: number, colliderType: 'None' | 'Convex' | 'Concave', type: BaseNodeTypes, parent: Entity | undefined): Entity {
+  const entity = new Entity(pos, rot, Vector3.one, parent, type);
+
+  entity.mesh.create(...getRainbowWaveLoop2());
+
+  entity.mesh.color.set(color, Math.min(1, alphaTransparency));
+
+  if (colliderType !== 'None' && entity.mesh.nodeID) {
+    entity.collider.createFromMeshNode(entity.mesh.nodeID, colliderType);
+  }
+
+  entity.scale = scale;
+
+  return entity;
 }
