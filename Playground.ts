@@ -2,6 +2,7 @@ import { registerStart } from "./Yuu API/RegisterStart";
 import { playgroundDemos } from "./PlaygroundLaex";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { lexy } from "./PlaygroundLexy";
+import { antichamber } from "./Antichamber";
 import { initializeCubeGun } from "./CubeGun";
 
 registerStart(start);
@@ -18,5 +19,8 @@ async function start() {
 
   lexy.sierPlane(new Vector3(0,0,-20));
 
+  antichamber.spawnDoor(new Vector3(9,0,-5));
+
   initializeCubeGun();
+  
 }
