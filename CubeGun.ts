@@ -99,6 +99,7 @@ export function initializeCubeGun() {
                 percent = 1;
                 mc.entity.pos = mc.targetPos;
                 mc.entity.rot = Quaternion.one;
+                mc.entity.collidable.set(true);
                 movingCubes.splice(i, 1);
             } else {
                 mc.entity.pos = mc.startPos.lerp(mc.targetPos, percent);
@@ -181,6 +182,7 @@ export function initializeCubeGun() {
                         'Static',
                         undefined
                     );
+                    newCube.collidable.set(false);
 
                     pickableCubes.push(newCube);
                     movingCubes.push({
