@@ -3,18 +3,17 @@ import { Quaternion } from "./Yuu API/Basic Types/Quaternion";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { Controller } from "./Yuu API/Controller";
 import { Entity } from "./Yuu API/Entity";
+import { Events } from "./Yuu API/Events";
 import { Player } from "./Yuu API/Player";
 import { Raycast } from "./Yuu API/Raycast";
 import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
 
-let cubeInventory = 0;
-const pickableCubes: Entity[] = [];
+class Cube {
+    entity: Entity;
 
-export function initializeCubeGun() {
-    // Spawn initial pickable cubes for the player to use
-    for (let i = 0; i < 5; i++) {
-        const testCube = spawnPrimitive.cube(
-            new Vector3(0, 1 + i * 0.2, -2), // Position somewhat in front of the player
+    constructor(position: Vector3) {
+        this.entity = spawnPrimitive.cube(
+            position,
             new Vector3(0.1, 0.1, 0.1),
             Quaternion.one,
             Color.blue,
@@ -23,8 +22,89 @@ export function initializeCubeGun() {
             'Static', // Type
             undefined
         );
+    }
+
+    destroy() {
+        this.entity.destroy();
+    }
+}
+
+let cubeInventory = 0;
+const pickableCubes: Cube[] = [];
+
+export function initializeCubeGun() {
+    // Spawn initial pickable cubes for the player to use
+    for (let i = 0; i < 5; i++) {
+        const testCube = new Cube(new Vector3(0, 1 + i * 0.2, -2)); // Position somewhat in front of the player
         pickableCubes.push(testCube);
     }
+
+    // Laser for the raycast
+    const laserEntity = spawnPrimitive.cube(
+        Vector3.zero,
+        new Vector3(0.005, 0.005, 1),
+        Quaternion.one,
+        Color.red,
+        0.5,
+        false,
+        'Static',
+        undefined
+    );
+
+    // Held cube for inventory indication
+    const heldCubeEntity = spawnPrimitive.cube(
+        Vector3.zero,
+        new Vector3(0.05, 0.05, 0.05), // smaller than placed cubes
+        Quaternion.one,
+        Color.blue,
+        1,
+        false, // No collider
+        'Static',
+        undefined
+    );
+    heldCubeEntity.visible.set(false);
+    let heldCubeRotation = 0;
+
+    Events.onUpdate(() => {
+        const rightHandPos = Player.rightHand.position.get();
+        const rightHandForward = Player.rightHand.forward.get();
+        const rightHandRot = Player.rightHand.rotation.get();
+
+        if (rightHandPos && rightHandForward && rightHandRot) {
+            const hit = Raycast.directional(rightHandPos, rightHandForward, 100, { getEntity: false });
+            let distance = 100;
+            if (hit) {
+                distance = hit.distance;
+            }
+
+            // Offset the laser by distance / 2 so its start is at the hand
+            const laserCenter = rightHandPos.add(rightHandForward.multiply(distance / 2));
+            laserEntity.pos = laserCenter;
+            laserEntity.scale = new Vector3(0.005, 0.005, distance);
+            laserEntity.rot = rightHandRot;
+        } else {
+            laserEntity.scale = Vector3.zero;
+        }
+
+        // Held cube logic
+        if (cubeInventory > 0 && rightHandPos) {
+            heldCubeEntity.visible.set(true);
+            
+            // Position it slightly above the right hand to avoid clipping
+            const upOffset = Player.rightHand.up.get()?.multiply(0.1) || new Vector3(0, 0.1, 0);
+            heldCubeEntity.pos = rightHandPos.add(upOffset);
+
+            // Rotate the cube continuously
+            heldCubeRotation += 0.03;
+            if (heldCubeRotation > Math.PI * 2) {
+                heldCubeRotation -= Math.PI * 2;
+            }
+            
+            heldCubeEntity.rot = Quaternion.fromEuler(new Vector3(heldCubeRotation, heldCubeRotation, 0));
+        } else {
+            heldCubeEntity.visible.set(false);
+        }
+    });
 
     // Bind Right Grip for pickup
     Controller.subscribe('rightGrip', 'Pressed', () => {
@@ -36,7 +116,7 @@ export function initializeCubeGun() {
             const hit = Raycast.directional(rightHandPos, rightHandForward, 100, { getEntity: true });
             
             if (hit && hit.entity) {
-                const index = pickableCubes.findIndex(c => c.nodeID === hit.entity!.nodeID);
+                const index = pickableCubes.findIndex(c => c.entity.nodeID === hit.entity!.nodeID);
                 if (index !== -1) {
                     // Pick up cube
                     const cubeToPickup = pickableCubes[index];
@@ -69,16 +149,7 @@ export function initializeCubeGun() {
                     const snappedPos = new Vector3(gridX, gridY, gridZ);
 
                     // Spawn new cube
-                    const newCube = spawnPrimitive.cube(
-                        snappedPos,
-                        new Vector3(0.1, 0.1, 0.1),
-                        Quaternion.one,
-                        Color.white,
-                        1,
-                        true,
-                        'Static',
-                        undefined
-                    );
+                    const newCube = new Cube(snappedPos);
 
                     pickableCubes.push(newCube);
                     cubeInventory--;
