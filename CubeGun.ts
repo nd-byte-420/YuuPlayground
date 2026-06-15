@@ -3,6 +3,7 @@ import { Quaternion } from "./Yuu API/Basic Types/Quaternion";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { Controller } from "./Yuu API/Controller";
 import { Entity } from "./Yuu API/Entity";
+import { Events } from "./Yuu API/Events";
 import { Player } from "./Yuu API/Player";
 import { Raycast } from "./Yuu API/Raycast";
 import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
@@ -11,6 +12,38 @@ let cubeInventory = 0;
 const pickableCubes: Entity[] = [];
 
 export function initializeCubeGun() {
+    // Visual inventory cube rendered at the player's hand
+    const inventoryCubeEntity = spawnPrimitive.cube(
+        Vector3.zero,
+        Vector3.zero, // initially hidden
+        Quaternion.one,
+        Color.blue,
+        0,
+        false, // No collider
+        'Static',
+        undefined
+    );
+
+    Events.onUpdate(() => {
+        if (cubeInventory > 0) {
+            const rightHandPos = Player.rightHand.position.get();
+            if (rightHandPos) {
+                // Render slightly above the right hand
+                const offsetPos = rightHandPos.add(new Vector3(0, 0.15, 0));
+                inventoryCubeEntity.pos = offsetPos;
+                inventoryCubeEntity.scale = new Vector3(0.05, 0.05, 0.05);
+                
+                // Set rotation based on current time
+                const time = Date.now() / 1000;
+                inventoryCubeEntity.rot = Quaternion.fromEuler(new Vector3(time, time, 0));
+            } else {
+                inventoryCubeEntity.scale = Vector3.zero;
+            }
+        } else {
+            inventoryCubeEntity.scale = Vector3.zero;
+        }
+    });
+
     // Spawn initial pickable cubes for the player to use
     for (let i = 0; i < 5; i++) {
         const testCube = spawnPrimitive.cube(
