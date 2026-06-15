@@ -36,7 +36,7 @@ export function initializeCubeGun() {
         undefined
     );
 
-    Events.onUpdate(() => {
+    Events.onPhysicsUpdate(() => {
         const rightHandPos = Player.rightHand.position.get();
         const rightHandForward = Player.rightHand.forward.get();
         const rightHandRot = Player.rightHand.rotation.get();
