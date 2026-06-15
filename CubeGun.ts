@@ -24,15 +24,15 @@ export function initializeCubeGun() {
         undefined
     );
 
-    // Laser for the raycast
+    // Laser for the raycast, rendered the same way as the paint raycast
     const laserEntity = spawnPrimitive.cube(
-        Vector3.zero,
-        new Vector3(0.005, 0.005, 1),
+        new Vector3(0, -10, 0),
+        Vector3.one,
         Quaternion.one,
         Color.red,
         0.5,
         false,
-        'Static',
+        'Empty',
         undefined
     );
 
@@ -51,8 +51,9 @@ export function initializeCubeGun() {
 
             const laserCenter = rightHandPos.add(rightHandForward.multiply(distance / 2));
             laserEntity.pos = laserCenter;
-            laserEntity.scale = new Vector3(0.005, 0.005, distance);
+            laserEntity.scale = new Vector3(0.001, 0.005, distance);
             laserEntity.rot = rightHandRot;
+            laserEntity.visible.set(true);
 
             // Update Inventory Cube
             if (cubeInventory > 0) {
@@ -68,7 +69,7 @@ export function initializeCubeGun() {
                 inventoryCubeEntity.scale = Vector3.zero;
             }
         } else {
-            laserEntity.scale = Vector3.zero;
+            laserEntity.visible.set(false);
             inventoryCubeEntity.scale = Vector3.zero;
         }
     });
