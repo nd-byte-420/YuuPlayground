@@ -27,7 +27,7 @@ export function initializeCubeGun() {
         Vector3.zero, // initially hidden
         Quaternion.one,
         Color.blue,
-        0,
+        1,
         false, // No collider
         'Static',
         undefined
@@ -73,7 +73,7 @@ export function initializeCubeGun() {
             // Update Inventory Cube
             if (cubeInventory > 0) {
                 // Render slightly above the right hand
-                const offsetPos = rightHandPos.add(new Vector3(0, 0, 0));
+                const offsetPos = rightHandPos.add(new Vector3(0, 0.05, 0));
                 inventoryCubeEntity.pos = offsetPos;
                 inventoryCubeEntity.scale = new Vector3(0.5, 0.5, 0.5);
                 
