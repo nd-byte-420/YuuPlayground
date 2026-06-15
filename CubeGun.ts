@@ -51,20 +51,6 @@ export function initializeCubeGun() {
         undefined
     );
 
-    // Held cube for inventory indication
-    const heldCubeEntity = spawnPrimitive.cube(
-        Vector3.zero,
-        new Vector3(0.05, 0.05, 0.05), // smaller than placed cubes
-        Quaternion.one,
-        Color.blue,
-        1,
-        false, // No collider
-        'Static',
-        undefined
-    );
-    heldCubeEntity.visible.set(false);
-    let heldCubeRotation = 0;
-
     Events.onUpdate(() => {
         const rightHandPos = Player.rightHand.position.get();
         const rightHandForward = Player.rightHand.forward.get();
@@ -84,25 +70,6 @@ export function initializeCubeGun() {
             laserEntity.rot = rightHandRot;
         } else {
             laserEntity.scale = Vector3.zero;
-        }
-
-        // Held cube logic
-        if (cubeInventory > 0 && rightHandPos) {
-            heldCubeEntity.visible.set(true);
-            
-            // Position it slightly above the right hand to avoid clipping
-            const upOffset = Player.rightHand.up.get()?.multiply(0.1) || new Vector3(0, 0.1, 0);
-            heldCubeEntity.pos = rightHandPos.add(upOffset);
-
-            // Rotate the cube continuously
-            heldCubeRotation += 0.03;
-            if (heldCubeRotation > Math.PI * 2) {
-                heldCubeRotation -= Math.PI * 2;
-            }
-            
-            heldCubeEntity.rot = Quaternion.fromEuler(new Vector3(heldCubeRotation, heldCubeRotation, 0));
-        } else {
-            heldCubeEntity.visible.set(false);
         }
     });
 
