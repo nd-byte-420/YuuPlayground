@@ -36,22 +36,28 @@ export function initializeCubeGun() {
         undefined
     );
 
+    let latestHitDistance = 100;
+
     Events.onPhysicsUpdate(() => {
+        const rightHandPos = Player.rightHand.position.get();
+        const rightHandForward = Player.rightHand.forward.get();
+        
+        if (rightHandPos && rightHandForward) {
+            const hit = Raycast.directional(rightHandPos, rightHandForward, 100, { getEntity: false });
+            latestHitDistance = hit ? hit.distance : 100;
+        }
+    });
+
+    Events.onUpdate(() => {
         const rightHandPos = Player.rightHand.position.get();
         const rightHandForward = Player.rightHand.forward.get();
         const rightHandRot = Player.rightHand.rotation.get();
 
         if (rightHandPos && rightHandForward && rightHandRot) {
             // Update Laser
-            const hit = Raycast.directional(rightHandPos, rightHandForward, 100, { getEntity: false });
-            let distance = 100;
-            if (hit) {
-                distance = hit.distance;
-            }
-
-            const laserCenter = rightHandPos.add(rightHandForward.multiply(distance / 2));
+            const laserCenter = rightHandPos.add(rightHandForward.multiply(latestHitDistance / 2));
             laserEntity.pos = laserCenter;
-            laserEntity.scale = new Vector3(0.001, 0.005, distance);
+            laserEntity.scale = new Vector3(0.001, 0.005, latestHitDistance);
             laserEntity.rot = rightHandRot;
             laserEntity.visible.set(true);
 
