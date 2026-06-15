@@ -3,7 +3,6 @@ import { Quaternion } from "./Yuu API/Basic Types/Quaternion";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { Controller } from "./Yuu API/Controller";
 import { Entity } from "./Yuu API/Entity";
-import { Events } from "./Yuu API/Events";
 import { Player } from "./Yuu API/Player";
 import { Raycast } from "./Yuu API/Raycast";
 import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
@@ -38,40 +37,6 @@ export function initializeCubeGun() {
         const testCube = new Cube(new Vector3(0, 1 + i * 0.2, -2)); // Position somewhat in front of the player
         pickableCubes.push(testCube);
     }
-
-    // Laser for the raycast
-    const laserEntity = spawnPrimitive.cube(
-        Vector3.zero,
-        new Vector3(0.005, 0.005, 1),
-        Quaternion.one,
-        Color.red,
-        0.5,
-        false,
-        'Static',
-        undefined
-    );
-
-    Events.onUpdate(() => {
-        const rightHandPos = Player.rightHand.position.get();
-        const rightHandForward = Player.rightHand.forward.get();
-        const rightHandRot = Player.rightHand.rotation.get();
-
-        if (rightHandPos && rightHandForward && rightHandRot) {
-            const hit = Raycast.directional(rightHandPos, rightHandForward, 100, { getEntity: false });
-            let distance = 100;
-            if (hit) {
-                distance = hit.distance;
-            }
-
-            // Offset the laser by distance / 2 so its start is at the hand
-            const laserCenter = rightHandPos.add(rightHandForward.multiply(distance / 2));
-            laserEntity.pos = laserCenter;
-            laserEntity.scale = new Vector3(0.005, 0.005, distance);
-            laserEntity.rot = rightHandRot;
-        } else {
-            laserEntity.scale = Vector3.zero;
-        }
-    });
 
     // Bind Right Grip for pickup
     Controller.subscribe('rightGrip', 'Pressed', () => {
