@@ -24,14 +24,42 @@ export function initializeCubeGun() {
         undefined
     );
 
+    // Laser for the raycast
+    const laserEntity = spawnPrimitive.cube(
+        Vector3.zero,
+        new Vector3(0.005, 0.005, 1),
+        Quaternion.one,
+        Color.red,
+        0.5,
+        false,
+        'Static',
+        undefined
+    );
+
     Events.onUpdate(() => {
-        if (cubeInventory > 0) {
-            const rightHandPos = Player.rightHand.position.get();
-            if (rightHandPos) {
+        const rightHandPos = Player.rightHand.position.get();
+        const rightHandForward = Player.rightHand.forward.get();
+        const rightHandRot = Player.rightHand.rotation.get();
+
+        if (rightHandPos && rightHandForward && rightHandRot) {
+            // Update Laser
+            const hit = Raycast.directional(rightHandPos, rightHandForward, 100, { getEntity: false });
+            let distance = 100;
+            if (hit) {
+                distance = hit.distance;
+            }
+
+            const laserCenter = rightHandPos.add(rightHandForward.multiply(distance / 2));
+            laserEntity.pos = laserCenter;
+            laserEntity.scale = new Vector3(0.005, 0.005, distance);
+            laserEntity.rot = rightHandRot;
+
+            // Update Inventory Cube
+            if (cubeInventory > 0) {
                 // Render slightly above the right hand
                 const offsetPos = rightHandPos.add(new Vector3(0, 0.15, 0));
                 inventoryCubeEntity.pos = offsetPos;
-                inventoryCubeEntity.scale = new Vector3(0.05, 0.05, 0.05);
+                inventoryCubeEntity.scale = new Vector3(0.5, 0.5, 0.5);
                 
                 // Set rotation based on current time
                 const time = Date.now() / 1000;
@@ -40,6 +68,7 @@ export function initializeCubeGun() {
                 inventoryCubeEntity.scale = Vector3.zero;
             }
         } else {
+            laserEntity.scale = Vector3.zero;
             inventoryCubeEntity.scale = Vector3.zero;
         }
     });
@@ -106,7 +135,7 @@ export function initializeCubeGun() {
                         snappedPos,
                         new Vector3(0.1, 0.1, 0.1),
                         Quaternion.one,
-                        Color.white,
+                        Color.blue,
                         1,
                         true,
                         'Static',
