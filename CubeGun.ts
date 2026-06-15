@@ -103,7 +103,8 @@ export function initializeCubeGun() {
                 
                 // Set rotation based on current time
                 const time = Date.now() / 1000;
-                inventoryCubeEntity.rot = Quaternion.fromEuler(new Vector3(time, time, 0));
+                const localRot = Quaternion.fromEuler(new Vector3(time, time, 0));
+                inventoryCubeEntity.rot = rightHandRot.multiply(localRot);
             } else {
                 inventoryCubeEntity.scale = Vector3.zero;
             }
