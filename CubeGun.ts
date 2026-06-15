@@ -13,6 +13,7 @@ const pickableCubes: Entity[] = [];
 
 interface MovingCube {
     entity: Entity;
+    ghostEntity: Entity;
     startPos: Vector3;
     targetPos: Vector3;
     startTime: number;
@@ -100,6 +101,7 @@ export function initializeCubeGun() {
                 mc.entity.pos = mc.targetPos;
                 mc.entity.rot = Quaternion.one;
                 mc.entity.collidable.set(true);
+                mc.ghostEntity.destroy();
                 movingCubes.splice(i, 1);
             } else {
                 mc.entity.pos = mc.startPos.lerp(mc.targetPos, percent);
@@ -171,7 +173,7 @@ export function initializeCubeGun() {
                     const velocity = 50; // m/s
                     const durationMs = (distance / velocity) * 1000;
 
-                    // Spawn new cube
+                    // Spawn flying cube
                     const newCube = spawnPrimitive.cube(
                         startPos,
                         new Vector3(0.1, 0.1, 0.1),
@@ -184,9 +186,23 @@ export function initializeCubeGun() {
                     );
                     newCube.collidable.set(false);
 
+                    // Spawn invisible ghost cube at the target position to block further raycasts
+                    const ghostCube = spawnPrimitive.cube(
+                        snappedPos,
+                        new Vector3(0.1, 0.1, 0.1),
+                        Quaternion.one,
+                        Color.blue,
+                        1,
+                        true,
+                        'Static',
+                        undefined
+                    );
+                    ghostCube.visible.set(false);
+
                     pickableCubes.push(newCube);
                     movingCubes.push({
                         entity: newCube,
+                        ghostEntity: ghostCube,
                         startPos: startPos,
                         targetPos: snappedPos,
                         startTime: Date.now(),
