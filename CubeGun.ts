@@ -7,12 +7,14 @@ import { Player } from "./Yuu API/Player";
 import { Raycast } from "./Yuu API/Raycast";
 import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
 
-class Cube {
-    entity: Entity;
+let cubeInventory = 0;
+const pickableCubes: Entity[] = [];
 
-    constructor(position: Vector3) {
-        this.entity = spawnPrimitive.cube(
-            position,
+export function initializeCubeGun() {
+    // Spawn initial pickable cubes for the player to use
+    for (let i = 0; i < 5; i++) {
+        const testCube = spawnPrimitive.cube(
+            new Vector3(0, 1 + i * 0.2, -2), // Position somewhat in front of the player
             new Vector3(0.1, 0.1, 0.1),
             Quaternion.one,
             Color.blue,
@@ -21,20 +23,6 @@ class Cube {
             'Static', // Type
             undefined
         );
-    }
-
-    destroy() {
-        this.entity.destroy();
-    }
-}
-
-let cubeInventory = 0;
-const pickableCubes: Cube[] = [];
-
-export function initializeCubeGun() {
-    // Spawn initial pickable cubes for the player to use
-    for (let i = 0; i < 5; i++) {
-        const testCube = new Cube(new Vector3(0, 1 + i * 0.2, -2)); // Position somewhat in front of the player
         pickableCubes.push(testCube);
     }
 
@@ -48,7 +36,7 @@ export function initializeCubeGun() {
             const hit = Raycast.directional(rightHandPos, rightHandForward, 100, { getEntity: true });
             
             if (hit && hit.entity) {
-                const index = pickableCubes.findIndex(c => c.entity.nodeID === hit.entity!.nodeID);
+                const index = pickableCubes.findIndex(c => c.nodeID === hit.entity!.nodeID);
                 if (index !== -1) {
                     // Pick up cube
                     const cubeToPickup = pickableCubes[index];
@@ -81,7 +69,16 @@ export function initializeCubeGun() {
                     const snappedPos = new Vector3(gridX, gridY, gridZ);
 
                     // Spawn new cube
-                    const newCube = new Cube(snappedPos);
+                    const newCube = spawnPrimitive.cube(
+                        snappedPos,
+                        new Vector3(0.1, 0.1, 0.1),
+                        Quaternion.one,
+                        Color.white,
+                        1,
+                        true,
+                        'Static',
+                        undefined
+                    );
 
                     pickableCubes.push(newCube);
                     cubeInventory--;
