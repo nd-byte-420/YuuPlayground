@@ -73,9 +73,9 @@ export function initializeCubeGun() {
             // Update Inventory Cube
             if (cubeInventory > 0) {
                 // Render slightly above the right hand
-                const offsetPos = rightHandPos.add(new Vector3(0, 0.05, 0));
+                const offsetPos = rightHandPos.add(new Vector3(0, 0.15, 0));
                 inventoryCubeEntity.pos = offsetPos;
-                inventoryCubeEntity.scale = new Vector3(0.5, 0.5, 0.5);
+                inventoryCubeEntity.scale = new Vector3(0.05, 0.05, 0.05);
                 
                 // Set rotation based on current time
                 const time = Date.now() / 1000;
@@ -122,7 +122,7 @@ export function initializeCubeGun() {
     }
 
     // Bind Right Grip for pickup
-    Controller.subscribe('rightGrip', 'Pressed', () => {
+    Controller.subscribe('rightGrip', 'Update', () => {
         const rightHandPos = Player.rightHand.position.get();
         const rightHandForward = Player.rightHand.forward.get();
         
