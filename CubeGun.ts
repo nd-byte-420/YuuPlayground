@@ -11,6 +11,15 @@ import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
 let cubeInventory = 0;
 const pickableCubes: Entity[] = [];
 
+interface MovingCube {
+    entity: Entity;
+    startPos: Vector3;
+    targetPos: Vector3;
+    startTime: number;
+    duration: number;
+}
+const movingCubes: MovingCube[] = [];
+
 export function initializeCubeGun() {
     // Visual inventory cube rendered at the player's hand
     const inventoryCubeEntity = spawnPrimitive.cube(
@@ -64,7 +73,7 @@ export function initializeCubeGun() {
             // Update Inventory Cube
             if (cubeInventory > 0) {
                 // Render slightly above the right hand
-                const offsetPos = rightHandPos.add(new Vector3(0, 0.15, 0));
+                const offsetPos = rightHandPos.add(new Vector3(0, 0.3, 0));
                 inventoryCubeEntity.pos = offsetPos;
                 inventoryCubeEntity.scale = new Vector3(0.5, 0.5, 0.5);
                 
@@ -77,6 +86,23 @@ export function initializeCubeGun() {
         } else {
             laserEntity.visible.set(false);
             inventoryCubeEntity.scale = Vector3.zero;
+        }
+
+        // Update Moving Cubes
+        const now = Date.now();
+        for (let i = movingCubes.length - 1; i >= 0; i--) {
+            const mc = movingCubes[i];
+            const elapsed = now - mc.startTime;
+            let percent = elapsed / mc.duration;
+            if (percent >= 1) {
+                percent = 1;
+                mc.entity.pos = mc.targetPos;
+                mc.entity.rot = Quaternion.one;
+                movingCubes.splice(i, 1);
+            } else {
+                mc.entity.pos = mc.startPos.lerp(mc.targetPos, percent);
+                mc.entity.rot = Quaternion.fromEuler(new Vector3(percent * Math.PI * 4, percent * Math.PI * 4, 0)); 
+            }
         }
     });
 
@@ -137,9 +163,15 @@ export function initializeCubeGun() {
                     const gridZ = Math.round(offsetPos.z * 10) / 10;
                     const snappedPos = new Vector3(gridX, gridY, gridZ);
 
+                    const startPos = rightHandPos.add(new Vector3(0, 0.3, 0));
+
+                    const distance = Vector3.distance(startPos, snappedPos);
+                    const velocity = 15; // m/s
+                    const durationMs = (distance / velocity) * 1000;
+
                     // Spawn new cube
                     const newCube = spawnPrimitive.cube(
-                        snappedPos,
+                        startPos,
                         new Vector3(0.1, 0.1, 0.1),
                         Quaternion.one,
                         Color.blue,
@@ -150,6 +182,14 @@ export function initializeCubeGun() {
                     );
 
                     pickableCubes.push(newCube);
+                    movingCubes.push({
+                        entity: newCube,
+                        startPos: startPos,
+                        targetPos: snappedPos,
+                        startTime: Date.now(),
+                        duration: durationMs
+                    });
+
                     cubeInventory--;
                     console.log(`Placed a cube. Inventory: ${cubeInventory}`);
                 }
