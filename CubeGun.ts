@@ -73,7 +73,7 @@ export function initializeCubeGun() {
             // Update Inventory Cube
             if (cubeInventory > 0) {
                 // Render slightly above the right hand
-                const offsetPos = rightHandPos.add(new Vector3(0, 0.3, 0));
+                const offsetPos = rightHandPos.add(new Vector3(0, 0, 0));
                 inventoryCubeEntity.pos = offsetPos;
                 inventoryCubeEntity.scale = new Vector3(0.5, 0.5, 0.5);
                 
@@ -163,10 +163,10 @@ export function initializeCubeGun() {
                     const gridZ = Math.round(offsetPos.z * 10) / 10;
                     const snappedPos = new Vector3(gridX, gridY, gridZ);
 
-                    const startPos = rightHandPos.add(new Vector3(0, 0.3, 0));
+                    const startPos = rightHandPos.add(new Vector3(0, 0, 0));
 
                     const distance = Vector3.distance(startPos, snappedPos);
-                    const velocity = 15; // m/s
+                    const velocity = 50; // m/s
                     const durationMs = (distance / velocity) * 1000;
 
                     // Spawn new cube
