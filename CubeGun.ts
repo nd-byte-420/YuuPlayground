@@ -11,15 +11,21 @@ import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
 export class CubeEntity {
     public entity: Entity;
 
-    constructor(pos: Vector3, hasCollider: boolean = true) {
+    constructor(
+        pos: Vector3, 
+        hasCollider: boolean = true,
+        scale: Vector3 = new Vector3(0.1, 0.1, 0.1),
+        color: Color = Color.blue,
+        physicsType: any = 'Static'
+    ) {
         this.entity = spawnPrimitive.cube(
             pos,
-            new Vector3(0.1, 0.1, 0.1),
+            scale,
             Quaternion.one,
-            Color.blue,
+            color,
             1,
             hasCollider,
-            'Static',
+            physicsType,
             undefined
         );
         (this.entity as any).isCubeEntity = true;
