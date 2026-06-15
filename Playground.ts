@@ -19,7 +19,7 @@ async function start() {
 
   lexy.sierPlane(new Vector3(0,0,-20));
 
-  antichamber.spawnDoor(new Vector3(9,0,-5));
+  antichamber.spawnDoor(new Vector3(9,4,-5));
 
   initializeCubeGun();
   
