@@ -61,8 +61,9 @@ export function initializeCubeGun() {
         const rightHandPos = Player.rightHand.position.get();
         const rightHandForward = Player.rightHand.forward.get();
         const rightHandRot = Player.rightHand.rotation.get();
+        const rightHandUp = Player.rightHand.up.get();
 
-        if (rightHandPos && rightHandForward && rightHandRot) {
+        if (rightHandPos && rightHandForward && rightHandRot && rightHandUp) {
             // Update Laser
             const laserCenter = rightHandPos.add(rightHandForward.multiply(latestHitDistance / 2));
             laserEntity.pos = laserCenter;
@@ -72,8 +73,8 @@ export function initializeCubeGun() {
 
             // Update Inventory Cube
             if (cubeInventory > 0) {
-                // Render slightly above the right hand
-                const offsetPos = rightHandPos.add(new Vector3(0, 0.15, 0));
+                // Render slightly above the right hand based on its rotation
+                const offsetPos = rightHandPos.add(rightHandUp.multiply(0.10));
                 inventoryCubeEntity.pos = offsetPos;
                 inventoryCubeEntity.scale = new Vector3(0.05, 0.05, 0.05);
                 
