@@ -8,11 +8,33 @@ import { Player } from "./Yuu API/Player";
 import { Raycast } from "./Yuu API/Raycast";
 import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
 
+export class CubeEntity {
+    public entity: Entity;
+
+    constructor(pos: Vector3, hasCollider: boolean = true) {
+        this.entity = spawnPrimitive.cube(
+            pos,
+            new Vector3(0.1, 0.1, 0.1),
+            Quaternion.one,
+            Color.blue,
+            1,
+            hasCollider,
+            'Static',
+            undefined
+        );
+        (this.entity as any).isCubeEntity = true;
+        (this.entity as any).cubeEntity = this;
+    }
+
+    public destroy() {
+        this.entity.destroy();
+    }
+}
+
 let cubeInventory = 0;
-const pickableCubes: Entity[] = [];
 
 interface MovingCube {
-    entity: Entity;
+    cubeEntity: CubeEntity;
     ghostEntity: Entity;
     startPos: Vector3;
     targetPos: Vector3;
@@ -98,31 +120,21 @@ export function initializeCubeGun() {
             let percent = elapsed / mc.duration;
             if (percent >= 1) {
                 percent = 1;
-                mc.entity.pos = mc.targetPos;
-                mc.entity.rot = Quaternion.one;
-                mc.entity.collidable.set(true);
+                mc.cubeEntity.entity.pos = mc.targetPos;
+                mc.cubeEntity.entity.rot = Quaternion.one;
+                mc.cubeEntity.entity.collidable.set(true);
                 mc.ghostEntity.destroy();
                 movingCubes.splice(i, 1);
             } else {
-                mc.entity.pos = mc.startPos.lerp(mc.targetPos, percent);
-                mc.entity.rot = Quaternion.fromEuler(new Vector3(percent * Math.PI * 4, percent * Math.PI * 4, 0)); 
+                mc.cubeEntity.entity.pos = mc.startPos.lerp(mc.targetPos, percent);
+                mc.cubeEntity.entity.rot = Quaternion.fromEuler(new Vector3(percent * Math.PI * 4, percent * Math.PI * 4, 0)); 
             }
         }
     });
 
     // Spawn initial pickable cubes for the player to use
     for (let i = 0; i < 5; i++) {
-        const testCube = spawnPrimitive.cube(
-            new Vector3(0, 1 + i * 0.2, -2), // Position somewhat in front of the player
-            new Vector3(0.1, 0.1, 0.1),
-            Quaternion.one,
-            Color.blue,
-            1,
-            true, // Has collider
-            'Static', // Type
-            undefined
-        );
-        pickableCubes.push(testCube);
+        new CubeEntity(new Vector3(0, 1 + i * 0.2, -2), true);
     }
 
     // Bind Right Grip for pickup
@@ -134,16 +146,12 @@ export function initializeCubeGun() {
             // Raycast properties: getEntity = true to identify the hit object
             const hit = Raycast.directional(rightHandPos, rightHandForward, 100, { getEntity: true });
             
-            if (hit && hit.entity) {
-                const index = pickableCubes.findIndex(c => c.nodeID === hit.entity!.nodeID);
-                if (index !== -1) {
-                    // Pick up cube
-                    const cubeToPickup = pickableCubes[index];
-                    cubeToPickup.destroy();
-                    pickableCubes.splice(index, 1);
-                    cubeInventory++;
-                    console.log(`Picked up a cube. Inventory: ${cubeInventory}`);
-                }
+            if (hit && hit.entity && "isCubeEntity" in hit.entity) {
+                // Pick up cube
+                const cubeToPickup = (hit.entity as any).cubeEntity as CubeEntity;
+                cubeToPickup.destroy();
+                cubeInventory++;
+                console.log(`Picked up a cube. Inventory: ${cubeInventory}`);
             }
         }
     });
@@ -174,17 +182,8 @@ export function initializeCubeGun() {
                     const durationMs = (distance / velocity) * 1000;
 
                     // Spawn flying cube
-                    const newCube = spawnPrimitive.cube(
-                        startPos,
-                        new Vector3(0.1, 0.1, 0.1),
-                        Quaternion.one,
-                        Color.blue,
-                        1,
-                        true,
-                        'Static',
-                        undefined
-                    );
-                    newCube.collidable.set(false);
+                    const newCube = new CubeEntity(startPos, true);
+                    newCube.entity.collidable.set(false);
 
                     // Spawn invisible ghost cube at the target position to block further raycasts
                     const ghostCube = spawnPrimitive.cube(
@@ -199,9 +198,8 @@ export function initializeCubeGun() {
                     );
                     ghostCube.visible.set(false);
 
-                    pickableCubes.push(newCube);
                     movingCubes.push({
-                        entity: newCube,
+                        cubeEntity: newCube,
                         ghostEntity: ghostCube,
                         startPos: startPos,
                         targetPos: snappedPos,
