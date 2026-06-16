@@ -67,7 +67,7 @@ async function spawnDoor(pos: Vector3) {
       // Clamp door position to keep it between the ground (pos.y) and 2x the door height (pos.y + 2 * 2)
       let curY = curPos.y;
       const doorHeight = 2;
-      const minY = pos.y;
+      const minY = 0;
       const maxY = pos.y + 2 * doorHeight;
       if (curY < minY) {
         curY = minY;
