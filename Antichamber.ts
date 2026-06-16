@@ -49,32 +49,23 @@ async function spawnDoor(pos: Vector3) {
 
 const doorShader = `
 shader_type spatial;
-render_mode depth_draw_always, cull_back, diffuse_burley, specular_schlick_ggx;
+// blend_mix enables standard transparency, depth_draw_always fixes overlapping glass issues
+render_mode blend_mix, depth_draw_always, cull_back, specular_schlick_ggx;
 
-// Shader parameters you can tweak in the inspector
-uniform vec4 glass_color : source_color = vec4(0.8, 0.9, 1.0, 0.15); // Slight blue tint
-uniform float roughness : hint_range(0.0, 1.0) = 0.05; // Very smooth
-uniform float metallic : hint_range(0.0, 1.0) = 0.9;   // Highly reflective
-uniform float refraction_strength : hint_range(0.0, 0.2) = 0.05;
-
-// Captures the rendered scene behind the object
-uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;
+// The Alpha channel here (0.3) dictates the transparency
+uniform vec4 glass_color : source_color = vec4(0.8, 0.9, 1.0, 0.3); 
+uniform float roughness : hint_range(0.0, 1.0) = 0.05; 
+uniform float metallic : hint_range(0.0, 1.0) = 0.9;   
 
 void fragment() {
-    // 1. Calculate the distortion offset using the geometry's normal
-    vec2 offset = NORMAL.xy * refraction_strength;
+    // 1. Set the base color
+    ALBEDO = glass_color.rgb;
     
-    // 2. Apply the offset to the screen UV to simulate light bending (refraction)
-    vec2 refraction_uv = SCREEN_UV + offset;
+    // 2. Set the transparency. 
+    // This single line tells Godot to push this object to the transparent render pass.
+    ALPHA = glass_color.a;
 
-    // 3. Sample the background pixel behind the object
-    vec3 background_color = texture(screen_texture, refraction_uv).rgb;
-
-    // 4. Mix the distorted background with your chosen glass color
-    // The alpha value of glass_color determines how strongly the tint is applied
-    ALBEDO = mix(background_color, glass_color.rgb, glass_color.a);
-
-    // 5. Apply PBR properties for realistic lighting reflections
+    // 3. Apply PBR properties for realistic lighting reflections
     ROUGHNESS = roughness;
     METALLIC = metallic;
 }
