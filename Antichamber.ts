@@ -64,16 +64,19 @@ async function spawnDoor(pos: Vector3) {
         door.velocity.set(new Vector3(0, yVel, 0));
       }
 
-      // Clamp door position to keep it between pos.y + 3.5 (resting on support) and pos.y + 7.5 (fully open)
+      // Clamp door position to keep it between the ground (pos.y) and 2x the door height (pos.y + 2 * 2)
       let curY = curPos.y;
-      if (curY < pos.y + 3.5) {
-        curY = pos.y + 3.5;
+      const doorHeight = 2;
+      const minY = pos.y;
+      const maxY = pos.y + 2 * doorHeight;
+      if (curY < minY) {
+        curY = minY;
         const currentVel = door.velocity.get();
         if (currentVel && currentVel.y < 0) {
           door.velocity.set(new Vector3(0, 0, 0));
         }
-      } else if (curY > pos.y + 7.5) {
-        curY = pos.y + 7.5;
+      } else if (curY > maxY) {
+        curY = maxY;
         const currentVel = door.velocity.get();
         if (currentVel && currentVel.y > 0) {
           door.velocity.set(new Vector3(0, 0, 0));
