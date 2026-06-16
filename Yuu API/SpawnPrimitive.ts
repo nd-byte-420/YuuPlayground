@@ -5,6 +5,7 @@ import { Vector3 } from "./Basic Types/Vector3";
 import { Entity } from "./Entity";
 import { getRainbowWaveLoop2 } from "./rainbowWaveLoop2Model";
 import { getNissanGtr32Exp } from "./nissanGtr32ExpModel";
+import { getDoor } from "./doorModel";
 
 
 export const spawnPrimitive = {
@@ -14,7 +15,8 @@ export const spawnPrimitive = {
   cone,
   cubeScaled,
   rainbowWaveLoop2,
-  nissanGtr32Exp
+  nissanGtr32Exp,
+  door
 }
 
 /**
@@ -554,6 +556,26 @@ function nissanGtr32Exp(pos: Vector3, scale: Vector3, rot: Quaternion, color: Co
   const entity = new Entity(pos, rot, Vector3.one, parent, type);
 
   entity.mesh.create(...getNissanGtr32Exp());
+
+  entity.mesh.color.set(color, Math.min(1, alphaTransparency));
+
+  if (colliderType !== 'None' && entity.mesh.nodeID) {
+    entity.collider.createFromMeshNode(entity.mesh.nodeID, colliderType);
+  }
+
+  entity.scale = scale;
+
+  return entity;
+}
+
+/**
+ * Create A door
+ 
+ */
+function door(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alphaTransparency: number, colliderType: 'None' | 'Convex' | 'Concave', type: BaseNodeTypes, parent: Entity | undefined): Entity {
+  const entity = new Entity(pos, rot, Vector3.one, parent, type);
+
+  entity.mesh.create(...getDoor());
 
   entity.mesh.color.set(color, Math.min(1, alphaTransparency));
 

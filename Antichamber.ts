@@ -70,3 +70,77 @@ void fragment() {
     METALLIC = metallic;
 }
 `
+
+
+
+const doorShader2 = `
+shader_type spatial;
+
+// Enable transparency and standard blending
+render_mode blend_mix, depth_draw_opaque, cull_disabled;
+
+// We use a varying to pass the object-space normal from the vertex to the fragment shader,
+// because Godot's fragment 'NORMAL' is in view-space, whereas Blender's TexCoord Normal is object-space.
+varying vec3 object_normal;
+
+void vertex() {
+    object_normal = NORMAL;
+}
+
+void fragment() {
+    // --- 1. Texture Coordinate (UV) -> Separate XYZ ---
+    float uv_x = UV.x;
+    float uv_y = UV.y;
+
+    // --- 2. Math Operations for UV X ---
+    // Math & Math.002
+    float math = uv_x - 0.5;
+    float math_002 = math > 0.5 ? 1.0 : 0.0;
+    
+    // Math.003 & Math.004
+    float math_003 = uv_x - 0.5;
+    float math_004 = math_003 < 0.5 ? 1.0 : 0.0;
+    
+    // Math.005 (Maximum of X)
+    float math_005 = max(math_002, math_004);
+
+    // --- 3. Math Operations for UV Y ---
+    // Math.001 & Math.006
+    float math_001 = uv_y - 0.5;
+    float math_006 = math_001 > 0.5 ? 1.0 : 0.0;
+    
+    // Math.007 & Math.008
+    float math_007 = uv_y - 0.5;
+    float math_008 = math_007 < 0.5 ? 1.0 : 0.0;
+    
+    // Math.009 (Maximum of Y)
+    float math_009 = max(math_006, math_008);
+
+    // --- 4. Combine UV X and Y masks ---
+    // Math.010
+    float math_010 = max(math_005, math_009);
+
+    // --- 5. Texture Coordinate (Normal) -> Separate XYZ.001 ---
+    float norm_y = object_normal.y;
+
+    // --- 6. Math Operations for Normal Y ---
+    // Math.011 (Absolute) & Math.012 (Greater Than)
+    float math_011 = abs(norm_y);
+    float math_012 = math_011 > 0.5 ? 1.0 : 0.0;
+
+    // --- 7. Final Mask Combine ---
+    // Math.013 (Mix Shader Factor)
+    float math_013 = max(math_010, math_012);
+
+    // --- 8. Mix Shader: Transparent BSDF and Emission ---
+    // The Mix Shader uses math_013 as the Factor.
+    // Factor 0.0 = Transparent BSDF
+    // Factor 1.0 = Emission Shader (Color: 1,1,1, Strength: 1.0)
+    
+    float factor = math_013;
+    
+    // Godot handles emission and transparency via specific built-in variables
+    ALBEDO = vec3(0.0); // Black base color so only emission is visible
+    EMISSION = vec3(1.0) * factor; // Pure white emission scaled by our mask
+    ALPHA = factor; // Transparent where the mask is 0
+}`
