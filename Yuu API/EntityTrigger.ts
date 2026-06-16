@@ -20,6 +20,13 @@ function onUpdate(deltaTime: number) {
   addToArray(playerPositions, Godot.localPlayer.rightHand.position.get());
   addToArray(playerPositions, Godot.localPlayer.foot.position.get());
 
+  // Also check CubeEntity instances from the cube gun
+  Entity.getAllEntities().forEach((entity) => {
+    if ((entity as any).isCubeEntity) {
+      addToArray(playerPositions, entity.pos);
+    }
+  });
+
   entity_Data.triggerMap.forEach((payload, entityNodeID) => {
     // Current Sphere / Cylinder triggers only work upright
     // Need Cube triggers with directions badly

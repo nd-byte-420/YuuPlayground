@@ -982,6 +982,10 @@ export class Entity {
   static getEntityByID(id: number): Entity | undefined {
     return Entity.entityMap.get(id);
   }
+
+  static getAllEntities(): Entity[] {
+    return Array.from(Entity.entityMap.values());
+  }
 }
 
 
