@@ -20,7 +20,7 @@ async function spawnDoor(pos: Vector3) {
   const doorPos = new Vector3(pos.x, pos.y + 5, pos.z);
   // const cube = spawnPrimitive.cube(doorPos, new Vector3(5, 5, 0.1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
 
-  const door = spawnPrimitive.door(doorPos, new Vector3(5, 5, 5), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, 'Physics', 'Convex', undefined);
+  const door = spawnPrimitive.door(doorPos, new Vector3(5, 5, 5), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
   const nodeId = door.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, doorShader2);
 
