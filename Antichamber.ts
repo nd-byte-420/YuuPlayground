@@ -24,18 +24,62 @@ async function spawnDoor(pos: Vector3) {
   const nodeId = door.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, doorShader4);
 
+  let isGravityReversed = false;
 
-  Events.onPhysicsUpdate(() => {
+  // Create a visible trigger on one side of the door
+  const triggerPos = new Vector3(0,1,0);
+  const triggerEntity = new Entity(triggerPos, Quaternion.one, new Vector3(3, 3, 3), undefined, 'Static');
+  triggerEntity.trigger.initialize(1.5, undefined);
+  triggerEntity.trigger.setVisible(true, Color.red);
+
+  triggerEntity.trigger.setOccupiedFunction(() => {
+    isGravityReversed = true;
+    triggerEntity.trigger.setVisible(true, Color.green);
+    if (nodeId !== -1) {
+      Godot.shader.updateColor(nodeId, "border_color", 0.1, 1.0, 0.1);
+    }
+  });
+
+  triggerEntity.trigger.setEmptyFunction(() => {
+    isGravityReversed = false;
+    triggerEntity.trigger.setVisible(true, Color.red);
+    if (nodeId !== -1) {
+      Godot.shader.updateColor(nodeId, "border_color", 1.0, 1.0, 1.0);
+    }
+  });
+
+  Events.onPhysicsUpdate((deltaTime) => {
     if (door.exists()) {
       door.rot = Quaternion.one;
       
       const curPos = door.pos;
-      door.pos = new Vector3(pos.x, curPos.y, pos.z);
-      
-      const vel = door.velocity.get();
+      let vel = door.velocity.get();
       if (vel) {
-        door.velocity.set(new Vector3(0, vel.y, 0));
+        let yVel = vel.y;
+        if (isGravityReversed) {
+          // Accelerate upwards: counteract default downward gravity (9.8 m/s^2)
+          // and apply an upward gravity (9.8 m/s^2). Net upward acceleration is 19.6 m/s^2.
+          yVel += 19.6 * deltaTime;
+        }
+        door.velocity.set(new Vector3(0, yVel, 0));
       }
+
+      // Clamp door position to keep it between pos.y + 3.5 (resting on support) and pos.y + 7.5 (fully open)
+      let curY = curPos.y;
+      if (curY < pos.y + 3.5) {
+        curY = pos.y + 3.5;
+        const currentVel = door.velocity.get();
+        if (currentVel && currentVel.y < 0) {
+          door.velocity.set(new Vector3(0, 0, 0));
+        }
+      } else if (curY > pos.y + 7.5) {
+        curY = pos.y + 7.5;
+        const currentVel = door.velocity.get();
+        if (currentVel && currentVel.y > 0) {
+          door.velocity.set(new Vector3(0, 0, 0));
+        }
+      }
+      door.pos = new Vector3(pos.x, curY, pos.z);
     }
   });
 
