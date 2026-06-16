@@ -76,48 +76,44 @@ const doorShader2 = `
 shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_disabled;
 
-// Adjust these right in the Godot Inspector!
-// 0.05 means a 5% border on the edges.
 uniform float border_width : hint_range(0.0, 0.5) = 0.05; 
-
-// Adjusts the face-selection threshold (the Normal Y part of your graph)
 uniform float normal_threshold : hint_range(0.0, 1.0) = 0.5;
-
-// Toggle this if the transparent/emission areas are backwards!
 uniform bool invert_mask = false;
 
-varying vec3 object_normal;
+// We will pass the local position instead of the normal
+varying vec3 local_pos;
 
 void vertex() {
-    object_normal = NORMAL;
+    // Grab the raw vertex position in local space
+    local_pos = VERTEX;
 }
 
 void fragment() {
-    // --- 1. UV Border Mask ---
-    // This replaces all the Subtract/Less-Than/Greater-Than nodes.
-    // It cleanly checks if the UV is near the 0.0 edge OR the 1.0 edge.
+    // --- 1. The Triangles Fix (Flat Normal Calculation) ---
+    // This calculates the true, flat geometric normal of the face in real-time.
+    // It completely ignores any smooth shading applied to the model.
+    vec3 flat_normal = normalize(cross(dFdy(local_pos), dFdx(local_pos)));
+
+    // --- 2. Top/Bottom Normal Mask ---
+    // We use abs() so it works perfectly regardless of whether the calculated normal points up or down.
+    float normal_mask = step(normal_threshold, abs(flat_normal.y));
+
+    // --- 3. UV Border Mask ---
     float edge_x = step(1.0 - border_width, UV.x) + step(UV.x, border_width);
     float edge_y = step(1.0 - border_width, UV.y) + step(UV.y, border_width);
     
     float uv_mask = max(edge_x, edge_y);
 
-    // --- 2. Top/Bottom Normal Mask ---
-    // Replaces Math 011 (Absolute) & Math 012 (Greater Than).
-    // This targets faces pointing up or down on the Y axis.
-    float normal_mask = step(normal_threshold, abs(object_normal.y));
-
-    // --- 3. Final Combine ---
-    // Replaces Math 013 (Maximum).
+    // --- 4. Final Combine ---
     float factor = clamp(max(uv_mask, normal_mask), 0.0, 1.0);
     
-    // Flip the logic if the border is white and the center is transparent (or vice versa)
     if (invert_mask) {
         factor = 1.0 - factor;
     }
 
-    // --- 4. Material Output ---
-    ALBEDO = vec3(0.0); // Keep base color black to make emission pop
-    EMISSION = vec3(1.0) * factor; // Pure white where the mask is 1.0
-    ALPHA = factor; // Transparent where the mask is 0.0
+    // --- 5. Material Output ---
+    ALBEDO = vec3(0.0); 
+    EMISSION = vec3(1.0) * factor; 
+    ALPHA = factor; 
 }
 `
