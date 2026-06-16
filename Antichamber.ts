@@ -22,7 +22,7 @@ async function spawnDoor(pos: Vector3) {
 
   const door = spawnPrimitive.door(doorPos, new Vector3(0.1, 5, 5), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
   const nodeId = door.mesh.nodeID ?? -1;
-  Godot.shader.applyToMesh(nodeId, doorShader2);
+  Godot.shader.applyToMesh(nodeId, doorShader3);
 
 
   Events.onPhysicsUpdate(() => {
@@ -113,3 +113,47 @@ void fragment() {
     ALPHA = factor; 
 }
 `
+
+const doorShader3 = `
+shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_disabled;
+
+uniform float border_width : hint_range(0.0, 0.5) = 0.05; 
+uniform float normal_threshold : hint_range(0.0, 1.0) = 0.5;
+uniform bool invert_mask = false;
+
+varying vec3 local_pos;
+
+void vertex() {
+    local_pos = VERTEX;
+}
+
+void fragment() {
+    // --- 1. Flat Normal Calculation ---
+    vec3 flat_normal = normalize(cross(dFdy(local_pos), dFdx(local_pos)));
+
+    // --- 2. Y and Z Normal Mask ---
+    // Check BOTH the Y (top/bottom) and Z (front/back) axes.
+    // If either axis exceeds the threshold, the mask becomes 1.0.
+    float mask_y = abs(flat_normal.y);
+    float mask_z = abs(flat_normal.z);
+    float normal_mask = step(normal_threshold, max(mask_y, mask_z));
+
+    // --- 3. UV Border Mask ---
+    float edge_x = step(1.0 - border_width, UV.x) + step(UV.x, border_width);
+    float edge_y = step(1.0 - border_width, UV.y) + step(UV.y, border_width);
+    
+    float uv_mask = max(edge_x, edge_y);
+
+    // --- 4. Final Combine ---
+    float factor = clamp(max(uv_mask, normal_mask), 0.0, 1.0);
+    
+    if (invert_mask) {
+        factor = 1.0 - factor;
+    }
+
+    // --- 5. Material Output ---
+    ALBEDO = vec3(0.0); 
+    EMISSION = vec3(1.0) * factor; 
+    ALPHA = factor; 
+}`
