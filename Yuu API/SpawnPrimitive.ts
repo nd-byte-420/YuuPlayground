@@ -572,15 +572,15 @@ function nissanGtr32Exp(pos: Vector3, scale: Vector3, rot: Quaternion, color: Co
  * Create A door
  
  */
-function door(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alphaTransparency: number, colliderType: 'None' | 'Convex' | 'Concave', type: BaseNodeTypes, parent: Entity | undefined): Entity {
+function door(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alphaTransparency: number, hasCollider: boolean, type: BaseNodeTypes, parent: Entity | undefined): Entity {
   const entity = new Entity(pos, rot, Vector3.one, parent, type);
 
   entity.mesh.create(...getDoor());
 
   entity.mesh.color.set(color, Math.min(1, alphaTransparency));
 
-  if (colliderType !== 'None' && entity.mesh.nodeID) {
-    entity.collider.createFromMeshNode(entity.mesh.nodeID, colliderType);
+  if (hasCollider && entity.mesh.nodeID) {
+    entity.collider.createBox(Vector3.one);
   }
 
   entity.scale = scale;

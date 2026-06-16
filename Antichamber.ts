@@ -18,24 +18,23 @@ export const antichamber = {
 // create a cube and attach shadercode new/
 async function spawnDoor(pos: Vector3) {
   const doorPos = new Vector3(pos.x, pos.y + 5, pos.z);
-  const cube = spawnPrimitive.cube(doorPos, new Vector3(5, 5, 0.1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
+  // const cube = spawnPrimitive.cube(doorPos, new Vector3(5, 5, 0.1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
 
-  cube.collidable.set(true);
-  const nodeId = cube.mesh.nodeID ?? -1;
-
-  Godot.shader.applyToMesh(nodeId, doorShader);
+  const door = spawnPrimitive.door(doorPos, new Vector3(5, 5, 0.1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
+  const nodeId = door.mesh.nodeID ?? -1;
+  Godot.shader.applyToMesh(nodeId, doorShader2);
 
 
   Events.onPhysicsUpdate(() => {
-    if (cube.exists()) {
-      cube.rot = Quaternion.one;
+    if (door.exists()) {
+      door.rot = Quaternion.one;
       
-      const curPos = cube.pos;
-      cube.pos = new Vector3(pos.x, curPos.y, pos.z);
+      const curPos = door.pos;
+      door.pos = new Vector3(pos.x, curPos.y, pos.z);
       
-      const vel = cube.velocity.get();
+      const vel = door.velocity.get();
       if (vel) {
-        cube.velocity.set(new Vector3(0, vel.y, 0));
+        door.velocity.set(new Vector3(0, vel.y, 0));
       }
     }
   });
