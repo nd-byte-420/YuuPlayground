@@ -580,7 +580,7 @@ function door(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alpha
   entity.mesh.color.set(color, Math.min(1, alphaTransparency));
 
   if (hasCollider && entity.mesh.nodeID) {
-    entity.collider.createBox(Vector3.one);
+    entity.collider.createBox(new Vector3(scale.x, scale.y, scale.z));
   }
 
   entity.scale = scale;
