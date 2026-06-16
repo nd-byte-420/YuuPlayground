@@ -49,57 +49,33 @@ async function spawnDoor(pos: Vector3) {
 
 const doorShader = `
 shader_type spatial;
-render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
+render_mode depth_draw_always, cull_back, diffuse_burley, specular_schlick_ggx;
 
-// Exposing uniforms so you can tweak the material in the Godot inspector
-group_uniforms Base_Properties;
-uniform vec4 base_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
-uniform float metallic = 0.0;
+// Shader parameters you can tweak in the inspector
+uniform vec4 glass_color : source_color = vec4(0.8, 0.9, 1.0, 0.15); // Slight blue tint
+uniform float roughness : hint_range(0.0, 1.0) = 0.05; // Very smooth
+uniform float metallic : hint_range(0.0, 1.0) = 0.9;   // Highly reflective
+uniform float refraction_strength : hint_range(0.0, 0.2) = 0.05;
 
-group_uniforms Border_Logic;
-// In your graph, the "Greater Than" nodes had a default of 0.5. 
-// You may need to lower this slightly (e.g., to 0.45 or 0.48) to see a thicker border.
-uniform float border_threshold = 0.5; 
-
-group_uniforms Map_Ranges;
-// Values for the Alpha Map Range node
-uniform float alpha_to_min = 0.0;
-uniform float alpha_to_max = 1.0;
-
-// Values for the Roughness Map Range node
-uniform float roughness_to_min = 0.0;
-uniform float roughness_to_max = 1.0;
+// Captures the rendered scene behind the object
+uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;
 
 void fragment() {
-	// 1. Texture Coordinate (UV)
-	vec2 uv = UV;
-	
-	// 2. Separate XYZ -> Math Logic for X
-	float x_sub = uv.x - 0.5;
-	float x_abs = abs(x_sub);
-	// Equivalent to Math > Greater Than
-	float x_gt = x_abs > border_threshold ? 1.0 : 0.0; 
-	
-	// 3. Separate XYZ -> Math Logic for Y
-	float y_sub = uv.y - 0.5;
-	float y_abs = abs(y_sub);
-	// Equivalent to Math > Greater Than
-	float y_gt = y_abs > border_threshold ? 1.0 : 0.0;
-	
-	// 4. Math > Maximum
-	float border_mask = max(x_gt, y_gt);
-	
-	// 5. Map Range (Alpha)
-	// Remaps the 0-1 mask to your target alpha range
-	float mapped_alpha = mix(alpha_to_min, alpha_to_max, border_mask);
-	
-	// 6. Map Range.001 (Roughness)
-	// Remaps the 0-1 mask to your target roughness range
-	float mapped_roughness = mix(roughness_to_min, roughness_to_max, border_mask);
-	
-	// 7. Principled BSDF Output
-	ALBEDO = base_color.rgb;
-	METALLIC = metallic;
-	ROUGHNESS = mapped_roughness;
-	ALPHA = mapped_alpha;
-}`
+    // 1. Calculate the distortion offset using the geometry's normal
+    vec2 offset = NORMAL.xy * refraction_strength;
+    
+    // 2. Apply the offset to the screen UV to simulate light bending (refraction)
+    vec2 refraction_uv = SCREEN_UV + offset;
+
+    // 3. Sample the background pixel behind the object
+    vec3 background_color = texture(screen_texture, refraction_uv).rgb;
+
+    // 4. Mix the distorted background with your chosen glass color
+    // The alpha value of glass_color determines how strongly the tint is applied
+    ALBEDO = mix(background_color, glass_color.rgb, glass_color.a);
+
+    // 5. Apply PBR properties for realistic lighting reflections
+    ROUGHNESS = roughness;
+    METALLIC = metallic;
+}
+`
