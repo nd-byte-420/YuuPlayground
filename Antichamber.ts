@@ -208,7 +208,7 @@ void fragment() {
 const doorShader4 = `
 shader_type spatial;
 
-// Note: Keeping your settings so transparency works and you see back borders through the front glass.
+// Keeping cull_disabled so you can look through the glass to the back walls
 render_mode blend_mix, depth_draw_always, cull_disabled;
 
 // --- Mask Uniforms ---
@@ -225,9 +225,9 @@ uniform float metallic : hint_range(0.0, 1.0) = 0.9;
 uniform vec4 border_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float border_emission = 1.0;
 
-// --- Borderlands Outline Uniforms (Merged into single pass) ---
+// --- Borderlands Outline Uniforms ---
 uniform vec4 outline_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
-uniform float outline_thickness : hint_range(0.0, 1.0, 0.01) = 0.35; // Controls the silhouette edge width
+uniform float outline_thickness : hint_range(0.0, 1.0, 0.01) = 0.35; // Adjust via API to make ink lines thinner/thicker
 
 varying vec3 local_pos;
 
@@ -255,29 +255,32 @@ void fragment() {
         factor = 1.0 - factor;
     }
 
-    // --- 5. Borderlands Silhouette Outline (Fresnel Rim) ---
-    // Calculates where the object's faces curve drastically away from the camera lens
-    float fresnel = dot(NORMAL, VIEW);
+    // --- 5. Fix: Smart Borderlands Silhouette Outline ---
+    // Calculate alignment with camera view. We wrap NORMAL in an absolute check
+    // or adjust it based on FRONT_FACING to prevent the black sphere glitch.
+    float view_alignment = dot(NORMAL, VIEW);
     
-    // Create a sharp step threshold for a crisp, ink-style outer line
-    float ink_outline_mask = step(outline_thickness, 1.0 - fresnel);
+    // If FRONT_FACING is true, we are looking at the outside of the glass.
+    // If false, we are looking at the inside back-faces. We only want outlines on the outside!
+    float ink_outline_mask = 0.0;
+    if (FRONT_FACING) {
+        ink_outline_mask = step(outline_thickness, 1.0 - max(0.0, view_alignment));
+    }
 
     // --- 6. Mix Everything Together ---
-    
-    // Start with your core look (mixing glass color and white inner grid lines)
     vec3 base_albedo = mix(glass_color.rgb, border_color.rgb, factor);
     float base_alpha = mix(glass_color.a, border_color.a, factor);
     float base_roughness = mix(roughness, 1.0, factor);
     float base_metallic = mix(metallic, 0.0, factor);
     vec3 base_emission = border_color.rgb * border_emission * factor;
 
-    // Overwrite the edges with the custom black ink outline parameter
+    // Overwrite the outer edges with your ink color parameter
     ALBEDO = mix(base_albedo, outline_color.rgb, ink_outline_mask);
     ALPHA = mix(base_alpha, outline_color.a, ink_outline_mask);
     ROUGHNESS = mix(base_roughness, 1.0, ink_outline_mask);
     METALLIC = mix(base_metallic, 0.0, ink_outline_mask);
     
-    // Ensure the ink outline absorbs light and remains dark by omitting it from emission
+    // Turn off emission on the ink lines so they stay pitch black
     EMISSION = mix(base_emission, vec3(0.0), ink_outline_mask);
 }
 
