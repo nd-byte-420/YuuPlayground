@@ -643,9 +643,14 @@ export class Entity {
   private triggerMeshEntity: Entity | undefined;
 
   trigger = {
-    initialize: (triggerRadius: number, yRadius: number | undefined) => {
+    initialize: (triggerRadiusOrBoxSize: number | Vector3, yRadius?: number | undefined) => {
       if (this.nodeID) {
-        entity_Data.triggerMap.set(this.nodeID ?? -1, { triggerRadius: triggerRadius, yRadius: yRadius, activeCount: 0, onUpdateTriggeredFunction: undefined, occupiedTriggeredFunction: undefined, emptyTriggeredFunction: undefined });
+        if (triggerRadiusOrBoxSize instanceof Vector3) {
+          entity_Data.triggerMap.set(this.nodeID ?? -1, { boxSize: triggerRadiusOrBoxSize, activeCount: 0, onUpdateTriggeredFunction: undefined, occupiedTriggeredFunction: undefined, emptyTriggeredFunction: undefined });
+        }
+        else {
+          entity_Data.triggerMap.set(this.nodeID ?? -1, { triggerRadius: triggerRadiusOrBoxSize, yRadius: yRadius, activeCount: 0, onUpdateTriggeredFunction: undefined, occupiedTriggeredFunction: undefined, emptyTriggeredFunction: undefined });
+        }
       }
     },
 
@@ -730,7 +735,12 @@ export class Entity {
           const data = entity_Data.triggerMap.get(this.nodeID ?? -1);
 
           if (data) {
-            this.triggerMeshEntity = spawnPrimitive.sphere(16, 16, Vector3.zero, (data.triggerRadius * 2), Quaternion.one, color ?? Color.green, 0.25, 'None', 'Empty', this);
+            if (data.boxSize) {
+              this.triggerMeshEntity = spawnPrimitive.cube(Vector3.zero, data.boxSize, Quaternion.one, color ?? Color.green, 0.25, false, 'None', this);
+            }
+            else if (data.triggerRadius !== undefined) {
+              this.triggerMeshEntity = spawnPrimitive.sphere(16, 16, Vector3.zero, (data.triggerRadius * 2), Quaternion.one, color ?? Color.green, 0.25, 'None', 'Empty', this);
+            }
           }
         }
       }

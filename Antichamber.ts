@@ -30,7 +30,7 @@ async function spawnDoor(pos: Vector3) {
   const triggerPos = new Vector3(5,1,0);
   const triggerEntity = spawnPrimitive.cube(triggerPos, new Vector3(0.5, 0.5, 4), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
 
-  triggerEntity.trigger.initialize(0.5, undefined);
+  triggerEntity.trigger.initialize(new Vector3(0.5, 0.5, 4));
   triggerEntity.trigger.setVisible(true, Color.red);
 
   triggerEntity.trigger.setOccupiedFunction(() => {
