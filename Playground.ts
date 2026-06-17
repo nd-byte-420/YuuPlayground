@@ -46,9 +46,9 @@ async function start() {
 
   // these doors should be rotated 90 degrees
   const rot90 = Quaternion.fromEuler(new Vector3(0, Math.PI / 2, 0));
-  antichamber.spawnLaserDoor(new Vector3(56, 2, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), false, rot90);
-  antichamber.spawnLaserDoor(new Vector3(57.5, 2, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), true, rot90);
-  antichamber.spawnLaserDoor(new Vector3(59, 2, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), false, rot90);
+  antichamber.spawnLaserDoor(new Vector3(56, 2, -1.5), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), false, rot90);
+  antichamber.spawnLaserDoor(new Vector3(56, 2, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), true, rot90);
+  antichamber.spawnLaserDoor(new Vector3(56, 2, 1.5), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), false, rot90);
 
 
 
