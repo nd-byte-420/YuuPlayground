@@ -17,7 +17,7 @@ export const antichamber = {
 
 // create a cube and attach shadercode new/
 async function spawnDoor(pos: Vector3) {
-  const doorPos = new Vector3(pos.x, pos.y + 5, pos.z);
+  const doorPos = new Vector3(pos.x, pos.y + 2 * 2, pos.z);
   // const cube = spawnPrimitive.cube(doorPos, new Vector3(5, 5, 0.1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
 
   const door = spawnPrimitive.door2(doorPos, new Vector3(0.05, 1, 1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
@@ -86,7 +86,7 @@ async function spawnDoor(pos: Vector3) {
     }
   });
 
-  const supportPos = new Vector3(pos.x, pos.y, pos.z);
+  const supportPos = new Vector3(pos.x, pos.y+2, pos.z+2);
   const supportCube = new CubeEntity(supportPos, true, new Vector3(0.1,0.1,0.1), Color.blue, 'Static');
   const support = supportCube.entity;
   support.collidable.set(true);
