@@ -44,7 +44,7 @@ async function start() {
 
 
   antichamber.spawnLaserDoor(new Vector3(55, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
-  antichamber.spawnLaserDoor(new Vector3(56.5, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
+  antichamber.spawnLaserDoor(new Vector3(56.5, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), true);
   antichamber.spawnLaserDoor(new Vector3(57.8, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
 
 

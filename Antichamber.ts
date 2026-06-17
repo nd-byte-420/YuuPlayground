@@ -98,13 +98,21 @@ async function spawnDoor(pos: Vector3) {
   support.collidable.set(true);
 }
 
-async function spawnLaserDoor(pos: Vector3, laserPos: Vector3, laserSize: Vector3 = new Vector3(0.1, 0.1, 4)) {
-  const doorPos = new Vector3(pos.x, pos.y, pos.z);
+async function spawnLaserDoor(pos: Vector3, laserPos: Vector3, laserSize: Vector3 = new Vector3(0.1, 0.1, 4), invertLogic: boolean = false) {
+  const doorPos = invertLogic ? new Vector3(pos.x, pos.y + 2 * 2, pos.z) : new Vector3(pos.x, pos.y, pos.z);
 
   const door = spawnPrimitive.door(doorPos, new Vector3(1, 1, 1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
   const nodeId = door.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, doorShader);
   
+  if (nodeId !== -1) {
+    if (invertLogic) {
+      Godot.shader.updateColor(nodeId, "border_color", 0.1, 1.0, 0.1); // Initialize to green (starts open)
+    } else {
+      Godot.shader.updateColor(nodeId, "border_color", 1.0, 1.0, 1.0); // Initialize to white (starts closed)
+    }
+  }
+
   let isBlocked = false;
 
   // Create a visible trigger on one side of the door
@@ -119,7 +127,8 @@ async function spawnLaserDoor(pos: Vector3, laserPos: Vector3, laserSize: Vector
     isBlocked = true;
     triggerEntity.trigger.setVisible(true, Color.green);
     if (nodeId !== -1) {
-      Godot.shader.updateColor(nodeId, "border_color", 0.1, 1.0, 0.1);
+      const activeColor = invertLogic ? new Color(1.0, 1.0, 1.0) : new Color(0.1, 1.0, 0.1);
+      Godot.shader.updateColor(nodeId, "border_color", activeColor.r, activeColor.g, activeColor.b);
     }
   });
 
@@ -127,7 +136,8 @@ async function spawnLaserDoor(pos: Vector3, laserPos: Vector3, laserSize: Vector
     isBlocked = false;
     triggerEntity.trigger.setVisible(true, Color.red);
     if (nodeId !== -1) {
-      Godot.shader.updateColor(nodeId, "border_color", 1.0, 1.0, 1.0);
+      const emptyColor = invertLogic ? new Color(0.1, 1.0, 0.1) : new Color(1.0, 1.0, 1.0);
+      Godot.shader.updateColor(nodeId, "border_color", emptyColor.r, emptyColor.g, emptyColor.b);
     }
   });
 
@@ -139,7 +149,8 @@ async function spawnLaserDoor(pos: Vector3, laserPos: Vector3, laserSize: Vector
       let vel = door.velocity.get();
       if (vel) {
         let yVel = vel.y;
-        if (isBlocked) {
+        const shouldGoUp = invertLogic ? !isBlocked : isBlocked;
+        if (shouldGoUp) {
           // Accelerate upwards: counteract default downward gravity (9.8 m/s^2)
           // and apply an upward gravity (9.8 m/s^2). Net upward acceleration is 19.6 m/s^2.
           yVel += 19.6 * deltaTime;
