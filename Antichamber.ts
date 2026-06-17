@@ -69,7 +69,7 @@ async function spawnDoor(pos: Vector3) {
       let curY = curPos.y;
       const doorHeight = 2;
       const minY = 0;
-      const maxY = pos.y + 1.9 * doorHeight;
+      const maxY = pos.y + 1.98 * doorHeight;
       if (curY < minY) {
         curY = minY;
         const currentVel = door.velocity.get();
