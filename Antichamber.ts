@@ -86,7 +86,7 @@ async function spawnDoor(pos: Vector3) {
     }
   });
 
-  const supportPos = new Vector3(pos.x, pos.y + 2.5, pos.z);
+  const supportPos = new Vector3(pos.x, pos.y, pos.z);
   const supportCube = new CubeEntity(supportPos, true, new Vector3(0.1,0.1,0.1), Color.blue, 'Static');
   const support = supportCube.entity;
   support.collidable.set(true);
