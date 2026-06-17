@@ -9,50 +9,50 @@ registerStart(start);
 async function start() {
 
   // gravity door with block under it
-  antichamber.spawnDoor(new Vector3(9,0,0));
+  antichamber.spawnDoor(new Vector3(9,2,0));
 
 
 
   // static door at 18,0,0
-  antichamber.spawnStaticDoor(new Vector3(18, 0, 0));
+  antichamber.spawnStaticDoor(new Vector3(18, 2, 0));
 
   // gravity door down physics, laser makes it go up
   // 22.25x, 0, 0
   // door connected to laser, laser position 13.5x
-  antichamber.spawnLaserDoor(new Vector3(22.25, 0, 0), new Vector3(13.5, 1.0, 0));
+  antichamber.spawnLaserDoor(new Vector3(22.25, 2, 0), new Vector3(13.5, 1.0, 0));
 
 
   // gravity door at 31.75x, 0,0
   // laser at 36,0,0
-  antichamber.spawnLaserDoor(new Vector3(31.75, 0, 0), new Vector3(35.6, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
+  antichamber.spawnLaserDoor(new Vector3(31.75, 2, 0), new Vector3(35.6, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
   new CubeEntity(new Vector3(35.6, 1.0, 0));
   new CubeEntity(new Vector3(47.15, 1.0, 0));
   
   // gravity door up, blocked with cube on 35.5 laser makes it go up
 
 
-  antichamber.spawnStaticDoor(new Vector3(35.5, 0, 0));
-  antichamber.spawnStaticDoor(new Vector3(39, 0, 0));
+  antichamber.spawnStaticDoor(new Vector3(35.5, 2, 0));
+  antichamber.spawnStaticDoor(new Vector3(39, 2, 0));
 
   // static door at 35.5,0,0
   // static door at 39,0,0
 
 
   // gravity door down, laser makes it go up
-  antichamber.spawnLaserDoor(new Vector3(42.5, 0, 0), new Vector3(38.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
+  antichamber.spawnLaserDoor(new Vector3(42.5, 2, 0), new Vector3(38.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
 
   // static door at 54,0,0
-  antichamber.spawnStaticDoor(new Vector3(54, 0, 0));
+  antichamber.spawnStaticDoor(new Vector3(54, 2, 0));
 
   // these doors should be rotated 90 degrees
   const rot90 = Quaternion.fromEuler(new Vector3(0, Math.PI / 2, 0));
-  antichamber.spawnLaserDoor(new Vector3(56, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), false, rot90);
-  antichamber.spawnLaserDoor(new Vector3(56, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), true, rot90);
-  antichamber.spawnLaserDoor(new Vector3(56, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), false, rot90);
+  antichamber.spawnLaserDoor(new Vector3(56, 2, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), false, rot90);
+  antichamber.spawnLaserDoor(new Vector3(56, 2, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), true, rot90);
+  antichamber.spawnLaserDoor(new Vector3(56, 2, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), false, rot90);
 
 
 
-  antichamber.spawnStaticDoor(new Vector3(58, 0, 0));
+  antichamber.spawnStaticDoor(new Vector3(58, 2, 0));
 
 
   // 3 doors 

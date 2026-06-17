@@ -33,6 +33,7 @@ import { getCube026 } from "./Yuu API/cube026Model";
 import { getCube027 } from "./Yuu API/cube027Model";
 import { getCube028 } from "./Yuu API/cube028Model";
 import { getCube029 } from "./Yuu API/cube029Model";
+import { getCube040 } from "./Yuu API/cube040Model";
 
 export const scene = {
   spawnChamber,
@@ -297,6 +298,14 @@ export async function spawnScene() {
   spawnModel(
     getCube029,
     new Vector3(47.250000, 0.250000, 0.000000),
+    new Vector3(1.000000, 1.000000, 1.000000),
+    new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
+  );
+
+  // Spawn Cube.040
+  spawnModel(
+    getCube040,
+    new Vector3(37.750000, -0.250000, 0.000000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
