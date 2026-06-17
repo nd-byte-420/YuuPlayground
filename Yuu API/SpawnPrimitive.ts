@@ -4,6 +4,7 @@ import { Vector2 } from "./Basic Types/Vector2";
 import { Vector3 } from "./Basic Types/Vector3";
 import { Entity } from "./Entity";
 import { getDoor2 } from "./door2Model";
+import { getDoor3 } from "./door3Model";
 import { getDoor } from "./doorModel";
 import { getYuuchamber2 } from "./yuuchamber2Model";
 
@@ -16,6 +17,7 @@ export const spawnPrimitive = {
   cubeScaled,
   door,
   door2,
+  door3,
   chamber
 }
 
@@ -548,6 +550,26 @@ function door2(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alph
   const entity = new Entity(pos, rot, Vector3.one, parent, type);
 
   entity.mesh.create(...getDoor2());
+
+  entity.mesh.color.set(color, Math.min(1, alphaTransparency));
+
+  if (hasCollider && entity.mesh.nodeID) {
+    entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Concave');
+  }
+
+  entity.scale = scale;
+
+  return entity;
+}
+
+/**
+ * Create A door
+ 
+ */
+function door3(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alphaTransparency: number, hasCollider: boolean, type: BaseNodeTypes, parent: Entity | undefined): Entity {
+  const entity = new Entity(pos, rot, Vector3.one, parent, type);
+
+  entity.mesh.create(...getDoor3());
 
   entity.mesh.color.set(color, Math.min(1, alphaTransparency));
 
