@@ -269,4 +269,22 @@ void fragment() {
     
     // Apply emission only to the border
     EMISSION = border_color.rgb * border_emission * factor;
-}`
+}
+pass 2 {
+	render_mode cull_front, unshaded, depth_draw_always;
+
+	uniform vec4 outline_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
+	uniform float outline_thickness : hint_range(0.0, 0.5, 0.001) = 0.02;
+
+	void vertex() {
+		// Extrude outwards for the outline hull
+		VERTEX += NORMAL * outline_thickness;
+	}
+
+	void fragment() {
+		ALBEDO = outline_color.rgb;
+		ALPHA = outline_color.a;
+	}
+}
+
+`
