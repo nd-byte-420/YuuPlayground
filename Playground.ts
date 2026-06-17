@@ -6,7 +6,7 @@ import { scene } from "./Scene";
 
 registerStart(start);
 async function start() {
-  antichamber.spawnDoor(new Vector3(9,4,-5));
+  antichamber.spawnDoor(new Vector3(9,0,0));
 
   initializeCubeGun();
   // scene.spawnChamber();
