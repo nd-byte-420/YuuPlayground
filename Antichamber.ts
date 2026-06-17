@@ -109,25 +109,25 @@ async function spawnLaserDoor(pos: Vector3, laserPos: Vector3) {
 
   // Create a visible trigger on one side of the door
   const triggerPos = new Vector3(laserPos.x, laserPos.y, laserPos.z)
-  const triggerEntity = new Entity(new Vector3(laserPos.x, laserPos.y, laserPos.z), Quaternion.one, new Vector3(0.1, 0.1, 4), undefined, 'Static');
+  const triggerEntity = new Entity(triggerPos, Quaternion.one, new Vector3(0.1, 0.1, 4), undefined, 'Static');
 
   triggerEntity.trigger.initialize(new Vector3(0.1, 0.1, 4));
   triggerEntity.trigger.setVisible(true, Color.red);
 
 
-  laserTrigger.trigger.setOccupiedFunction(() => {
+  triggerEntity.trigger.setOccupiedFunction(() => {
     isBlocked = true;
-    laserBeam.mesh.color.set(Color.green, 0.2); // turn green and more transparent when blocked
+    triggerEntity.trigger.setVisible(true, Color.green);
     if (nodeId !== -1) {
-      Godot.shader.updateColor(nodeId, "border_color", 1.0, 1.0, 1.0); // door borders white (closed)
+      Godot.shader.updateColor(nodeId, "border_color", 0.1, 1.0, 0.1);
     }
   });
 
-  laserTrigger.trigger.setEmptyFunction(() => {
+  triggerEntity.trigger.setEmptyFunction(() => {
     isBlocked = false;
-    laserBeam.mesh.color.set(Color.red, 0.5); // return to normal red
+    triggerEntity.trigger.setVisible(true, Color.red);
     if (nodeId !== -1) {
-      Godot.shader.updateColor(nodeId, "border_color", 0.1, 1.0, 0.1); // door borders green (active/open)
+      Godot.shader.updateColor(nodeId, "border_color", 1.0, 1.0, 1.0);
     }
   });
 
