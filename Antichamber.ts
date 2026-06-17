@@ -14,7 +14,7 @@ export const antichamber = {
 
 // create a cube and attach shadercode new/
 async function spawnDoor(pos: Vector3) {
-  const doorPos = new Vector3(pos.x, pos.y + 2 * 2, pos.z);
+  const doorPos = new Vector3(pos.x, pos.y + 2, pos.z);
 
   // door can still be glitched through with 'physics' instead of animated/static
   // but I need the game physics so the doors catch on the blocks and its probably more efficient
@@ -69,7 +69,7 @@ async function spawnDoor(pos: Vector3) {
       let curY = curPos.y;
       const doorHeight = 2;
       const minY = 0;
-      const maxY = pos.y + 2 * doorHeight;
+      const maxY = pos.y + doorHeight;
       if (curY < minY) {
         curY = minY;
         const currentVel = door.velocity.get();
@@ -94,7 +94,7 @@ async function spawnDoor(pos: Vector3) {
 }
 
 async function spawnLaserDoor(pos: Vector3, laserPos: Vector3, laserSize: Vector3 = new Vector3(0.1, 0.1, 4), invertLogic: boolean = false, rotation: Quaternion = Quaternion.one) {
-  const doorPos = invertLogic ? new Vector3(pos.x, pos.y + 2 * 2, pos.z) : new Vector3(pos.x, pos.y, pos.z);
+  const doorPos = invertLogic ? new Vector3(pos.x, pos.y + 2, pos.z) : new Vector3(pos.x, pos.y, pos.z);
 
   const door = spawnPrimitive.door(doorPos, new Vector3(1, 1, 1), rotation, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
   const nodeId = door.mesh.nodeID ?? -1;
@@ -157,7 +157,7 @@ async function spawnLaserDoor(pos: Vector3, laserPos: Vector3, laserSize: Vector
       let curY = curPos.y;
       const doorHeight = 2;
       const minY = pos.y;
-      const maxY = pos.y + 2 * doorHeight;
+      const maxY = pos.y + doorHeight;
       if (curY < minY) {
         curY = minY;
         const currentVel = door.velocity.get();
