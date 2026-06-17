@@ -208,7 +208,8 @@ void fragment() {
 const doorShader4 = `
 shader_type spatial;
 
-// Keeping cull_disabled so you can look through the glass to the back walls
+// Added depth_draw_always to fix overlapping transparency issues.
+// Note: I kept cull_disabled instead of cull_back so you can see the borders on the back of the cube through the front glass.
 render_mode blend_mix, depth_draw_always, cull_disabled;
 
 // --- Mask Uniforms ---
@@ -224,10 +225,6 @@ uniform float metallic : hint_range(0.0, 1.0) = 0.9;
 // --- Border Uniforms ---
 uniform vec4 border_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float border_emission = 1.0;
-
-// --- Borderlands Outline Uniforms ---
-uniform vec4 outline_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
-uniform float outline_thickness : hint_range(0.0, 1.0, 0.01) = 0.35; // Adjust via API to make ink lines thinner/thicker
 
 varying vec3 local_pos;
 
@@ -249,39 +246,28 @@ void fragment() {
     float edge_y = step(1.0 - border_width, UV.y) + step(UV.y, border_width);
     float uv_mask = max(edge_x, edge_y);
 
-    // --- 4. Final Combine Factor for White Grid Lines ---
+    // --- 4. Final Combine Factor ---
+    // factor = 1.0 (Border), factor = 0.0 (Glass)
     float factor = clamp(max(uv_mask, normal_mask), 0.0, 1.0);
     if (invert_mask) {
         factor = 1.0 - factor;
     }
 
-    // --- 5. Fix: Smart Borderlands Silhouette Outline ---
-    // Calculate alignment with camera view. We wrap NORMAL in an absolute check
-    // or adjust it based on FRONT_FACING to prevent the black sphere glitch.
-    float view_alignment = dot(NORMAL, VIEW);
+    // --- 5. Mix Materials based on Factor ---
     
-    // If FRONT_FACING is true, we are looking at the outside of the glass.
-    // If false, we are looking at the inside back-faces. We only want outlines on the outside!
-    float ink_outline_mask = 0.0;
-    if (FRONT_FACING) {
-        ink_outline_mask = step(outline_thickness, 1.0 - max(0.0, view_alignment));
-    }
-
-    // --- 6. Mix Everything Together ---
-    vec3 base_albedo = mix(glass_color.rgb, border_color.rgb, factor);
-    float base_alpha = mix(glass_color.a, border_color.a, factor);
-    float base_roughness = mix(roughness, 1.0, factor);
-    float base_metallic = mix(metallic, 0.0, factor);
-    vec3 base_emission = border_color.rgb * border_emission * factor;
-
-    // Overwrite the outer edges with your ink color parameter
-    ALBEDO = mix(base_albedo, outline_color.rgb, ink_outline_mask);
-    ALPHA = mix(base_alpha, outline_color.a, ink_outline_mask);
-    ROUGHNESS = mix(base_roughness, 1.0, ink_outline_mask);
-    METALLIC = mix(base_metallic, 0.0, ink_outline_mask);
+    // Mix the base colors. 
+    ALBEDO = mix(glass_color.rgb, border_color.rgb, factor);
     
-    // Turn off emission on the ink lines so they stay pitch black
-    EMISSION = mix(base_emission, vec3(0.0), ink_outline_mask);
+    // Mix the alpha. Uses the glass_color.a for the center, and border_color.a for the edges.
+    ALPHA = mix(glass_color.a, border_color.a, factor);
+    
+    // Apply PBR properties. 
+    // The glass gets your roughness/metallic values. 
+    // The border gets standard matte non-metallic values (1.0 roughness, 0.0 metallic).
+    ROUGHNESS = mix(roughness, 1.0, factor);
+    METALLIC = mix(metallic, 0.0, factor);
+    
+    // Apply emission only to the border
+    EMISSION = border_color.rgb * border_emission * factor;
 }
-
 `
