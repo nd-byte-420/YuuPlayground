@@ -28,7 +28,7 @@ function spawnModel(
   entity.mesh.create(...getMesh());
   entity.mesh.color.set(color, Math.min(1, alphaTransparency));
   if (hasCollider && entity.mesh.nodeID) {
-    entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Convex');
+    entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Concave');
   }
   entity.scale = scale;
   return entity;
@@ -46,7 +46,7 @@ export async function spawnScene() {
   // Spawn Cube.001
   spawnModel(
     getCube001,
-    new Vector3(0.000000, 0.000000, -5.250000),
+    new Vector3(0.000000, 0.000000, 0.000000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -54,7 +54,7 @@ export async function spawnScene() {
   // Spawn Cube.002
   spawnModel(
     getCube002,
-    new Vector3(0.000000, 0.000000, -5.250000),
+    new Vector3(0.000000, 0.000000, 0.000000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -62,7 +62,7 @@ export async function spawnScene() {
   // Spawn Cube.003
   spawnModel(
     getCube003,
-    new Vector3(0.000000, 0.000000, -5.250000),
+    new Vector3(0.000000, 0.000000, 0.000000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
