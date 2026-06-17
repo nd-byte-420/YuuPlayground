@@ -553,7 +553,7 @@ function chamber(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, al
   entity.mesh.color.set(color, Math.min(1, alphaTransparency));
 
   if (hasCollider && entity.mesh.nodeID) {
-    entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Concave');
+    entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Convex');
   }
 
   entity.scale = scale;
