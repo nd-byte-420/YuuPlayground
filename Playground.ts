@@ -19,12 +19,12 @@ async function start() {
   // gravity door down physics, laser makes it go up
   // 22.25x, 0, 0
   // door connected to laser, laser position 13.5x
-  antichamber.spawnLaserDoor(new Vector3(22.25, 2, 0), new Vector3(13.5, 1.0, 0));
+  antichamber.spawnLaserDoor(new Vector3(22.2, 2, 0), new Vector3(13.5, 1.0, 0));
 
 
   // gravity door at 31.75x, 0,0
   // laser at 36,0,0
-  antichamber.spawnLaserDoor(new Vector3(31.75, 2, 0), new Vector3(35.6, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
+  antichamber.spawnLaserDoor(new Vector3(31.9, 2, 0), new Vector3(35.6, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
   new CubeEntity(new Vector3(35.6, 1.0, 0));
   new CubeEntity(new Vector3(47.15, 1.0, 0));
   
@@ -47,8 +47,8 @@ async function start() {
   // these doors should be rotated 90 degrees
   const rot90 = Quaternion.fromEuler(new Vector3(0, Math.PI / 2, 0));
   antichamber.spawnLaserDoor(new Vector3(56, 2, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), false, rot90);
-  antichamber.spawnLaserDoor(new Vector3(56, 2, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), true, rot90);
-  antichamber.spawnLaserDoor(new Vector3(56, 2, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), false, rot90);
+  antichamber.spawnLaserDoor(new Vector3(57.5, 2, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), true, rot90);
+  antichamber.spawnLaserDoor(new Vector3(59, 2, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), false, rot90);
 
 
 
