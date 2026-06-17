@@ -208,7 +208,7 @@ void fragment() {
 const doorShader4 = `
 shader_type spatial;
 
-// Note: I kept cull_disabled instead of cull_back so you can see the borders on the back of the cube through the front glass.
+// Note: Keeping your settings so transparency works and you see back borders through the front glass.
 render_mode blend_mix, depth_draw_always, cull_disabled;
 
 // --- Mask Uniforms ---
@@ -225,15 +225,12 @@ uniform float metallic : hint_range(0.0, 1.0) = 0.9;
 uniform vec4 border_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float border_emission = 1.0;
 
-// --- Borderlands Outline Uniforms (MOVED TO TOP) ---
+// --- Borderlands Outline Uniforms (Merged into single pass) ---
 uniform vec4 outline_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
-uniform float outline_thickness : hint_range(0.0, 0.5, 0.001) = 0.02;
+uniform float outline_thickness : hint_range(0.0, 1.0, 0.01) = 0.35; // Controls the silhouette edge width
 
 varying vec3 local_pos;
 
-// ==========================================
-// PASS 1: Your Glass Shader
-// ==========================================
 void vertex() {
     local_pos = VERTEX;
 }
@@ -252,36 +249,36 @@ void fragment() {
     float edge_y = step(1.0 - border_width, UV.y) + step(UV.y, border_width);
     float uv_mask = max(edge_x, edge_y);
 
-    // --- 4. Final Combine Factor ---
+    // --- 4. Final Combine Factor for White Grid Lines ---
     float factor = clamp(max(uv_mask, normal_mask), 0.0, 1.0);
     if (invert_mask) {
         factor = 1.0 - factor;
     }
 
-    // --- 5. Mix Materials based on Factor ---
-    ALBEDO = mix(glass_color.rgb, border_color.rgb, factor);
-    ALPHA = mix(glass_color.a, border_color.a, factor);
-    ROUGHNESS = mix(roughness, 1.0, factor);
-    METALLIC = mix(metallic, 0.0, factor);
-    EMISSION = border_color.rgb * border_emission * factor;
-}
+    // --- 5. Borderlands Silhouette Outline (Fresnel Rim) ---
+    // Calculates where the object's faces curve drastically away from the camera lens
+    float fresnel = dot(NORMAL, VIEW);
+    
+    // Create a sharp step threshold for a crisp, ink-style outer line
+    float ink_outline_mask = step(outline_thickness, 1.0 - fresnel);
 
-// ==========================================
-// PASS 2: The Borderlands Outline Pass
-// ==========================================
-pass 2 {
-    render_mode cull_front, unshaded, depth_draw_always;
+    // --- 6. Mix Everything Together ---
+    
+    // Start with your core look (mixing glass color and white inner grid lines)
+    vec3 base_albedo = mix(glass_color.rgb, border_color.rgb, factor);
+    float base_alpha = mix(glass_color.a, border_color.a, factor);
+    float base_roughness = mix(roughness, 1.0, factor);
+    float base_metallic = mix(metallic, 0.0, factor);
+    vec3 base_emission = border_color.rgb * border_emission * factor;
 
-    // We can use the uniforms here because they were declared at the top!
-    void vertex() {
-        // Extrude outwards for the outline hull
-        VERTEX += NORMAL * outline_thickness;
-    }
-
-    void fragment() {
-        ALBEDO = outline_color.rgb;
-        ALPHA = outline_color.a;
-    }
+    // Overwrite the edges with the custom black ink outline parameter
+    ALBEDO = mix(base_albedo, outline_color.rgb, ink_outline_mask);
+    ALPHA = mix(base_alpha, outline_color.a, ink_outline_mask);
+    ROUGHNESS = mix(base_roughness, 1.0, ink_outline_mask);
+    METALLIC = mix(base_metallic, 0.0, ink_outline_mask);
+    
+    // Ensure the ink outline absorbs light and remains dark by omitting it from emission
+    EMISSION = mix(base_emission, vec3(0.0), ink_outline_mask);
 }
 
 `
