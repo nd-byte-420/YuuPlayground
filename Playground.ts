@@ -1,7 +1,7 @@
 import { registerStart } from "./Yuu API/RegisterStart";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { antichamber } from "./Antichamber";
-import { initializeCubeGun } from "./CubeGun";
+import { initializeCubeGun, CubeEntity } from "./CubeGun";
 import { scene } from "./Scene";
 
 registerStart(start);
@@ -24,11 +24,12 @@ async function start() {
   // gravity door at 31.75x, 0,0
   // laser at 36,0,0
   antichamber.spawnLaserDoor(new Vector3(31.75, 0, 0), new Vector3(36, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
-
+  new CubeEntity(new Vector3(36, 1.0, 0));
+  
   // gravity door up, blocked with cube on 35.5 laser makes it go up
 
 
-  antichamber.spawnStaticDoor(new Vector3(35.75, 0, 0));
+  antichamber.spawnStaticDoor(new Vector3(35.9, 0, 0));
 
   // static door at 35.5,0,0
   // static door at 39,0,0
