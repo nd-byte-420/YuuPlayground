@@ -14,6 +14,7 @@ import { Events } from "./Yuu API/Events";
 export const antichamber = {
   spawnDoor,
   spawnStaticDoor,
+  spawnLaserDoor,
 }
 
 // create a cube and attach shadercode new/
@@ -95,6 +96,97 @@ async function spawnDoor(pos: Vector3) {
   const supportCube = new CubeEntity(supportPos, true, new Vector3(0.1,0.1,0.1), Color.blue, 'Static');
   const support = supportCube.entity;
   support.collidable.set(true);
+}
+
+async function spawnLaserDoor(pos: Vector3, laserPos: Vector3) {
+  const doorPos = new Vector3(pos.x, pos.y + 2 * 2, pos.z);
+
+  const door = spawnPrimitive.door(doorPos, new Vector3(1, 1, 1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
+  const nodeId = door.mesh.nodeID ?? -1;
+  Godot.shader.applyToMesh(nodeId, doorShader);
+  
+  if (nodeId !== -1) {
+    Godot.shader.updateColor(nodeId, "border_color", 0.1, 1.0, 0.1); // Initialize open state border color (green)
+  }
+
+  let isBlocked = false;
+
+  // Create a visible red laser beam
+  const laserBeam = spawnPrimitive.cube(
+    new Vector3(laserPos.x, laserPos.y, laserPos.z),
+    new Vector3(0.05, 0.05, 6.0), // thin laser beam across the corridor
+    Quaternion.one,
+    Color.red,
+    0.5, // nice transparent red glow
+    false, // no collider
+    'Empty',
+    undefined
+  );
+
+  // Create a trigger volume at the laser position
+  const laserTrigger = new Entity(
+    new Vector3(laserPos.x, laserPos.y, laserPos.z),
+    Quaternion.one,
+    new Vector3(0.2, 0.4, 6.0), // matching trigger size
+    undefined,
+    'Static'
+  );
+  laserTrigger.trigger.initialize(new Vector3(0.2, 0.4, 6.0));
+  laserTrigger.trigger.setVisible(false);
+
+  laserTrigger.trigger.setOccupiedFunction(() => {
+    isBlocked = true;
+    laserBeam.mesh.color.set(Color.green, 0.2); // turn green and more transparent when blocked
+    if (nodeId !== -1) {
+      Godot.shader.updateColor(nodeId, "border_color", 1.0, 1.0, 1.0); // door borders white (closed)
+    }
+  });
+
+  laserTrigger.trigger.setEmptyFunction(() => {
+    isBlocked = false;
+    laserBeam.mesh.color.set(Color.red, 0.5); // return to normal red
+    if (nodeId !== -1) {
+      Godot.shader.updateColor(nodeId, "border_color", 0.1, 1.0, 0.1); // door borders green (active/open)
+    }
+  });
+
+  Events.onPhysicsUpdate((deltaTime) => {
+    if (door.exists()) {
+      door.rot = Quaternion.one;
+      
+      const curPos = door.pos;
+      let vel = door.velocity.get();
+      if (vel) {
+        let yVel = vel.y;
+        if (!isBlocked) {
+          // Accelerate upwards: counteract default downward gravity (9.8 m/s^2)
+          // and apply an upward gravity (9.8 m/s^2). Net upward acceleration is 19.6 m/s^2.
+          yVel += 19.6 * deltaTime;
+        }
+        door.velocity.set(new Vector3(0, yVel, 0));
+      }
+
+      // Clamp door position to keep it between the ground (pos.y) and 2x the door height (pos.y + 2 * 2)
+      let curY = curPos.y;
+      const doorHeight = 2;
+      const minY = pos.y;
+      const maxY = pos.y + 2 * doorHeight;
+      if (curY < minY) {
+        curY = minY;
+        const currentVel = door.velocity.get();
+        if (currentVel && currentVel.y < 0) {
+          door.velocity.set(new Vector3(0, 0, 0));
+        }
+      } else if (curY > maxY) {
+        curY = maxY;
+        const currentVel = door.velocity.get();
+        if (currentVel && currentVel.y > 0) {
+          door.velocity.set(new Vector3(0, 0, 0));
+        }
+      }
+      door.pos = new Vector3(pos.x, curY, pos.z);
+    }
+  });
 }
 
 async function spawnStaticDoor(pos: Vector3) {
