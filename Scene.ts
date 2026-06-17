@@ -332,7 +332,7 @@ export async function spawnScene() {
   // Spawn Cube.033
   spawnModel(
     getCube033,
-    new Vector3(57.750000, 1.750000, 4.250000),
+    new Vector3(58.250000, 1.750000, 4.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
