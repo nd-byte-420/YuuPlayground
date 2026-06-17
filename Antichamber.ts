@@ -49,38 +49,36 @@ async function spawnDoor(pos: Vector3) {
     }
   });
 
-  Events.onPhysicsUpdate((deltaTime) => {
+  let doorYVelocity = 0;
+
+  Events.onUpdate((deltaTime) => {
     if (door.exists()) {
       door.rot = Quaternion.one;
       
-      const curPos = door.pos;
-      let vel = door.velocity.get();
-      if (vel) {
-        let yVel = vel.y;
-        if (isGravityReversed) {
-          // Accelerate upwards: counteract default downward gravity (9.8 m/s^2)
-          // and apply an upward gravity (9.8 m/s^2). Net upward acceleration is 19.6 m/s^2.
-          yVel += 19.6 * deltaTime;
-        }
-        door.velocity.set(new Vector3(0, yVel, 0));
+      if (isGravityReversed) {
+        // Accelerate upwards
+        doorYVelocity += 9.8 * deltaTime;
+      } else {
+        // Accelerate downwards (default gravity)
+        doorYVelocity -= 9.8 * deltaTime;
       }
 
+      const curPos = door.pos;
+      let curY = curPos.y + doorYVelocity * deltaTime;
+
       // Clamp door position to keep it between the ground (pos.y) and 2x the door height (pos.y + 2 * 2)
-      let curY = curPos.y;
       const doorHeight = 2;
-      const minY = 0;
+      const minY = pos.y;
       const maxY = pos.y + 2 * doorHeight;
       if (curY < minY) {
         curY = minY;
-        const currentVel = door.velocity.get();
-        if (currentVel && currentVel.y < 0) {
-          door.velocity.set(new Vector3(0, 0, 0));
+        if (doorYVelocity < 0) {
+          doorYVelocity = 0;
         }
       } else if (curY > maxY) {
         curY = maxY;
-        const currentVel = door.velocity.get();
-        if (currentVel && currentVel.y > 0) {
-          door.velocity.set(new Vector3(0, 0, 0));
+        if (doorYVelocity > 0) {
+          doorYVelocity = 0;
         }
       }
       door.pos = new Vector3(pos.x, curY, pos.z);
