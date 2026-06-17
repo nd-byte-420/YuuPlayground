@@ -135,6 +135,7 @@ export function initializeCubeGun() {
                 mc.cubeEntity.entity.pos = mc.startPos.lerp(mc.targetPos, percent);
                 mc.cubeEntity.entity.rot = Quaternion.fromEuler(new Vector3(percent * Math.PI * 4, percent * Math.PI * 4, 0)); 
             }
+        }
     });
 
     // Spawn initial pickable cubes for the player to use

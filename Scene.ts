@@ -302,7 +302,7 @@ export async function spawnScene() {
     getCube029,
     new Vector3(47.299999, 0.500000, 0.000000),
     new Vector3(1.000000, 1.000000, 1.000000),
-    new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
+    new Quaternion(0.000000, 0.000000, 0.000000, 1.000000),
     Color.yellow
   );
 
