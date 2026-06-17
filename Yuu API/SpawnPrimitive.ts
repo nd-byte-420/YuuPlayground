@@ -3,8 +3,6 @@ import { Quaternion } from "./Basic Types/Quaternion";
 import { Vector2 } from "./Basic Types/Vector2";
 import { Vector3 } from "./Basic Types/Vector3";
 import { Entity } from "./Entity";
-import { getRainbowWaveLoop2 } from "./rainbowWaveLoop2Model";
-import { getNissanGtr32Exp } from "./nissanGtr32ExpModel";
 import { getDoor } from "./doorModel";
 import { getYuuchamber2 } from "./yuuchamber2Model";
 

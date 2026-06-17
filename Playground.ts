@@ -9,5 +9,6 @@ async function start() {
   antichamber.spawnDoor(new Vector3(9,4,-5));
 
   initializeCubeGun();
-  scene.spawnChamber();
+  // scene.spawnChamber();
+  scene.spawnScene();
 }
