@@ -31,6 +31,9 @@ async function start() {
   new CubeEntity(new Vector3(45.5, 1.0, 1));
   new CubeEntity(new Vector3(46.0, 1.0, 2));
   new CubeEntity(new Vector3(46.5, 1.0, 3));
+  new CubeEntity(new Vector3(44.5, 1.0, 3));
+  new CubeEntity(new Vector3(43.5, 1.0, 3));
+  new CubeEntity(new Vector3(42.5, 1.0, 3));
   
   // gravity door up, blocked with cube on 35.5 laser makes it go up
 

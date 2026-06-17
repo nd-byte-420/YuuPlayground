@@ -135,12 +135,16 @@ export function initializeCubeGun() {
                 mc.cubeEntity.entity.pos = mc.startPos.lerp(mc.targetPos, percent);
                 mc.cubeEntity.entity.rot = Quaternion.fromEuler(new Vector3(percent * Math.PI * 4, percent * Math.PI * 4, 0)); 
             }
-        }
     });
 
     // Spawn initial pickable cubes for the player to use
-    for (let i = 0; i < 5; i++) {
-        new CubeEntity(new Vector3(0, 1 + i * 0.2, -2), true);
+    // spawn a 3x3x3 grid of cubes at 68,3,0
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            for (let k = 0; k < 3; k++) {
+                new CubeEntity(new Vector3(68 + i * 0.2, 3 + j * 0.2, k * 0.2), true);
+            }
+        }
     }
 
     // Bind Right Grip for pickup
