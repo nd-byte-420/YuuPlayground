@@ -15,7 +15,6 @@ async function start() {
 
   // static door at 18,0,0
   antichamber.spawnStaticDoor(new Vector3(18, 0, 0));
-  antichamber.spawnStaticDoor(new Vector3(4, 0.5, 0));
 
   // gravity door down physics, laser makes it go up
   // 22.25x, 0, 0
@@ -27,6 +26,7 @@ async function start() {
   // laser at 36,0,0
   antichamber.spawnLaserDoor(new Vector3(31.75, 0, 0), new Vector3(35.6, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
   new CubeEntity(new Vector3(35.6, 1.0, 0));
+  new CubeEntity(new Vector3(47.15, 1.0, 0));
   
   // gravity door up, blocked with cube on 35.5 laser makes it go up
 
