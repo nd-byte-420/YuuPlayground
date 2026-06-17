@@ -73,32 +73,20 @@ async function spawnDoor(pos: Vector3) {
       const doorHeight = 2;
       const minY = 0;
       const maxY = pos.y + 2 * doorHeight;
-      
-      let needsReposition = false;
       if (curY < minY) {
         curY = minY;
         const currentVel = door.velocity.get();
         if (currentVel && currentVel.y < 0) {
           door.velocity.set(new Vector3(0, 0, 0));
         }
-        needsReposition = true;
       } else if (curY > maxY) {
         curY = maxY;
         const currentVel = door.velocity.get();
         if (currentVel && currentVel.y > 0) {
           door.velocity.set(new Vector3(0, 0, 0));
         }
-        needsReposition = true;
       }
-
-      // Only reposition the door if it drifts from its guide track on X/Z
-      if (Math.abs(curPos.x - pos.x) > 0.001 || Math.abs(curPos.z - pos.z) > 0.001) {
-        needsReposition = true;
-      }
-
-      if (needsReposition) {
-        door.pos = new Vector3(pos.x, curY, pos.z);
-      }
+      door.pos = new Vector3(pos.x, curY, pos.z);
     }
   });
 
