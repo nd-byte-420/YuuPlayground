@@ -28,8 +28,9 @@ async function spawnDoor(pos: Vector3) {
 
   // Create a visible trigger on one side of the door
   const triggerPos = new Vector3(5,1,0);
-  const triggerEntity = new Entity(triggerPos, Quaternion.one, new Vector3(3, 3, 3), undefined, 'Static');
-  triggerEntity.trigger.initialize(1.5, undefined);
+  const triggerEntity = spawnPrimitive.cube(triggerPos, new Vector3(0.5, 0.5, 4), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
+
+  triggerEntity.trigger.initialize(0.5, undefined);
   triggerEntity.trigger.setVisible(true, Color.red);
 
   triggerEntity.trigger.setOccupiedFunction(() => {
