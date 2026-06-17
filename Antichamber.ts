@@ -105,34 +105,15 @@ async function spawnLaserDoor(pos: Vector3, laserPos: Vector3) {
   const nodeId = door.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, doorShader);
   
-  if (nodeId !== -1) {
-    Godot.shader.updateColor(nodeId, "border_color", 0.1, 1.0, 0.1); // Initialize open state border color (green)
-  }
-
   let isBlocked = false;
 
-  // Create a visible red laser beam
-  const laserBeam = spawnPrimitive.cube(
-    new Vector3(laserPos.x, laserPos.y, laserPos.z),
-    new Vector3(0.05, 0.05, 6.0), // thin laser beam across the corridor
-    Quaternion.one,
-    Color.red,
-    0.5, // nice transparent red glow
-    false, // no collider
-    'Empty',
-    undefined
-  );
+  // Create a visible trigger on one side of the door
+  const triggerPos = new Vector3(laserPos.x, laserPos.y, laserPos.z)
+  const triggerEntity = new Entity(new Vector3(laserPos.x, laserPos.y, laserPos.z), Quaternion.one, new Vector3(0.1, 0.1, 4), undefined, 'Static');
 
-  // Create a trigger volume at the laser position
-  const laserTrigger = new Entity(
-    new Vector3(laserPos.x, laserPos.y, laserPos.z),
-    Quaternion.one,
-    new Vector3(0.2, 0.4, 6.0), // matching trigger size
-    undefined,
-    'Static'
-  );
-  laserTrigger.trigger.initialize(new Vector3(0.2, 0.4, 6.0));
-  laserTrigger.trigger.setVisible(false);
+  triggerEntity.trigger.initialize(new Vector3(0.1, 0.1, 4));
+  triggerEntity.trigger.setVisible(true, Color.red);
+
 
   laserTrigger.trigger.setOccupiedFunction(() => {
     isBlocked = true;
