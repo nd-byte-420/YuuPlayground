@@ -572,12 +572,12 @@ function door3(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alph
   entity.mesh.create(...getDoor3());
 
   entity.mesh.color.set(color, Math.min(1, alphaTransparency));
+  entity.scale = scale;
 
   if (hasCollider && entity.mesh.nodeID) {
     entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Concave');
   }
 
-  entity.scale = scale;
 
   return entity;
 }
