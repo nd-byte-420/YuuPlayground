@@ -98,7 +98,7 @@ async function spawnDoor(pos: Vector3) {
   support.collidable.set(true);
 }
 
-async function spawnLaserDoor(pos: Vector3, laserPos: Vector3) {
+async function spawnLaserDoor(pos: Vector3, laserPos: Vector3, laserSize: Vector3 = new Vector3(0.1, 0.1, 4)) {
   const doorPos = new Vector3(pos.x, pos.y, pos.z);
 
   const door = spawnPrimitive.door(doorPos, new Vector3(1, 1, 1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
@@ -109,9 +109,9 @@ async function spawnLaserDoor(pos: Vector3, laserPos: Vector3) {
 
   // Create a visible trigger on one side of the door
   const triggerPos = new Vector3(laserPos.x, laserPos.y, laserPos.z)
-  const triggerEntity = new Entity(triggerPos, Quaternion.one, new Vector3(0.1, 0.1, 4), undefined, 'Static');
+  const triggerEntity = new Entity(triggerPos, Quaternion.one, laserSize, undefined, 'Static');
 
-  triggerEntity.trigger.initialize(new Vector3(0.1, 0.1, 4));
+  triggerEntity.trigger.initialize(laserSize);
   triggerEntity.trigger.setVisible(true, Color.red);
 
 
