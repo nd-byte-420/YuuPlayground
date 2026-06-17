@@ -63,6 +63,20 @@ async function start() {
 
   // static door at 58,0,0
 
+  // final 3 lasers door for winning
+  antichamber.spawnMultiLaserDoor(
+    new Vector3(64, 2, 0),
+    [
+      new Vector3(63, 1.0, 2),
+      new Vector3(63, 1.0, 3),
+      new Vector3(63, 1.0, 4)
+    ],
+    new Vector3(0.1, 0.1, 0.1)
+  );
+
+
+
+
   initializeCubeGun();
   // scene.spawnChamber();
   scene.spawnScene();

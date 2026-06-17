@@ -10,6 +10,7 @@ export const antichamber = {
   spawnDoor,
   spawnStaticDoor,
   spawnLaserDoor,
+  spawnMultiLaserDoor,
 }
 
 // create a cube and attach shadercode new/
@@ -154,6 +155,105 @@ async function spawnLaserDoor(pos: Vector3, laserPos: Vector3, laserSize: Vector
       }
 
       // Clamp door position to keep it between the ground (pos.y) and 2x the door height (pos.y + 2 * 2)
+      let curY = curPos.y;
+      const doorHeight = 2;
+      const minY = pos.y;
+      const maxY = pos.y + 1.5 * doorHeight;
+      if (curY < minY) {
+        curY = minY;
+        const currentVel = door.velocity.get();
+        if (currentVel && currentVel.y < 0) {
+          door.velocity.set(new Vector3(0, 0, 0));
+        }
+      } else if (curY > maxY) {
+        curY = maxY;
+        const currentVel = door.velocity.get();
+        if (currentVel && currentVel.y > 0) {
+          door.velocity.set(new Vector3(0, 0, 0));
+        }
+      }
+      door.pos = new Vector3(pos.x, curY, pos.z);
+    }
+  });
+}
+
+async function spawnMultiLaserDoor(
+  pos: Vector3, 
+  laserPositions: Vector3[], 
+  laserSize: Vector3 = new Vector3(0.1, 0.1, 4), 
+  invertLogic: boolean = false, 
+  rotation: Quaternion = Quaternion.one
+) {
+  const doorPos = invertLogic ? new Vector3(pos.x, pos.y + 2, pos.z) : new Vector3(pos.x, pos.y, pos.z);
+
+  const door = spawnPrimitive.door(doorPos, new Vector3(1, 1, 1), rotation, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
+  const nodeId = door.mesh.nodeID ?? -1;
+  Godot.shader.applyToMesh(nodeId, doorShader);
+  
+  if (nodeId !== -1) {
+    if (invertLogic) {
+      Godot.shader.updateColor(nodeId, "border_color", 0.1, 1.0, 0.1); // Initialize to green (starts open)
+    } else {
+      Godot.shader.updateColor(nodeId, "border_color", 1.0, 1.0, 1.0); // Initialize to white (starts closed)
+    }
+  }
+
+  let activeStates = laserPositions.map(() => false);
+
+  laserPositions.forEach((laserPos, index) => {
+    // Create a visible trigger at each laser position
+    const triggerPos = new Vector3(laserPos.x, laserPos.y, laserPos.z);
+    const triggerEntity = new Entity(triggerPos, Quaternion.one, laserSize, undefined, 'Static');
+
+    triggerEntity.trigger.initialize(laserSize);
+    triggerEntity.trigger.setVisible(true, Color.red);
+
+    triggerEntity.trigger.setOccupiedFunction(() => {
+      activeStates[index] = true;
+      triggerEntity.trigger.setVisible(true, Color.green);
+      updateDoorState();
+    });
+
+    triggerEntity.trigger.setEmptyFunction(() => {
+      activeStates[index] = false;
+      triggerEntity.trigger.setVisible(true, Color.red);
+      updateDoorState();
+    });
+  });
+
+  let allSatisfied = false;
+
+  function updateDoorState() {
+    const totalActive = activeStates.filter(s => s).length;
+    allSatisfied = totalActive === laserPositions.length;
+    
+    if (nodeId !== -1) {
+      const isDoorOpen = invertLogic ? !allSatisfied : allSatisfied;
+      if (isDoorOpen) {
+        Godot.shader.updateColor(nodeId, "border_color", 0.1, 1.0, 0.1); // open border (green)
+      } else {
+        Godot.shader.updateColor(nodeId, "border_color", 1.0, 1.0, 1.0); // closed border (white)
+      }
+    }
+  }
+
+  Events.onPhysicsUpdate((deltaTime) => {
+    if (door.exists()) {
+      door.rot = rotation;
+      
+      const curPos = door.pos;
+      let vel = door.velocity.get();
+      if (vel) {
+        let yVel = vel.y;
+        const shouldGoUp = invertLogic ? !allSatisfied : allSatisfied;
+        if (shouldGoUp) {
+          // Accelerate upwards
+          yVel += 19.6 * deltaTime;
+        }
+        door.velocity.set(new Vector3(0, yVel, 0));
+      }
+
+      // Clamp door position to keep it between the ground (pos.y) and 1.5x the door height
       let curY = curPos.y;
       const doorHeight = 2;
       const minY = pos.y;
