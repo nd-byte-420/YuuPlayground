@@ -9,7 +9,7 @@ export const scene = {
 
 // create a cube and attach shadercode new/
 async function spawnChamber() {
-  const chamber = spawnPrimitive.chamber(new Vector3(0, 1, 0), new Vector3(2, 2, 2), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Static', undefined);
+  const chamber = spawnPrimitive.chamber(new Vector3(0, 2, 0), new Vector3(2, 2, 2), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Static', undefined);
 
   const nodeId = chamber.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, chamberShader);
