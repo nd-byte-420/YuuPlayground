@@ -13,6 +13,7 @@ async function start() {
 
 
   // static door at 18,0,0
+  antichamber.spawnStaticDoor(new Vector3(18, 0, 0));
 
   // gravity door down, laser makes it go up
 

@@ -13,19 +13,20 @@ import { Events } from "./Yuu API/Events";
 
 export const antichamber = {
   spawnDoor,
+  spawnStaticDoor,
 }
 
 // create a cube and attach shadercode new/
 async function spawnDoor(pos: Vector3) {
   const doorPos = new Vector3(pos.x, pos.y + 2 * 2, pos.z);
-  // const cube = spawnPrimitive.cube(doorPos, new Vector3(5, 5, 0.1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
 
   // door can still be glitched through with 'physics' instead of animated/static
   // but I need the game physics so the doors catch on the blocks and its probably more efficient
   // do the level legit instead of glitching through the doors
-  const door = spawnPrimitive.door3(doorPos, new Vector3(1, 1, 1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
+  // another idea -- use animated plane in front of the door that moves up and down with the physics update
+  const door = spawnPrimitive.door(doorPos, new Vector3(1, 1, 1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
   const nodeId = door.mesh.nodeID ?? -1;
-  Godot.shader.applyToMesh(nodeId, doorShader4);
+  Godot.shader.applyToMesh(nodeId, doorShader);
 
   let isGravityReversed = false;
 
@@ -96,120 +97,14 @@ async function spawnDoor(pos: Vector3) {
   support.collidable.set(true);
 }
 
+async function spawnStaticDoor(pos: Vector3) {
+  const door = spawnPrimitive.door(pos, new Vector3(1, 1, 1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Static', undefined);
+  const nodeId = door.mesh.nodeID ?? -1;
+  Godot.shader.applyToMesh(nodeId, doorShader);
+  return door;
+}
 
 const doorShader = `
-shader_type spatial;
-// blend_mix enables standard transparency, depth_draw_always fixes overlapping glass issues
-render_mode blend_mix, depth_draw_always, cull_back, specular_schlick_ggx;
-
-// The Alpha channel here (0.3) dictates the transparency
-uniform vec4 glass_color : source_color = vec4(0.8, 0.9, 1.0, 0.3); 
-uniform float roughness : hint_range(0.0, 1.0) = 0.05; 
-uniform float metallic : hint_range(0.0, 1.0) = 0.9;   
-
-void fragment() {
-    // 1. Set the base color
-    ALBEDO = glass_color.rgb;
-    
-    // 2. Set the transparency. 
-    // This single line tells Godot to push this object to the transparent render pass.
-    ALPHA = glass_color.a;
-
-    // 3. Apply PBR properties for realistic lighting reflections
-    ROUGHNESS = roughness;
-    METALLIC = metallic;
-}
-`
-
-
-
-const doorShader2 = `
-shader_type spatial;
-render_mode blend_mix, depth_draw_opaque, cull_disabled;
-
-uniform float border_width : hint_range(0.0, 0.5) = 0.05; 
-uniform float normal_threshold : hint_range(0.0, 1.0) = 0.5;
-uniform bool invert_mask = false;
-
-varying vec3 local_pos;
-
-void vertex() {
-    local_pos = VERTEX;
-}
-
-void fragment() {
-    // --- 1. Flat Normal Calculation ---
-    vec3 flat_normal = normalize(cross(dFdy(local_pos), dFdx(local_pos)));
-
-    // --- 2. Front/Back Normal Mask (SWAPPED Y for Z) ---
-    // We are now checking the Z axis of the flat normal.
-    float normal_mask = step(normal_threshold, abs(flat_normal.z));
-
-    // --- 3. UV Border Mask ---
-    float edge_x = step(1.0 - border_width, UV.x) + step(UV.x, border_width);
-    float edge_y = step(1.0 - border_width, UV.y) + step(UV.y, border_width);
-    
-    float uv_mask = max(edge_x, edge_y);
-
-    // --- 4. Final Combine ---
-    float factor = clamp(max(uv_mask, normal_mask), 0.0, 1.0);
-    
-    if (invert_mask) {
-        factor = 1.0 - factor;
-    }
-
-    // --- 5. Material Output ---
-    ALBEDO = vec3(0.0); 
-    EMISSION = vec3(1.0) * factor; 
-    ALPHA = factor; 
-}
-`
-
-const doorShader3 = `
-shader_type spatial;
-render_mode blend_mix, depth_draw_opaque, cull_disabled;
-
-uniform float border_width : hint_range(0.0, 0.5) = 0.05; 
-uniform float normal_threshold : hint_range(0.0, 1.0) = 0.5;
-uniform bool invert_mask = false;
-
-varying vec3 local_pos;
-
-void vertex() {
-    local_pos = VERTEX;
-}
-
-void fragment() {
-    // --- 1. Flat Normal Calculation ---
-    vec3 flat_normal = normalize(cross(dFdy(local_pos), dFdx(local_pos)));
-
-    // --- 2. Y and Z Normal Mask ---
-    // Check BOTH the Y (top/bottom) and Z (front/back) axes.
-    // If either axis exceeds the threshold, the mask becomes 1.0.
-    float mask_y = abs(flat_normal.y);
-    float mask_z = abs(flat_normal.z);
-    float normal_mask = step(normal_threshold, max(mask_y, mask_z));
-
-    // --- 3. UV Border Mask ---
-    float edge_x = step(1.0 - border_width, UV.x) + step(UV.x, border_width);
-    float edge_y = step(1.0 - border_width, UV.y) + step(UV.y, border_width);
-    
-    float uv_mask = max(edge_x, edge_y);
-
-    // --- 4. Final Combine ---
-    float factor = clamp(max(uv_mask, normal_mask), 0.0, 1.0);
-    
-    if (invert_mask) {
-        factor = 1.0 - factor;
-    }
-
-    // --- 5. Material Output ---
-    ALBEDO = vec3(0.0); 
-    EMISSION = vec3(1.0) * factor; 
-    ALPHA = factor; 
-}`
-
-const doorShader4 = `
 shader_type spatial;
 
 // Added depth_draw_always to fix overlapping transparency issues.
