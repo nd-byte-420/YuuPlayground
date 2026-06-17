@@ -28,7 +28,7 @@ function spawnModel(
   entity.mesh.create(...getMesh());
   entity.mesh.color.set(color, Math.min(1, alphaTransparency));
   if (hasCollider && entity.mesh.nodeID) {
-    entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Convex');
+    entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Concave');
   }
   entity.scale = scale;
   return entity;
