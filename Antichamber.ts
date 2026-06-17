@@ -208,7 +208,6 @@ void fragment() {
 const doorShader4 = `
 shader_type spatial;
 
-// Added depth_draw_always to fix overlapping transparency issues.
 // Note: I kept cull_disabled instead of cull_back so you can see the borders on the back of the cube through the front glass.
 render_mode blend_mix, depth_draw_always, cull_disabled;
 
@@ -226,8 +225,15 @@ uniform float metallic : hint_range(0.0, 1.0) = 0.9;
 uniform vec4 border_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float border_emission = 1.0;
 
+// --- Borderlands Outline Uniforms (MOVED TO TOP) ---
+uniform vec4 outline_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
+uniform float outline_thickness : hint_range(0.0, 0.5, 0.001) = 0.02;
+
 varying vec3 local_pos;
 
+// ==========================================
+// PASS 1: Your Glass Shader
+// ==========================================
 void vertex() {
     local_pos = VERTEX;
 }
@@ -247,44 +253,35 @@ void fragment() {
     float uv_mask = max(edge_x, edge_y);
 
     // --- 4. Final Combine Factor ---
-    // factor = 1.0 (Border), factor = 0.0 (Glass)
     float factor = clamp(max(uv_mask, normal_mask), 0.0, 1.0);
     if (invert_mask) {
         factor = 1.0 - factor;
     }
 
     // --- 5. Mix Materials based on Factor ---
-    
-    // Mix the base colors. 
     ALBEDO = mix(glass_color.rgb, border_color.rgb, factor);
-    
-    // Mix the alpha. Uses the glass_color.a for the center, and border_color.a for the edges.
     ALPHA = mix(glass_color.a, border_color.a, factor);
-    
-    // Apply PBR properties. 
-    // The glass gets your roughness/metallic values. 
-    // The border gets standard matte non-metallic values (1.0 roughness, 0.0 metallic).
     ROUGHNESS = mix(roughness, 1.0, factor);
     METALLIC = mix(metallic, 0.0, factor);
-    
-    // Apply emission only to the border
     EMISSION = border_color.rgb * border_emission * factor;
 }
+
+// ==========================================
+// PASS 2: The Borderlands Outline Pass
+// ==========================================
 pass 2 {
-	render_mode cull_front, unshaded, depth_draw_always;
+    render_mode cull_front, unshaded, depth_draw_always;
 
-	uniform vec4 outline_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
-	uniform float outline_thickness : hint_range(0.0, 0.5, 0.001) = 0.02;
+    // We can use the uniforms here because they were declared at the top!
+    void vertex() {
+        // Extrude outwards for the outline hull
+        VERTEX += NORMAL * outline_thickness;
+    }
 
-	void vertex() {
-		// Extrude outwards for the outline hull
-		VERTEX += NORMAL * outline_thickness;
-	}
-
-	void fragment() {
-		ALBEDO = outline_color.rgb;
-		ALPHA = outline_color.a;
-	}
+    void fragment() {
+        ALBEDO = outline_color.rgb;
+        ALPHA = outline_color.a;
+    }
 }
 
 `
