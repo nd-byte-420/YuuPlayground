@@ -76,7 +76,7 @@ export async function spawnScene() {
   // Spawn Cube.001
   spawnModel(
     getCube001,
-    new Vector3(0.000000, 1.750000, -4.250000),
+    new Vector3(0.000000, 3.750000, -4.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -84,7 +84,7 @@ export async function spawnScene() {
   // Spawn Cube.002
   spawnModel(
     getCube002,
-    new Vector3(-4.250000, 1.750000, 0.000000),
+    new Vector3(-4.250000, 3.750000, 0.000000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -92,7 +92,7 @@ export async function spawnScene() {
   // Spawn Cube.003
   spawnModel(
     getCube003,
-    new Vector3(0.000000, 1.750000, 4.250000),
+    new Vector3(0.000000, 3.750000, 4.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -100,7 +100,7 @@ export async function spawnScene() {
   // Spawn Cube.004
   spawnModel(
     getCube004,
-    new Vector3(18.000000, 1.750000, 4.250000),
+    new Vector3(18.000000, 3.750000, 4.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -108,7 +108,7 @@ export async function spawnScene() {
   // Spawn Cube.005
   spawnModel(
     getCube005,
-    new Vector3(35.500000, 1.750000, -4.250000),
+    new Vector3(35.500000, 3.750000, -4.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -116,7 +116,7 @@ export async function spawnScene() {
   // Spawn Cube.006
   spawnModel(
     getCube006,
-    new Vector3(39.000000, 1.750000, 4.250000),
+    new Vector3(39.000000, 3.750000, 4.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -124,7 +124,7 @@ export async function spawnScene() {
   // Spawn Cube.007
   spawnModel(
     getCube007,
-    new Vector3(4.250000, 1.750000, 3.250000),
+    new Vector3(4.250000, 3.750000, 3.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -132,7 +132,7 @@ export async function spawnScene() {
   // Spawn Cube.008
   spawnModel(
     getCube008,
-    new Vector3(9.000000, 1.750000, 2.250000),
+    new Vector3(9.000000, 3.750000, 2.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -140,7 +140,7 @@ export async function spawnScene() {
   // Spawn Cube.009
   spawnModel(
     getCube009,
-    new Vector3(13.750000, 1.750000, 3.250000),
+    new Vector3(13.750000, 3.750000, 3.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -148,7 +148,7 @@ export async function spawnScene() {
   // Spawn Cube.010
   spawnModel(
     getCube010,
-    new Vector3(13.750000, 1.750000, -3.250000),
+    new Vector3(13.750000, 3.750000, -3.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -156,7 +156,7 @@ export async function spawnScene() {
   // Spawn Cube.011
   spawnModel(
     getCube011,
-    new Vector3(4.250000, 1.750000, -3.250000),
+    new Vector3(4.250000, 3.750000, -3.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -164,7 +164,7 @@ export async function spawnScene() {
   // Spawn Cube.012
   spawnModel(
     getCube012,
-    new Vector3(9.000000, 1.750000, -2.250000),
+    new Vector3(9.000000, 3.750000, -2.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -172,7 +172,7 @@ export async function spawnScene() {
   // Spawn Cube.013
   spawnModel(
     getCube013,
-    new Vector3(18.000000, 1.750000, -4.250000),
+    new Vector3(18.000000, 3.750000, -4.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -180,7 +180,7 @@ export async function spawnScene() {
   // Spawn Cube.014
   spawnModel(
     getCube014,
-    new Vector3(22.250000, 1.750000, 3.250000),
+    new Vector3(22.250000, 3.750000, 3.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -188,7 +188,7 @@ export async function spawnScene() {
   // Spawn Cube.015
   spawnModel(
     getCube015,
-    new Vector3(22.250000, 1.750000, -3.250000),
+    new Vector3(22.250000, 3.750000, -3.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -196,7 +196,7 @@ export async function spawnScene() {
   // Spawn Cube.016
   spawnModel(
     getCube016,
-    new Vector3(28.750000, 1.750000, 2.250000),
+    new Vector3(28.750000, 3.750000, 2.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -204,7 +204,7 @@ export async function spawnScene() {
   // Spawn Cube.017
   spawnModel(
     getCube017,
-    new Vector3(27.000000, 1.750000, -2.250000),
+    new Vector3(27.000000, 3.750000, -2.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -212,7 +212,7 @@ export async function spawnScene() {
   // Spawn Cube.018
   spawnModel(
     getCube018,
-    new Vector3(31.750000, 1.750000, -3.250000),
+    new Vector3(31.750000, 3.750000, -3.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -220,7 +220,7 @@ export async function spawnScene() {
   // Spawn Cube.019
   spawnModel(
     getCube019,
-    new Vector3(35.250000, 1.750000, 3.250000),
+    new Vector3(35.250000, 3.750000, 3.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -228,7 +228,7 @@ export async function spawnScene() {
   // Spawn Cube.020
   spawnModel(
     getCube020,
-    new Vector3(39.250000, 1.750000, -3.250000),
+    new Vector3(39.250000, 3.750000, -3.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -236,7 +236,7 @@ export async function spawnScene() {
   // Spawn Cube.021
   spawnModel(
     getCube021,
-    new Vector3(46.500000, 1.750000, -2.250000),
+    new Vector3(46.500000, 3.750000, -2.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -244,7 +244,7 @@ export async function spawnScene() {
   // Spawn Cube.022
   spawnModel(
     getCube022,
-    new Vector3(46.250000, 1.750000, 2.250000),
+    new Vector3(46.250000, 3.750000, 2.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -252,7 +252,7 @@ export async function spawnScene() {
   // Spawn Cube.023
   spawnModel(
     getCube023,
-    new Vector3(42.750000, 1.750000, 3.250000),
+    new Vector3(42.750000, 3.750000, 3.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -260,7 +260,7 @@ export async function spawnScene() {
   // Spawn Cube.024
   spawnModel(
     getCube024,
-    new Vector3(53.750000, 1.750000, -6.250000),
+    new Vector3(53.750000, 3.750000, -6.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -268,7 +268,7 @@ export async function spawnScene() {
   // Spawn Cube.025
   spawnModel(
     getCube025,
-    new Vector3(49.750000, 1.750000, 4.750000),
+    new Vector3(49.750000, 3.750000, 4.750000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -276,7 +276,7 @@ export async function spawnScene() {
   // Spawn Cube.026
   spawnModel(
     getCube026,
-    new Vector3(67.000000, 1.750000, -10.250000),
+    new Vector3(67.000000, 3.750000, -10.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -284,7 +284,7 @@ export async function spawnScene() {
   // Spawn Cube.027
   spawnModel(
     getCube027,
-    new Vector3(65.000000, 1.750000, 7.250000),
+    new Vector3(65.000000, 3.750000, 7.250000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -292,7 +292,7 @@ export async function spawnScene() {
   // Spawn Cube.028
   spawnModel(
     getCube028,
-    new Vector3(80.250000, 1.750000, -1.500000),
+    new Vector3(80.250000, 3.750000, -1.500000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -300,10 +300,9 @@ export async function spawnScene() {
   // Spawn Cube.029
   spawnModel(
     getCube029,
-    new Vector3(47.299999, 0.500000, 0.000000),
+    new Vector3(47.299999, 1.500000, 0.000000),
     new Vector3(1.000000, 1.000000, 1.000000),
-    new Quaternion(0.000000, 0.000000, 0.000000, 1.000000),
-    Color.yellow
+    new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
   // Spawn Cube.040
@@ -317,7 +316,7 @@ export async function spawnScene() {
   // Spawn Cube.030
   spawnModel(
     getCube030,
-    new Vector3(64.224998, 1.750000, -6.000000),
+    new Vector3(64.224998, 3.750000, -6.000000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -325,7 +324,7 @@ export async function spawnScene() {
   // Spawn Cube.031
   spawnModel(
     getCube031,
-    new Vector3(64.224998, 1.750000, 4.500000),
+    new Vector3(64.224998, 3.750000, 4.500000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -333,7 +332,7 @@ export async function spawnScene() {
   // Spawn Cube.033
   spawnModel(
     getCube033,
-    new Vector3(58.250000, 1.750000, 4.500000),
+    new Vector3(58.250000, 3.750000, 4.500000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
