@@ -27,14 +27,7 @@ async function start() {
   // laser at 36,0,0
   antichamber.spawnLaserDoor(new Vector3(31.9, 2, 0), new Vector3(35.6, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
   new CubeEntity(new Vector3(35.6, 1.0, 0));
-  new CubeEntity(new Vector3(45.5, 1.0, 0));
-  new CubeEntity(new Vector3(45.5, 1.0, 1));
-  new CubeEntity(new Vector3(46.0, 1.0, 2));
-  new CubeEntity(new Vector3(46.5, 1.0, 2.5));
-  new CubeEntity(new Vector3(44.5, 1.0, -1));
-  new CubeEntity(new Vector3(44.5, 1.0, -1));
-  new CubeEntity(new Vector3(43.5, 1.0, -2));
-  new CubeEntity(new Vector3(42.5, 1.0, -2.5));
+  new CubeEntity(new Vector3(44.5, 1.0, 0));
   
   // gravity door up, blocked with cube on 35.5 laser makes it go up
 
