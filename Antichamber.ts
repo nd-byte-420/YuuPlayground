@@ -27,7 +27,7 @@ async function spawnDoor(pos: Vector3) {
   let isGravityReversed = false;
 
   // Create a visible trigger on one side of the door
-  const triggerPos = new Vector3(0,1,0);
+  const triggerPos = new Vector3(5,1,0);
   const triggerEntity = new Entity(triggerPos, Quaternion.one, new Vector3(3, 3, 3), undefined, 'Static');
   triggerEntity.trigger.initialize(1.5, undefined);
   triggerEntity.trigger.setVisible(true, Color.red);
@@ -86,7 +86,7 @@ async function spawnDoor(pos: Vector3) {
     }
   });
 
-  const supportPos = new Vector3(pos.x, pos.y+2, pos.z+2);
+  const supportPos = new Vector3(pos.x, pos.y+1.9, pos.z+1.9);
   const supportCube = new CubeEntity(supportPos, true, new Vector3(0.1,0.1,0.1), Color.blue, 'Static');
   const support = supportCube.entity;
   support.collidable.set(true);
