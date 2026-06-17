@@ -9,7 +9,7 @@ registerStart(start);
 async function start() {
 
   // gravity door with block under it
-  antichamber.spawnDoor(new Vector3(9,2,0));
+  antichamber.spawnDoor(new Vector3(9,1,0));
 
 
 
