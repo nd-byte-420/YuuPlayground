@@ -99,7 +99,7 @@ async function spawnDoor(pos: Vector3) {
 }
 
 async function spawnLaserDoor(pos: Vector3, laserPos: Vector3) {
-  const doorPos = new Vector3(pos.x, pos.y + 2 * 2, pos.z);
+  const doorPos = new Vector3(pos.x, pos.y, pos.z);
 
   const door = spawnPrimitive.door(doorPos, new Vector3(1, 1, 1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
   const nodeId = door.mesh.nodeID ?? -1;
@@ -139,7 +139,7 @@ async function spawnLaserDoor(pos: Vector3, laserPos: Vector3) {
       let vel = door.velocity.get();
       if (vel) {
         let yVel = vel.y;
-        if (!isBlocked) {
+        if (isBlocked) {
           // Accelerate upwards: counteract default downward gravity (9.8 m/s^2)
           // and apply an upward gravity (9.8 m/s^2). Net upward acceleration is 19.6 m/s^2.
           yVel += 19.6 * deltaTime;
