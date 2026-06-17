@@ -69,7 +69,7 @@ async function spawnDoor(pos: Vector3) {
       let curY = curPos.y;
       const doorHeight = 2;
       const minY = 0;
-      const maxY = pos.y + doorHeight;
+      const maxY = pos.y + 1.5 * doorHeight;
       if (curY < minY) {
         curY = minY;
         const currentVel = door.velocity.get();
@@ -157,7 +157,7 @@ async function spawnLaserDoor(pos: Vector3, laserPos: Vector3, laserSize: Vector
       let curY = curPos.y;
       const doorHeight = 2;
       const minY = pos.y;
-      const maxY = pos.y + doorHeight;
+      const maxY = pos.y + 1.5 * doorHeight;
       if (curY < minY) {
         curY = minY;
         const currentVel = door.velocity.get();
