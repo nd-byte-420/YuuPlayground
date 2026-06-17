@@ -302,7 +302,8 @@ export async function spawnScene() {
     getCube029,
     new Vector3(47.299999, 1.500000, 0.000000),
     new Vector3(1.000000, 1.000000, 1.000000),
-    new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
+    new Quaternion(0.000000, 0.000000, 0.000000, 1.000000),
+    Color.yellow
   );
 
   // Spawn Cube.040
@@ -332,7 +333,7 @@ export async function spawnScene() {
   // Spawn Cube.033
   spawnModel(
     getCube033,
-    new Vector3(58.250000, 3.750000, 4.500000),
+    new Vector3(58.250000, 3.750000, 4.400000),
     new Vector3(1.000000, 1.000000, 1.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
