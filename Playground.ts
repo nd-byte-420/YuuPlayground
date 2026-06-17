@@ -40,6 +40,16 @@ async function start() {
   antichamber.spawnLaserDoor(new Vector3(42.5, 0, 0), new Vector3(38.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
 
   // static door at 54,0,0
+  antichamber.spawnStaticDoor(new Vector3(54, 0, 0));
+
+
+  antichamber.spawnLaserDoor(new Vector3(55, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
+  antichamber.spawnLaserDoor(new Vector3(56.5, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
+  antichamber.spawnLaserDoor(new Vector3(57.8, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
+
+
+
+  antichamber.spawnStaticDoor(new Vector3(58, 0, 0));
 
 
   // 3 doors 
