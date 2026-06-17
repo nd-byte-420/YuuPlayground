@@ -67,9 +67,9 @@ async function start() {
   antichamber.spawnMultiLaserDoor(
     new Vector3(64, 2, 0),
     [
-      new Vector3(63.7, 1.0, 2),
-      new Vector3(63.8, 1.0, 3),
-      new Vector3(63.9, 1.0, 4)
+      new Vector3(63.5, 1.0, 2),
+      new Vector3(63.6, 1.0, 3),
+      new Vector3(63.4, 1.0, 4)
     ],
     new Vector3(0.1, 0.1, 0.1)
   );
