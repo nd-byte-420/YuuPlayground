@@ -736,7 +736,7 @@ export class Entity {
 
           if (data) {
             if (data.boxSize) {
-              this.triggerMeshEntity = spawnPrimitive.cube(Vector3.zero, data.boxSize, Quaternion.one, color ?? Color.green, 0.25, false, 'None', this);
+              this.triggerMeshEntity = spawnPrimitive.cube(Vector3.zero, data.boxSize, Quaternion.one, color ?? Color.green, 0.25, false, 'Empty', this);
             }
             else if (data.triggerRadius !== undefined) {
               this.triggerMeshEntity = spawnPrimitive.sphere(16, 16, Vector3.zero, (data.triggerRadius * 2), Quaternion.one, color ?? Color.green, 0.25, 'None', 'Empty', this);
