@@ -20,7 +20,10 @@ async function spawnDoor(pos: Vector3) {
   const doorPos = new Vector3(pos.x, pos.y + 2 * 2, pos.z);
   // const cube = spawnPrimitive.cube(doorPos, new Vector3(5, 5, 0.1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
 
-  const door = spawnPrimitive.door3(doorPos, new Vector3(1, 1, 1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Animated', undefined);
+  // door can still be glitched through with 'physics' instead of animated/static
+  // but I need the game physics so the doors catch on the blocks and its probably more efficient
+  // do the level legit instead of glitching through the doors
+  const door = spawnPrimitive.door3(doorPos, new Vector3(1, 1, 1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
   const nodeId = door.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, doorShader4);
 
@@ -49,39 +52,53 @@ async function spawnDoor(pos: Vector3) {
     }
   });
 
-  let doorYVelocity = 0;
-
-  Events.onUpdate((deltaTime) => {
+  Events.onPhysicsUpdate((deltaTime) => {
     if (door.exists()) {
       door.rot = Quaternion.one;
       
-      if (isGravityReversed) {
-        // Accelerate upwards
-        doorYVelocity += 9.8 * deltaTime;
-      } else {
-        // Accelerate downwards (default gravity)
-        doorYVelocity -= 9.8 * deltaTime;
-      }
-
       const curPos = door.pos;
-      let curY = curPos.y + doorYVelocity * deltaTime;
+      let vel = door.velocity.get();
+      if (vel) {
+        let yVel = vel.y;
+        if (isGravityReversed) {
+          // Accelerate upwards: counteract default downward gravity (9.8 m/s^2)
+          // and apply an upward gravity (9.8 m/s^2). Net upward acceleration is 19.6 m/s^2.
+          yVel += 19.6 * deltaTime;
+        }
+        door.velocity.set(new Vector3(0, yVel, 0));
+      }
 
       // Clamp door position to keep it between the ground (pos.y) and 2x the door height (pos.y + 2 * 2)
+      let curY = curPos.y;
       const doorHeight = 2;
-      const minY = pos.y;
+      const minY = 0;
       const maxY = pos.y + 2 * doorHeight;
+      
+      let needsReposition = false;
       if (curY < minY) {
         curY = minY;
-        if (doorYVelocity < 0) {
-          doorYVelocity = 0;
+        const currentVel = door.velocity.get();
+        if (currentVel && currentVel.y < 0) {
+          door.velocity.set(new Vector3(0, 0, 0));
         }
+        needsReposition = true;
       } else if (curY > maxY) {
         curY = maxY;
-        if (doorYVelocity > 0) {
-          doorYVelocity = 0;
+        const currentVel = door.velocity.get();
+        if (currentVel && currentVel.y > 0) {
+          door.velocity.set(new Vector3(0, 0, 0));
         }
+        needsReposition = true;
       }
-      door.pos = new Vector3(pos.x, curY, pos.z);
+
+      // Only reposition the door if it drifts from its guide track on X/Z
+      if (Math.abs(curPos.x - pos.x) > 0.001 || Math.abs(curPos.z - pos.z) > 0.001) {
+        needsReposition = true;
+      }
+
+      if (needsReposition) {
+        door.pos = new Vector3(pos.x, curY, pos.z);
+      }
     }
   });
 

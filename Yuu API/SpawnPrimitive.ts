@@ -554,7 +554,8 @@ function door2(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alph
   entity.mesh.color.set(color, Math.min(1, alphaTransparency));
 
   if (hasCollider && entity.mesh.nodeID) {
-    entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Concave');
+    const colliderType = type === 'Physics' ? 'Convex' : 'Concave';
+    entity.collider.createFromMeshNode(entity.mesh.nodeID, colliderType);
   }
 
   entity.scale = scale;
@@ -575,7 +576,8 @@ function door3(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alph
   entity.scale = scale;
 
   if (hasCollider && entity.mesh.nodeID) {
-    entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Concave');
+    const colliderType = type === 'Physics' ? 'Convex' : 'Concave';
+    entity.collider.createFromMeshNode(entity.mesh.nodeID, colliderType);
   }
 
 
