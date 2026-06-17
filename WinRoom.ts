@@ -14,13 +14,12 @@ export const win = {
 async function winRoom() {
   spawnShaderSphere(new Vector3(70, 2.5, -2));
 
-  // playgroundDemos.spawnDissolveCubeRm2(new Vector3(5, 2.5, -4));
   spawnDissolveCube(new Vector3(75, 2.5, -1))
   spawnDissolveCube(new Vector3(75, 2.5, -2))
 
-  nissanGtr(new Vector3(70,2.5,3));
+  nissanGtr(new Vector3(70,1,3));
 
-  sierpinskiPlane(new Vector3(80,0,0));
+  sierpinskiPlane(new Vector3(78, 1,0));
 }
 
 
