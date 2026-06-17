@@ -1,5 +1,6 @@
 import { registerStart } from "./Yuu API/RegisterStart";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
+import { Quaternion } from "./Yuu API/Basic Types/Quaternion";
 import { antichamber } from "./Antichamber";
 import { initializeCubeGun, CubeEntity } from "./CubeGun";
 import { scene } from "./Scene";
@@ -14,6 +15,7 @@ async function start() {
 
   // static door at 18,0,0
   antichamber.spawnStaticDoor(new Vector3(18, 0, 0));
+  antichamber.spawnStaticDoor(new Vector3(4, 0, 0));
 
   // gravity door down physics, laser makes it go up
   // 22.25x, 0, 0
@@ -42,10 +44,11 @@ async function start() {
   // static door at 54,0,0
   antichamber.spawnStaticDoor(new Vector3(54, 0, 0));
 
-
-  antichamber.spawnLaserDoor(new Vector3(55, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
-  antichamber.spawnLaserDoor(new Vector3(56.5, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), true);
-  antichamber.spawnLaserDoor(new Vector3(57.8, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1));
+  // these doors should be rotated 90 degrees
+  const rot90 = Quaternion.fromEuler(new Vector3(0, Math.PI / 2, 0));
+  antichamber.spawnLaserDoor(new Vector3(56, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), false, rot90);
+  antichamber.spawnLaserDoor(new Vector3(56, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), true, rot90);
+  antichamber.spawnLaserDoor(new Vector3(56, 0, 0), new Vector3(53.9, 1.0, 0), new Vector3(0.1, 0.1, 0.1), false, rot90);
 
 
 

@@ -98,10 +98,10 @@ async function spawnDoor(pos: Vector3) {
   support.collidable.set(true);
 }
 
-async function spawnLaserDoor(pos: Vector3, laserPos: Vector3, laserSize: Vector3 = new Vector3(0.1, 0.1, 4), invertLogic: boolean = false) {
+async function spawnLaserDoor(pos: Vector3, laserPos: Vector3, laserSize: Vector3 = new Vector3(0.1, 0.1, 4), invertLogic: boolean = false, rotation: Quaternion = Quaternion.one) {
   const doorPos = invertLogic ? new Vector3(pos.x, pos.y + 2 * 2, pos.z) : new Vector3(pos.x, pos.y, pos.z);
 
-  const door = spawnPrimitive.door(doorPos, new Vector3(1, 1, 1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
+  const door = spawnPrimitive.door(doorPos, new Vector3(1, 1, 1), rotation, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
   const nodeId = door.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, doorShader);
   
@@ -143,7 +143,7 @@ async function spawnLaserDoor(pos: Vector3, laserPos: Vector3, laserSize: Vector
 
   Events.onPhysicsUpdate((deltaTime) => {
     if (door.exists()) {
-      door.rot = Quaternion.one;
+      door.rot = rotation;
       
       const curPos = door.pos;
       let vel = door.velocity.get();
