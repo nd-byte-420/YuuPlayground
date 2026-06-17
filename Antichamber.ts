@@ -20,9 +20,6 @@ async function spawnDoor(pos: Vector3) {
   const doorPos = new Vector3(pos.x, pos.y + 2 * 2, pos.z);
   // const cube = spawnPrimitive.cube(doorPos, new Vector3(5, 5, 0.1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
 
-  // door can still be glitched through with 'physics' instead of animated/static
-  // but I need the game physics so the doors catch on the blocks and its probably more efficient
-  // do the level legit instead of glitching through the doors
   const door = spawnPrimitive.door3(doorPos, new Vector3(1, 1, 1), Quaternion.one, new Color(0.1, 0.5, 0.1), 1, true, 'Physics', undefined);
   const nodeId = door.mesh.nodeID ?? -1;
   Godot.shader.applyToMesh(nodeId, doorShader4);
