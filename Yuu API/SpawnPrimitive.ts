@@ -4,6 +4,7 @@ import { Vector2 } from "./Basic Types/Vector2";
 import { Vector3 } from "./Basic Types/Vector3";
 import { Entity } from "./Entity";
 import { getDoor } from "./doorModel";
+import { getNissanGtr32Exp } from "./nissan";
 import { getYuuchamber2 } from "./yuuchamber2Model";
 
 
@@ -14,7 +15,8 @@ export const spawnPrimitive = {
   cone,
   cubeScaled,
   door,
-  chamber
+  chamber,
+  nissanGtr32Exp
 }
 
 /**
@@ -554,6 +556,27 @@ function chamber(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, al
 
   if (hasCollider && entity.mesh.nodeID) {
     entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Convex');
+  }
+
+  entity.scale = scale;
+
+  return entity;
+}
+
+
+/**
+ * Create A Nissan Gtr R32 Exp Entity
+ 
+ */
+function nissanGtr32Exp(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alphaTransparency: number, colliderType: 'None' | 'Convex' | 'Concave', type: BaseNodeTypes, parent: Entity | undefined): Entity {
+  const entity = new Entity(pos, rot, Vector3.one, parent, type);
+
+  entity.mesh.create(...getNissanGtr32Exp());
+
+  entity.mesh.color.set(color, Math.min(1, alphaTransparency));
+
+  if (colliderType !== 'None' && entity.mesh.nodeID) {
+    entity.collider.createFromMeshNode(entity.mesh.nodeID, colliderType);
   }
 
   entity.scale = scale;

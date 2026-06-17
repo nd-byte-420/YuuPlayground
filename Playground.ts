@@ -4,6 +4,7 @@ import { Quaternion } from "./Yuu API/Basic Types/Quaternion";
 import { antichamber } from "./Antichamber";
 import { initializeCubeGun, CubeEntity } from "./CubeGun";
 import { scene } from "./Scene";
+import { win } from "./WinRoom";
 
 registerStart(start);
 async function start() {
@@ -75,6 +76,7 @@ async function start() {
   );
 
 
+  win.winRoom()
 
 
   initializeCubeGun();
