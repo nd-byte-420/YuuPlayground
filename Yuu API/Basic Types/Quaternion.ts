@@ -60,6 +60,31 @@ export class Quaternion {
     );
   }
 
+  /**
+   * Converts the Quaternion to Euler angles in Radians
+   * @returns Vector3 rotation in Radians
+   */
+  toEuler(): Vector3 {
+    // roll (x-axis rotation)
+    const sinr_cosp = 2 * (this.w * this.x + this.y * this.z);
+    const cosr_cosp = 1 - 2 * (this.x * this.x + this.y * this.y);
+    const x = Math.atan2(sinr_cosp, cosr_cosp);
+
+    // pitch (y-axis rotation)
+    const sinp = 2 * (this.w * this.y - this.z * this.x);
+    let y: number;
+    if (Math.abs(sinp) >= 1)
+        y = Math.sign(sinp) * Math.PI / 2; // use 90 degrees if out of range
+    else
+        y = Math.asin(sinp);
+
+    // yaw (z-axis rotation)
+    const siny_cosp = 2 * (this.w * this.z + this.x * this.y);
+    const cosy_cosp = 1 - 2 * (this.y * this.y + this.z * this.z);
+    const z = Math.atan2(siny_cosp, cosy_cosp);
+
+    return new Vector3(x, y, z);
+  }
 
   static equals(q1: Quaternion, q2: Quaternion, epsilon: number = quaternionEpsilon): boolean { return q1.equals(q2, epsilon); }
   static clone(vector: Quaternion): Quaternion { return vector.clone(); }

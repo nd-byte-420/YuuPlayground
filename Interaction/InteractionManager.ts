@@ -3,12 +3,17 @@ import { IdleState } from "./States/IdleState";
 import { GrabState } from "./States/GrabState";
 import { DualHandState } from "./States/DualHandState";
 import { Events } from "../Yuu API/Events";
+import { Controller } from "../Yuu API/Controller";
+import { UndoManager } from "./UndoManager";
 
 class InteractionManagerClass {
   public leftHand: HandStateMachine;
   public rightHand: HandStateMachine;
+  public isSnapping: boolean = false;
 
   private updateSubscriptionId: number = -1;
+  private snapSub: number = -1;
+  private undoSub: number = -1;
 
   constructor() {
     this.leftHand = new HandStateMachine('left');
@@ -21,12 +26,22 @@ class InteractionManagerClass {
 
     // Subscribe to physics update
     this.updateSubscriptionId = Events.onPhysicsUpdate((dt) => this.update(dt));
+
+    this.snapSub = Controller.subscribe('leftThumbstick', 'Pressed', () => {
+      this.isSnapping = !this.isSnapping;
+    });
+
+    this.undoSub = Controller.subscribe('leftX', 'Pressed', () => {
+      UndoManager.undo();
+    });
   }
 
   public destroy() {
     if (this.updateSubscriptionId !== -1) {
       Events.unsubscribe(this.updateSubscriptionId);
     }
+    if (this.snapSub !== -1) Controller.unsubscribe(this.snapSub);
+    if (this.undoSub !== -1) Controller.unsubscribe(this.undoSub);
   }
 
   private update(deltaTime: number) {

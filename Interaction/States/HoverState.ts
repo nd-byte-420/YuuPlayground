@@ -17,6 +17,14 @@ export class HoverState extends HandState {
     }
 
     this.gripSub = Controller.subscribe(this.stateMachine.gripButton, 'Pressed', () => {
+      const modifierButton = this.stateMachine.handType === 'left' ? 'leftX' : 'rightA';
+
+      if (Controller.isPressed(modifierButton) && this.stateMachine.hoveredEntity) {
+        const clonedEntity = this.stateMachine.hoveredEntity.clone();
+        if (clonedEntity) {
+          this.stateMachine.hoveredEntity = clonedEntity;
+        }
+      }
       this.stateMachine.changeState(new GrabState(this.stateMachine));
     });
 

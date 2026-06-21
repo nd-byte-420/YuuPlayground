@@ -183,6 +183,32 @@ export class Entity {
     },
   }
 
+  /**
+   * Clones the Entity using the backend duplicate logic.
+   * Assumes the backend duplicates all necessary meshes, colliders, and child properties.
+   */
+  clone(): Entity | undefined {
+    if (this.nodeID && this.type) {
+      const duplicatedNodeID = Godot.node.duplicate(this.nodeID);
+      if (duplicatedNodeID) {
+        // Create a shell entity
+        const clonedEntity = new Entity(this.pos.clone(), this.rot.clone(), this.scale.clone(), this.parent, this.type);
+        
+        // Remove the default created node for the shell and map the duplicated one
+        if (clonedEntity.nodeID) {
+          Entity.entityMap.delete(clonedEntity.nodeID);
+          Godot.node.destroy(clonedEntity.nodeID);
+        }
+        
+        clonedEntity.nodeID = duplicatedNodeID;
+        Entity.entityMap.set(duplicatedNodeID, clonedEntity);
+        
+        return clonedEntity;
+      }
+    }
+    return undefined;
+  }
+
   changeType(type: BaseNodeTypes) {
     if (this.nodeID) {
       this.nodeID = Godot.node.changeType(this.nodeID, type) ?? this.nodeID;

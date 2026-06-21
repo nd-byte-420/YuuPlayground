@@ -1,4 +1,4 @@
-﻿
+
 
 /**
  * Options used to select what type of animation & physics a node will have, if any
@@ -427,6 +427,22 @@ declare namespace Godot {
      * @returns id of the new node if successful and undefined if there is an error
      */
     changeType: (id: number, type: BaseNodeTypes) => number | undefined;
+
+    /**
+     * Duplicates the node and returns the new node ID.
+     * @param id of the node to duplicate
+     * @returns the id of the duplicated node
+     */
+    duplicate: (id: number) => number | undefined;
+
+    physics: {
+      /**
+       * Freezes or unfreezes a physics node.
+       * @param id of the physics node
+       * @param isFrozen true to freeze, false to unfreeze
+       */
+      setFreeze: (id: number, isFrozen: boolean) => boolean;
+    };
 
     visible: {
       set: (id: number, isVisible: boolean) => boolean,
