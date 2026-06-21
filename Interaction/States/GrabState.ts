@@ -32,7 +32,7 @@ export class GrabState extends HandState {
     }
     
     this.stateMachine.grabbedEntity = this.stateMachine.hoveredEntity;
-    this.grabType = GrabType.FreeMove; // Default to FreeMove unless it's a gizmo handle
+    this.grabType = this.stateMachine.selectedGrabType; // Use the type selected via Radial Menu
     
     const handTransform = this.stateMachine.transform;
     const handPos = handTransform.position.get() || Vector3.zero;

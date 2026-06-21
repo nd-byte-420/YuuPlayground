@@ -785,6 +785,9 @@ declare namespace Godot {
       right: {
         get: () => ({ x: number, y: number, z: number } | undefined);
       },
+      thumbstick: {
+        get: () => ({ x: number, y: number } | undefined);
+      },
     },
     rightHand: {
       position: {
@@ -801,6 +804,9 @@ declare namespace Godot {
       },
       right: {
         get: () => ({ x: number, y: number, z: number } | undefined);
+      },
+      thumbstick: {
+        get: () => ({ x: number, y: number } | undefined);
       },
     },
     foot: {
