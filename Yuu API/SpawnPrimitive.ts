@@ -3,9 +3,6 @@ import { Quaternion } from "./Basic Types/Quaternion";
 import { Vector2 } from "./Basic Types/Vector2";
 import { Vector3 } from "./Basic Types/Vector3";
 import { Entity } from "./Entity";
-import { getDoor } from "./doorModel";
-import { getNissanGtr32Exp } from "./nissan";
-import { getYuuchamber2 } from "./yuuchamber2Model";
 
 
 export const spawnPrimitive = {
@@ -14,9 +11,6 @@ export const spawnPrimitive = {
   sphere,
   cone,
   cubeScaled,
-  door,
-  chamber,
-  nissanGtr32Exp
 }
 
 /**
@@ -521,65 +515,3 @@ function getCone(columns: number): [Vector3[], Vector2[], number[]] {
 }
 
 
-
-/**
- * Create A door
- 
- */
-function door(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alphaTransparency: number, hasCollider: boolean, type: BaseNodeTypes, parent: Entity | undefined): Entity {
-  const entity = new Entity(pos, rot, Vector3.one, parent, type);
-
-  entity.mesh.create(...getDoor());
-
-  entity.mesh.color.set(color, Math.min(1, alphaTransparency));
-  entity.scale = scale;
-
-  if (hasCollider && entity.mesh.nodeID) {
-    entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Concave');
-  }
-
-
-  return entity;
-}
-
-
-/**
- * Create A door
- 
- */
-function chamber(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alphaTransparency: number, hasCollider: boolean, type: BaseNodeTypes, parent: Entity | undefined): Entity {
-  const entity = new Entity(pos, rot, Vector3.one, parent, type);
-
-  entity.mesh.create(...getYuuchamber2());
-
-  entity.mesh.color.set(color, Math.min(1, alphaTransparency));
-
-  if (hasCollider && entity.mesh.nodeID) {
-    entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Convex');
-  }
-
-  entity.scale = scale;
-
-  return entity;
-}
-
-
-/**
- * Create A Nissan Gtr R32 Exp Entity
- 
- */
-function nissanGtr32Exp(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alphaTransparency: number, colliderType: 'None' | 'Convex' | 'Concave', type: BaseNodeTypes, parent: Entity | undefined): Entity {
-  const entity = new Entity(pos, rot, Vector3.one, parent, type);
-
-  entity.mesh.create(...getNissanGtr32Exp());
-
-  entity.mesh.color.set(color, Math.min(1, alphaTransparency));
-
-  if (colliderType !== 'None' && entity.mesh.nodeID) {
-    entity.collider.createFromMeshNode(entity.mesh.nodeID, colliderType);
-  }
-
-  entity.scale = scale;
-
-  return entity;
-}
