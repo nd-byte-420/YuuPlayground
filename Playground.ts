@@ -15,13 +15,13 @@ async function start() {
   // Show the in-world console 1.5m up and 2m forward
   inWorldConsole.visible(true, new Vector3(0, 1.5, -2));
 
-  console.log("Making HTTP request to local Express server...");
+  console.log("Making HTTP request to JSONPlaceholder...");
   try {
-    const response = http.getJson<{ message: string; success: boolean; timestamp: string }>(
-      "192.168.0.150:3000",
-      "/"
+    const response = http.getJson<{ userId: number; id: number; title: string; completed: boolean }>(
+      "jsonplaceholder.typicode.com",
+      "/todos/1"
     );
-    console.log("Express Server Response:", JSON.stringify(response));
+    console.log("JSONPlaceholder Response:", JSON.stringify(response));
   } catch (error) {
     console.error("HTTP Request failed:", error);
   }
