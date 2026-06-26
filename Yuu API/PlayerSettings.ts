@@ -1,12 +1,19 @@
-import { Vector3 } from "./Basic Types/Vector3";
 import { Files } from "./Files";
 
 
 export type PlayerSettings = {
   version: number,
-  username: string,
-  visits: number,
-  lastPos: Vector3,
+  worlds: PersistentWorldInfo[],
+}
+
+export type PersistentWorldInfo = {
+  name: string,
+  isDeletable: boolean,
+  isAlpha: boolean,
+  version: string,
+  gitUserRepoUrlPretty: string | undefined,
+  zipFileURL: string | undefined,
+  worldFolderName: string | undefined,
 }
 
 
@@ -32,29 +39,21 @@ function get(): PlayerSettings {
     if (settingsString) {
       const oldSettings: PlayerSettings = JSON.parse(settingsString);
 
-      // Would be wise to rethink this to consider the case of erased data (ie. going from a new version to an old on accident)
-
-      if (oldSettings.username !== undefined) {
-        settings.username = oldSettings.username;
-      }
-      if (oldSettings.visits !== undefined) {
-        settings.visits = oldSettings.visits;
-      }
-      if (oldSettings.lastPos !== undefined) {
-        settings.lastPos = oldSettings.lastPos;
+      if (oldSettings.worlds) {
+        settings.worlds = oldSettings.worlds;
       }
     }
   }
 
-  return settings ?? getEmptyPlayerSettings();
+  return settings;
 }
 
 function getEmptyPlayerSettings(): PlayerSettings {
   return {
     version: 1,
-    username: 'unknown',
-    visits: 0,
-    lastPos: Vector3.up,
+    worlds: [
+      { name: 'Yuu Paint', isDeletable: false, isAlpha: false, version: 'v1', gitUserRepoUrlPretty: 'YuuOnline/YuuPaint', zipFileURL: undefined, worldFolderName: undefined },
+    ],
   }
 }
 

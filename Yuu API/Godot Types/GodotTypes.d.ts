@@ -91,40 +91,14 @@ declare namespace Godot {
   }
 
 
-
-  // Things needed to be able to "travel to a new world"
-  // - Download zip from git hub
-  // - Unzip (should be done on separate thread)
-  // - Get contents of a folder
-
-  // Ideally a user could type in their git repo, it would download into a templates folder
-  // The user could then select a template to open
-  // Eventually these would not just open, but would become world save files (will need some way to update the code once created)
-  // Will also need a way to delete templates (maybe built in can't be deleted)
-  // Long term need a way to transfer read/write files locally over LAN
-
-
   const files: {
-    zip: {
-      compressFolder: (dirPathToCompress: string, saveZipToDirPath: string, zipFileName: string) => boolean;
-      extractFiles: (zipDirPath: string, saveDirPath: string, unzippedFolderName: string) => boolean;
-    }
-    folder: {
-      /**
-       * Create a folder at the specified dirPath
-       * @param dirPath to create a folder in, path to directory will be created if it doesn't exist
-       * @param folderName to create
-       * @returns boolean true if successful
-       */
-      create: (dirPath: string, folderName: string) => boolean;
-      /**
-       * Get the contents of a dirPath
-       * @param dirPath to get contents of
-       * @param isRecursive if true will return contents of sub folders as well
-       * @returns array of [directory path, file/folder name, file extension, "?" if no extension, or "" empty string for folders]
-       */
-      getContents: (dirPath: string, isRecursive: boolean) => [string, string, string][];
-    }
+    /**
+     * Checks if a file exists and returns a boolean if true
+     * @param filePath to check including extension
+     * @returns boolean true if the file exists
+     */
+    exists: (filePath: string) => boolean;
+
     text: {
       /**
        * Create a text file at the specified directory with corresponding name and extension (overwrites if it already exists)
@@ -152,6 +126,72 @@ declare namespace Godot {
        * @returns string contents, or undefined if unsuccessful
        */
       get: (dirPath: string, fileName: string, fileExtension: string) => string | undefined;
+    }
+    folder: {
+      /**
+       * Checks if a folder exists and returns a boolean if true
+       * @param dirPath to check
+       * @returns boolean true if the directory exists
+       */
+      exists: (dirPath: string) => boolean;
+
+      /**
+       * Create a folder at the specified dirPath
+       * @param dirPath to create a folder at, recursive path to the directory will be created if it doesn't exist
+       * @returns boolean true if successful (false if already exists, or other error occurs)
+       */
+      create: (dirPath: string) => boolean;
+
+      /**
+       * Delete the folder and recursively delete contents at the specified dirPath
+       * @param dirPath to delete
+       * @returns boolean true if successful
+       */
+      delete: (dirPath: string) => boolean;
+
+      /**
+       * Get the contents of a dirPath
+       * @param dirPath to get contents of
+       * @param isRecursive if true will return contents of sub folders as well
+       * @returns array of [directory path, file/folder name, file extension, "?" if no extension, or "" empty string for folders]
+       */
+      getContents: (dirPath: string, isRecursive: boolean) => [string, string, string][];
+
+      /**
+       * Transpile TS Files to JS, runs async, use areTSFilesTranspiled to check when it is completed
+       * @param tsPath folder to transpile
+       * @param jsPath folder to store js files into
+       * @returns boolean true if successfully queued
+       */
+      transpileTSFolderToJSFolder: (tsPath: string, jsPath: string) => boolean;
+      areTSFilesTranspiled: () => boolean;
+      tsFilesRemainingToBeCompiled: () => number;
+
+      /**
+       * Create a JS Virtual Machine
+       * @param jsPath folder of JS files to run
+       * @returns number id to close vm later, undefined if something went wrong
+       */
+      createJSVM: (jsPath: string) => number | undefined;
+      closeJSVM: (id: number) => boolean;
+    }
+    zip: {
+      /**
+       * Compress the contents of a folder into a zip file at a specified location
+       * @param dirPathToCompress folder to compress into a zip
+       * @param saveZipToDirPath folder to save the zip file to
+       * @param zipFileName to use, without extension (ie. 'File_Name')
+       * @returns boolean true if successful
+       */
+      compressFolder: (dirPathToCompress: string, saveZipToDirPath: string, zipFileName: string) => boolean;
+
+      /**
+       * Extract files from a zip into a folder
+       * @param zipDirPath to extract from, inclusive of extension (ie. user://worlds/folder_name/world_name.zip)
+       * @param saveDirPath location to save the uncompressed files to
+       * @returns boolean true if successful
+       */
+      extractFiles: (zipDirPath: string, saveDirPath: string) => boolean;
     }
   }
 
@@ -900,6 +940,21 @@ declare namespace Godot {
       // sendText: (id: number, msg: string) => boolean;
 
       // getPackets: (id: number) => string[];
+    },
+
+    http: {
+      getJSON: <T = unknown>(host: string, path: string) => T | undefined;
+
+      /**
+       * Download a zip from a url over http and save it to a folder with a given name
+       * Note: slow connections will time out after 10 seconds and fail
+       * @param hostURL domain to download from
+       * @param pathURL on the hostURLs domain to download from
+       * @param fileName to use without extension (ie. 'File_Name')
+       * @param folderPath to save the zip into
+       * @returns boolean true if successful
+       */
+      downloadZipToFolder: (hostURL: string, pathURL: string, fileName: string, folderPath: string) => boolean;
     },
   }
 

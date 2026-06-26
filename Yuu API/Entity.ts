@@ -6,7 +6,7 @@ import { Vector3 } from "./Basic Types/Vector3";
 import { RayHit } from "./Raycast";
 import { Texture } from "./Texture";
 import { spawnPrimitive } from "./SpawnPrimitive";
-import { entity_Data, OccupiedTriggerPayload, OnUpdatePayload } from "./Entity_Data";
+import { entity_Data, OccupiedTriggerPayload, OnUpdatePayload, WhatCanTrigger } from "./Entity_Data";
 
 
 /**
@@ -133,6 +133,25 @@ export class Entity {
     }
 
     return Vector3.zero;
+  }
+
+  private _tags: string[] = [];
+
+  tags = {
+    add: (tag: string) => {
+      if (!this._tags.includes(tag)) {
+        this._tags.push(tag);
+      }
+    },
+    remove: (tag: string) => {
+      arrayUtils.removeItemFromArray(this._tags, tag);
+    },
+    get: (): string[] => {
+      return [...this._tags];
+    },
+    clear: () => {
+      this._tags.length = 0;
+    },
   }
 
   /**
@@ -654,14 +673,51 @@ export class Entity {
   private triggerMeshEntity: Entity | undefined;
 
   trigger = {
-    initialize: (triggerRadiusOrBoxSize: number | Vector3, yRadius?: number | undefined) => {
-      if (this.nodeID) {
-        if (triggerRadiusOrBoxSize instanceof Vector3) {
-          entity_Data.triggerMap.set(this.nodeID ?? -1, { boxSize: triggerRadiusOrBoxSize, activeCount: 0, onUpdateTriggeredFunction: undefined, occupiedTriggeredFunction: undefined, emptyTriggeredFunction: undefined });
+    /**
+     * get and set whether or not a trigger can detect this entity
+     */
+    isTracked: {
+      /**
+       * Set whether or not a trigger can detect this entity
+       * @param isTracked boolean true will allow triggers to detect this entity
+       */
+      set: (isTracked: boolean) => {
+        if (this.nodeID) {
+          if (isTracked) {
+            if (!entity_Data.triggerDetectableEntities.includes(this.nodeID)) {
+              entity_Data.triggerDetectableEntities.push(this.nodeID);
+            }
+          }
+          else {
+            arrayUtils.removeItemFromArray(entity_Data.triggerDetectableEntities, this.nodeID);
+          }
+        }
+      },
+      
+      /**
+       * Get whether or not a trigger can detect this entity
+       * @returns boolean true if triggers can detect this entity
+       */
+      get: (): boolean => {
+        if (this.nodeID) {
+          return entity_Data.triggerDetectableEntities.includes(this.nodeID);
         }
         else {
-          entity_Data.triggerMap.set(this.nodeID ?? -1, { triggerRadius: triggerRadiusOrBoxSize, yRadius: yRadius, activeCount: 0, onUpdateTriggeredFunction: undefined, occupiedTriggeredFunction: undefined, emptyTriggeredFunction: undefined });
+          return false;
         }
+      },
+    },
+
+    /**
+     * Creates a trigger on the entity, so that it can detect things within its bubble
+     * @param triggerRadius to detect within
+     * @param yRadius allows for custom height on the trigger
+     * @param whatCanTrigger allows you to specify what causes the trigger to fire
+     * @param entityTags if detecting entities, they need to have isTracked set to true and have a matching tag to be detected
+     */
+    initialize: (triggerRadius: number, yRadius: number | undefined, whatCanTrigger: WhatCanTrigger[], entityTags: string[] | undefined) => {
+      if (this.nodeID) {
+        entity_Data.triggerMap.set(this.nodeID ?? -1, { triggerRadius: triggerRadius, yRadius: yRadius, whatCanTrigger: whatCanTrigger, entityTags: entityTags ?? [], activeCount: 0, onUpdateTriggeredFunction: undefined, occupiedTriggeredFunction: undefined, emptyTriggeredFunction: undefined });
       }
     },
 
@@ -746,12 +802,7 @@ export class Entity {
           const data = entity_Data.triggerMap.get(this.nodeID ?? -1);
 
           if (data) {
-            if (data.boxSize) {
-              this.triggerMeshEntity = spawnPrimitive.cube(Vector3.zero, data.boxSize, Quaternion.one, color ?? Color.green, 0.25, false, 'Empty', this);
-            }
-            else if (data.triggerRadius !== undefined) {
-              this.triggerMeshEntity = spawnPrimitive.sphere(16, 16, Vector3.zero, (data.triggerRadius * 2), Quaternion.one, color ?? Color.green, 0.25, 'None', 'Empty', this);
-            }
+            this.triggerMeshEntity = spawnPrimitive.sphere(16, 16, Vector3.zero, (data.triggerRadius * 2), Quaternion.one, color ?? Color.green, 0.25, 'None', 'Empty', this);
           }
         }
       }
@@ -1006,10 +1057,6 @@ export class Entity {
 
   static getEntityByID(id: number): Entity | undefined {
     return Entity.entityMap.get(id);
-  }
-
-  static getAllEntities(): Entity[] {
-    return Array.from(Entity.entityMap.values());
   }
 }
 

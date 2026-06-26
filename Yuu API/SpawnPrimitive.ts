@@ -10,7 +10,6 @@ export const spawnPrimitive = {
   plane,
   sphere,
   cone,
-  cubeScaled,
 }
 
 /**
@@ -40,22 +39,6 @@ function cube(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alpha
   return entity;
 }
 
-function cubeScaled(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alphaTransparency: number, hasCollider: boolean, type: BaseNodeTypes, parent: Entity | undefined): Entity {
-  const entity = new Entity(pos, rot, Vector3.one, parent, type);
-
-  entity.mesh.create(...getShadeSmoothStretchedUVCube());
-
-  entity.mesh.color.set(color, Math.min(1, alphaTransparency));
-
-  if (hasCollider && entity.mesh.nodeID) {
-    entity.collider.createBox(Vector3.one); // Note: Keep this at Vector3.one since the entity scale handles the collider size too
-  }
-
-  // Keep your original entity scaling intact!
-  entity.scale = scale;
-
-  return entity;
-}
 
 
 
