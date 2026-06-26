@@ -513,5 +513,3 @@ function getCone(columns: number): [Vector3[], Vector2[], number[]] {
     return [verts, uvs, triangles];
   }
 }
-
-

@@ -17,6 +17,10 @@ export class Entity {
   public type: BaseNodeTypes | undefined;
   private childNodeIDs: number[] = [];
 
+  public customColor: Color = Color.white;
+  public customAlpha: number = 1.0;
+  public customShader: string | undefined = undefined;
+
   public parent: Entity | undefined;
   public childEntities: Entity[] = [];
 
@@ -183,32 +187,6 @@ export class Entity {
     },
   }
 
-  /**
-   * Clones the Entity using the backend duplicate logic.
-   * Assumes the backend duplicates all necessary meshes, colliders, and child properties.
-   */
-  clone(): Entity | undefined {
-    if (this.nodeID && this.type) {
-      const duplicatedNodeID = Godot.node.duplicate(this.nodeID);
-      if (duplicatedNodeID) {
-        // Create a shell entity
-        const clonedEntity = new Entity(this.pos.clone(), this.rot.clone(), this.scale.clone(), this.parent, this.type);
-        
-        // Remove the default created node for the shell and map the duplicated one
-        if (clonedEntity.nodeID) {
-          Entity.entityMap.delete(clonedEntity.nodeID);
-          Godot.node.destroy(clonedEntity.nodeID);
-        }
-        
-        clonedEntity.nodeID = duplicatedNodeID;
-        Entity.entityMap.set(duplicatedNodeID, clonedEntity);
-        
-        return clonedEntity;
-      }
-    }
-    return undefined;
-  }
-
   changeType(type: BaseNodeTypes) {
     if (this.nodeID) {
       this.nodeID = Godot.node.changeType(this.nodeID, type) ?? this.nodeID;
@@ -336,8 +314,15 @@ export class Entity {
 
   mesh = {
     nodeID: undefined as number | undefined,
+    verts: [] as Vector3[],
+    uvs: [] as Vector2[],
+    triangles: [] as number[],
 
     create: (verts: Vector3[], uvs: Vector2[], triangles: number[]) => {
+      this.mesh.verts = verts.map(v => v.clone());
+      this.mesh.uvs = uvs.map(u => u.clone());
+      this.mesh.triangles = [...triangles];
+
       if (this.nodeID) {
         this.mesh.destroy();
 
@@ -876,6 +861,10 @@ export class Entity {
       if (this.nodeID) {
         this.text.nodeID = Godot.node.create.text(this.nodeID, text, fontSize, outlineSize);
       }
+    },
+
+    set: (text: string) => {
+      this.text.display.set(text);
     },
 
     display: {

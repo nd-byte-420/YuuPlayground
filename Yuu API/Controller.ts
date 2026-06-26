@@ -8,7 +8,6 @@ type ControllerEventType = 'Update' | 'Pressed' | 'Released';
 export const Controller = {
   subscribe,
   unsubscribe,
-  isPressed,
 }
 
 
@@ -61,14 +60,7 @@ function unsubscribe(id: number) {
   return false;
 }
 
-/**
- * Check if a button is currently pressed
- * @param button to check
- * @returns true if pressed
- */
-function isPressed(button: ControllerButtonPressed): boolean {
-  return buttonsPressedLast.includes(button);
-}
+
 
 registerStart(start);
 function start() {

@@ -101,15 +101,6 @@ export class Vector3 {
     );
   }
 
-  snapped(gridSize: number): Vector3 {
-    if (gridSize <= 0) return this.clone();
-    return new Vector3(
-      Math.round(this.x / gridSize) * gridSize,
-      Math.round(this.y / gridSize) * gridSize,
-      Math.round(this.z / gridSize) * gridSize
-    );
-  }
-
   toArray(): number[] {
     return [this.x, this.y, this.z];
   }

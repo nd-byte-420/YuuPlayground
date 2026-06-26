@@ -70,9 +70,6 @@ export const Player = {
         right: {
             get: (): Vector3 | undefined => { const right = Godot.localPlayer.leftHand.right.get(); if (right) { return new Vector3(right.x, right.y, right.z); } else { return undefined; } },
         },
-        thumbstick: {
-            get: (): { x: number, y: number } | undefined => { return Godot.localPlayer.leftHand.thumbstick.get(); },
-        },
     },
     rightHand: {
         position: {
@@ -89,9 +86,6 @@ export const Player = {
         },
         right: {
             get: (): Vector3 | undefined => { const right = Godot.localPlayer.rightHand.right.get(); if (right) { return new Vector3(right.x, right.y, right.z); } else { return undefined; } },
-        },
-        thumbstick: {
-            get: (): { x: number, y: number } | undefined => { return Godot.localPlayer.rightHand.thumbstick.get(); },
         },
     },
     foot: {
