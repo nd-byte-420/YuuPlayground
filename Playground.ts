@@ -301,7 +301,7 @@ function updateHandUI(deltaTime: number) {
           Quaternion.one,
           png.displayName,
           new Color(0.7, 0.7, 0.7),
-          12,
+          3,
           new Color(0.14, 0.14, 0.16),
           uiPanelRoot
         );
@@ -329,7 +329,7 @@ function updateHandUI(deltaTime: number) {
         Quaternion.one,
         'Wrap',
         new Color(0.7, 0.7, 0.7),
-        10,
+        2,
         new Color(0.14, 0.14, 0.16),
         uiPanelRoot
       );
@@ -350,7 +350,7 @@ function updateHandUI(deltaTime: number) {
         Quaternion.one,
         'Face',
         new Color(0.7, 0.7, 0.7),
-        10,
+        2,
         new Color(0.14, 0.14, 0.16),
         uiPanelRoot
       );
@@ -371,7 +371,7 @@ function updateHandUI(deltaTime: number) {
         Quaternion.one,
         'Rot CW',
         new Color(0.7, 0.7, 0.7),
-        10,
+        2,
         new Color(0.14, 0.14, 0.16),
         uiPanelRoot
       );
@@ -390,7 +390,7 @@ function updateHandUI(deltaTime: number) {
         Quaternion.one,
         'Rot CCW',
         new Color(0.7, 0.7, 0.7),
-        10,
+        2,
         new Color(0.14, 0.14, 0.16),
         uiPanelRoot
       );
