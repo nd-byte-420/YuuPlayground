@@ -147,23 +147,19 @@ function spawnCube(pos: Vector3) {
   
   // Debug checking file locations
   try {
-    console.log("DEBUG: bedrock.png exists in 'vm' root? " + Files.exists('vm', 'bedrock.png'));
-    console.log("DEBUG: bedrock.png exists in 'vm' sub? " + Files.exists('vm', '/bedrock.png'));
-    console.log("DEBUG: bedrock.png exists in 'user://worlds'? " + Files.exists('user://worlds', 'bedrock.png'));
-    
-    const contents = Files.folder.getContents('vm', '', true);
-    console.log("DEBUG: VM files list: " + JSON.stringify(contents));
+    console.log("DEBUG: bedrock_png.txt exists in 'vm'? " + Files.exists('vm', 'bedrock_png.txt'));
   } catch (e: any) {
     console.log("DEBUG: error checking files: " + e.message);
   }
 
-  const texture = loadPNGToTexture('vm', '', 'bedrock');
+  const texture = loadPNGToTexture('vm', '', 'bedrock_png');
   if (texture) {
     cube.mesh.texture.set(texture, false);
   } else {
     console.log("Failed to dynamically load bedrock.png texture");
   }
 }
+
 
 
 

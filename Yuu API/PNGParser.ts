@@ -216,26 +216,32 @@ export class PNGDecoder {
   }
 }
 
+function hexToBytes(hex: string): Uint8Array {
+  const cleanHex = hex.replace(/\s/g, "");
+  const bytes = new Uint8Array(cleanHex.length / 2);
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = parseInt(cleanHex.substring(i * 2, i * 2 + 2), 16);
+  }
+  return bytes;
+}
+
 export function loadPNGToTexture(baseDirPath: DirectoryBasePaths, subDirPath: string, fileName: string): Texture | undefined {
-  console.log(`loadPNGToTexture: Loading ${fileName}.png from base=${baseDirPath}, sub=${subDirPath}`);
-  const content = Files.text.get(baseDirPath, subDirPath, fileName, ".png");
+  console.log(`loadPNGToTexture: Loading hex text file ${fileName}.txt from base=${baseDirPath}, sub=${subDirPath}`);
+  const content = Files.text.get(baseDirPath, subDirPath, fileName, ".txt");
   if (!content) {
-    console.log(`loadPNGToTexture: Files.text.get returned undefined or empty for ${fileName}.png`);
+    console.log(`loadPNGToTexture: Files.text.get returned undefined or empty for ${fileName}.txt`);
     return undefined;
   }
 
   console.log(`loadPNGToTexture: File read successful. Length: ${content.length} characters.`);
   
-  // Log first few character codes to check signature/binary safety
-  const sampleCodes: number[] = [];
-  for (let i = 0; i < Math.min(content.length, 10); i++) {
-    sampleCodes.push(content.charCodeAt(i));
-  }
-  console.log(`loadPNGToTexture: First 10 charCodes read: ${sampleCodes.join(', ')}`);
-
-  const bytes = new Uint8Array(content.length);
-  for (let i = 0; i < content.length; i++) {
-    bytes[i] = content.charCodeAt(i) & 0xff;
+  let bytes: Uint8Array;
+  try {
+    bytes = hexToBytes(content);
+    console.log(`loadPNGToTexture: Hex decode successful. Decoded length: ${bytes.length} bytes.`);
+  } catch (err: any) {
+    console.log(`loadPNGToTexture: Hex decode failed: ${err.message || err}`);
+    return undefined;
   }
 
   try {
@@ -281,4 +287,5 @@ export function loadPNGToTexture(baseDirPath: DirectoryBasePaths, subDirPath: st
     return undefined;
   }
 }
+
 
