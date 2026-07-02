@@ -142,16 +142,92 @@ function spawnPaintableSphere(pos: Vector3) {
   paintableSphere.mesh.texture.isPaintable.set(true);
 }
 
+function dumpObject(obj: any, name: string): void {
+  try {
+    if (obj === null || obj === undefined) {
+      console.log(`DEBUG: ${name} is ${typeof obj}`);
+      return;
+    }
+    const keys = Object.keys(obj);
+    console.log(`DEBUG: ${name} keys: ${keys.join(', ')}`);
+    for (const key of keys) {
+      try {
+        const val = obj[key];
+        console.log(`DEBUG: ${name}.${key} is of type ${typeof val}`);
+        if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+          const subKeys = Object.keys(val);
+          console.log(`DEBUG: ${name}.${key} keys: ${subKeys.join(', ')}`);
+          for (const sk of subKeys) {
+             console.log(`DEBUG: ${name}.${key}.${sk} is of type ${typeof val[sk]}`);
+          }
+        }
+      } catch (e: any) {
+        console.log(`DEBUG: error reading ${name}.${key}: ${e.message}`);
+      }
+    }
+  } catch (e: any) {
+    console.log(`DEBUG: dumpObject failed for ${name}: ${e.message}`);
+  }
+}
+
 function spawnCube(pos: Vector3) {
   const cube = spawnPrimitive.cube(pos, new Vector3(0.05, 2.25, 0.05), Quaternion.fromEuler(new Vector3((Math.PI / 6), 0, 0)), Color.white, 1, true, 'Static', undefined);
   
-  // Debug checking file locations
-  try {
-    console.log("DEBUG: bedrock_png.txt exists in 'vm'? " + Files.exists('vm', 'bedrock_png.txt'));
-  } catch (e: any) {
-    console.log("DEBUG: error checking files: " + e.message);
+  console.log("--- VM PROBE START ---");
+  
+  // 1. Dump API structure
+  dumpObject(Godot, "Godot");
+  dumpObject(Godot.files, "Godot.files");
+  dumpObject(Godot.image, "Godot.image");
+
+  // 2. Probe direct file loading APIs
+  const pathsToTest = [
+    "bedrock.png",
+    "/bedrock.png",
+    "vm/bedrock.png",
+    "vmFolder/bedrock.png",
+    "user://worlds/bedrock.png"
+  ];
+
+  for (const path of pathsToTest) {
+    // Try Godot.image.create with string
+    try {
+      const res = (Godot.image as any).create(path);
+      console.log(`PROBE: Godot.image.create("${path}") => ${res}`);
+    } catch (e: any) {
+      console.log(`PROBE: Godot.image.create("${path}") error: ${e.message}`);
+    }
+
+    // Try Godot.image.load if it exists
+    try {
+      if ((Godot.image as any).load) {
+        const res = (Godot.image as any).load(path);
+        console.log(`PROBE: Godot.image.load("${path}") => ${res}`);
+      }
+    } catch (e: any) {
+      console.log(`PROBE: Godot.image.load("${path}") error: ${e.message}`);
+    }
+    
+    // Try Godot.files.exists
+    try {
+      console.log(`PROBE: Godot.files.exists("${path}") => ${Godot.files.exists(path)}`);
+    } catch (e: any) {
+      console.log(`PROBE: Godot.files.exists("${path}") error: ${e.message}`);
+    }
   }
 
+  // Try reading text file as binary
+  try {
+    const rawContent = Files.text.get('vm', '', 'bedrock_png', '.txt');
+    console.log(`PROBE: Files.text.get('vm', '', 'bedrock_png', '.txt') length = ${rawContent ? rawContent.length : 'undefined'}`);
+  } catch (e: any) {
+    console.log(`PROBE: Files.text.get error: ${e.message}`);
+  }
+
+
+  console.log("--- VM PROBE END ---");
+
+  // Fallback to our existing hex-loader for now so it doesn't break
   const texture = loadPNGToTexture('vm', '', 'bedrock_png');
   if (texture) {
     cube.mesh.texture.set(texture, false);
@@ -159,6 +235,7 @@ function spawnCube(pos: Vector3) {
     console.log("Failed to dynamically load bedrock.png texture");
   }
 }
+
 
 
 
