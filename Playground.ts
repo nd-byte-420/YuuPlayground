@@ -270,7 +270,7 @@ function updateHandUI(deltaTime: number) {
         uiPanelRoot,
         'Static'
       );
-      titleText.text.create('TEXTURES', 18, 1);
+      titleText.text.create('TEXTURES', 3, 1);
       titleText.text.doubleSided.set(false);
       titleText.text.color.set(new Color(1, 1, 1));
       titleText.text.outline.color.set(new Color(0.4, 0.2, 0.9));

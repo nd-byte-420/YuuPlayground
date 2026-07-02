@@ -10,5 +10,5 @@ function start() {
   console.log('Hello World!');
 
   // load a cube
-  playgroundDemos.spawnCube(new Vector3(0, 1.5, -1.5))
+  playgroundDemos.spawnCube(new Vector3(0, 1.5, -4.5))
 }
