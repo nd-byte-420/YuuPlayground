@@ -9,7 +9,7 @@ import { Player } from "../../Yuu API/Player";
 import { EditMode } from "../EditMode/EditMode";
 import { SceneManager } from "./SceneManager";
 
-export type ModelingMode = 'Select' | 'BoxSelect' | 'BrushSelect' | 'Move' | 'Delete' | 'SpawnCube' | 'SpawnSphere' | 'SpawnPlane' | 'SpawnCone' | 'VertexSelect' | 'EditMode';
+export type ModelingMode = 'Select' | 'BoxSelect' | 'BrushSelect' | 'Move' | 'Delete' | 'SpawnCube' | 'SpawnSphere' | 'SpawnPlane' | 'SpawnCone' | 'VertexSelect' | 'EditMode' | 'Texture';
 
 export const ModelingTool = {
   currentMode: 'Select' as ModelingMode,
