@@ -124,6 +124,106 @@ export class ToolsPanel implements MenuComponent {
         });
         elements.push(rotBtnCCW);
         
+        context.yPos -= 0.04;
+
+        // Tiling / Scale Section
+        const scaleLabelPos = new Vector3(context.offset.x - 0.08, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuLabel(parent, 'Tiling (Scale):', scaleLabelPos, 1.1, Color.white));
+        context.yPos -= 0.035;
+
+        const tileBtnSize = new Vector3(0.03, 0.03, 0.01);
+
+        // U Scale Row
+        const uScaleLblPos = new Vector3(context.offset.x - 0.08, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuLabel(parent, 'U:', uScaleLblPos, 1.0, new Color(0.8, 0.8, 0.8)));
+
+        const uScaleMinusPos = new Vector3(context.offset.x - 0.04, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuButton(parent, '-', uScaleMinusPos, tileBtnSize, new Color(0.25, 0.25, 0.25), () => {
+          settings.scale.x = Math.max(0.1, settings.scale.x - 0.25);
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        }));
+
+        const uScaleValPos = new Vector3(context.offset.x, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuLabel(parent, settings.scale.x.toFixed(2), uScaleValPos, 1.0, Color.white));
+
+        const uScalePlusPos = new Vector3(context.offset.x + 0.04, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuButton(parent, '+', uScalePlusPos, tileBtnSize, new Color(0.25, 0.25, 0.25), () => {
+          settings.scale.x += 0.25;
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        }));
+        context.yPos -= 0.04;
+
+        // V Scale Row
+        const vScaleLblPos = new Vector3(context.offset.x - 0.08, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuLabel(parent, 'V:', vScaleLblPos, 1.0, new Color(0.8, 0.8, 0.8)));
+
+        const vScaleMinusPos = new Vector3(context.offset.x - 0.04, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuButton(parent, '-', vScaleMinusPos, tileBtnSize, new Color(0.25, 0.25, 0.25), () => {
+          settings.scale.y = Math.max(0.1, settings.scale.y - 0.25);
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        }));
+
+        const vScaleValPos = new Vector3(context.offset.x, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuLabel(parent, settings.scale.y.toFixed(2), vScaleValPos, 1.0, Color.white));
+
+        const vScalePlusPos = new Vector3(context.offset.x + 0.04, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuButton(parent, '+', vScalePlusPos, tileBtnSize, new Color(0.25, 0.25, 0.25), () => {
+          settings.scale.y += 0.25;
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        }));
+        context.yPos -= 0.04;
+
+        // Offset Section
+        const offsetLabelPos = new Vector3(context.offset.x - 0.08, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuLabel(parent, 'Offset:', offsetLabelPos, 1.1, Color.white));
+        context.yPos -= 0.035;
+
+        // U Offset Row
+        const uOffsetLblPos = new Vector3(context.offset.x - 0.08, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuLabel(parent, 'U:', uOffsetLblPos, 1.0, new Color(0.8, 0.8, 0.8)));
+
+        const uOffsetMinusPos = new Vector3(context.offset.x - 0.04, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuButton(parent, '<', uOffsetMinusPos, tileBtnSize, new Color(0.25, 0.25, 0.25), () => {
+          settings.offset.x -= 0.05;
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        }));
+
+        const uOffsetValPos = new Vector3(context.offset.x, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuLabel(parent, settings.offset.x.toFixed(2), uOffsetValPos, 1.0, Color.white));
+
+        const uOffsetPlusPos = new Vector3(context.offset.x + 0.04, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuButton(parent, '>', uOffsetPlusPos, tileBtnSize, new Color(0.25, 0.25, 0.25), () => {
+          settings.offset.x += 0.05;
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        }));
+        context.yPos -= 0.04;
+
+        // V Offset Row
+        const vOffsetLblPos = new Vector3(context.offset.x - 0.08, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuLabel(parent, 'V:', vOffsetLblPos, 1.0, new Color(0.8, 0.8, 0.8)));
+
+        const vOffsetMinusPos = new Vector3(context.offset.x - 0.04, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuButton(parent, '<', vOffsetMinusPos, tileBtnSize, new Color(0.25, 0.25, 0.25), () => {
+          settings.offset.y -= 0.05;
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        }));
+
+        const vOffsetValPos = new Vector3(context.offset.x, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuLabel(parent, settings.offset.y.toFixed(2), vOffsetValPos, 1.0, Color.white));
+
+        const vOffsetPlusPos = new Vector3(context.offset.x + 0.04, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuButton(parent, '>', vOffsetPlusPos, tileBtnSize, new Color(0.25, 0.25, 0.25), () => {
+          settings.offset.y += 0.05;
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        }));
         context.yPos -= 0.045;
       }
     } else {

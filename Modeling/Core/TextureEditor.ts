@@ -17,17 +17,32 @@ export interface TextureSettings {
   mappingMode: 'wrap' | 'face';
   rotation: 0 | 90 | 180 | 270;
   selectedPNGName: string | undefined;
+  scale: Vector2;
+  offset: Vector2;
 }
 
 const entityTextureSettings = new Map<number, TextureSettings>();
+export const entityBaseUVs = new Map<number, Vector2[]>();
 
 export function getTextureSettings(entity: Entity): TextureSettings {
   if (!entity.nodeID) {
-    return { mappingMode: 'wrap', rotation: 0, selectedPNGName: undefined };
+    return {
+      mappingMode: 'wrap',
+      rotation: 0,
+      selectedPNGName: undefined,
+      scale: new Vector2(1, 1),
+      offset: Vector2.zero
+    };
   }
   let settings = entityTextureSettings.get(entity.nodeID);
   if (!settings) {
-    settings = { mappingMode: 'wrap', rotation: 0, selectedPNGName: undefined };
+    settings = {
+      mappingMode: 'wrap',
+      rotation: 0,
+      selectedPNGName: undefined,
+      scale: new Vector2(1, 1),
+      offset: Vector2.zero
+    };
     entityTextureSettings.set(entity.nodeID, settings);
   }
   return settings;
@@ -69,42 +84,30 @@ export function findLoadablePNGs(): LoadablePNG[] {
   return list;
 }
 
-export function getRotatedUVs(baseUVs: Vector2[], rotationAngle: 0 | 90 | 180 | 270): Vector2[] {
-  if (rotationAngle === 0) {
-    return baseUVs;
-  }
-  
-  const rotated = baseUVs.map(uv => new Vector2(uv.x, uv.y));
-  const numFaces = Math.floor(baseUVs.length / 4);
-  const steps = rotationAngle / 90;
-  
-  for (let step = 0; step < steps; step++) {
-    for (let face = 0; face < numFaces; face++) {
-      const idxs = [4 * face, 4 * face + 1, 4 * face + 2, 4 * face + 3];
-      
-      // Calculate center of this face's UVs
-      let sumX = 0;
-      let sumY = 0;
-      for (const i of idxs) {
-        sumX += rotated[i].x;
-        sumY += rotated[i].y;
-      }
-      const centerX = sumX / 4;
-      const centerY = sumY / 4;
-      
-      // Rotate 90 deg CW
-      const orig = idxs.map(i => new Vector2(rotated[i].x, rotated[i].y));
-      for (let k = 0; k < 4; k++) {
-        const i = idxs[k];
-        const u = orig[k].x;
-        const v = orig[k].y;
-        rotated[i].x = centerX - (v - centerY);
-        rotated[i].y = centerY + (u - centerX);
-      }
-    }
-  }
-  
-  return rotated;
+export function applyUVTransformations(baseUVs: Vector2[], settings: TextureSettings): Vector2[] {
+  const rad = (settings.rotation * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+
+  return baseUVs.map(uv => {
+    // Translate to center (0.5, 0.5) for scale/rotation pivot
+    let u = uv.x - 0.5;
+    let v = uv.y - 0.5;
+
+    // Apply scale (tiling)
+    u *= settings.scale.x;
+    v *= settings.scale.y;
+
+    // Apply rotation
+    const ru = u * cos - v * sin;
+    const rv = u * sin + v * cos;
+
+    // Translate back and apply offset
+    return new Vector2(
+      ru + 0.5 + settings.offset.x,
+      rv + 0.5 + settings.offset.y
+    );
+  });
 }
 
 export function updateEntityMeshTexture(entity: Entity) {
@@ -116,18 +119,32 @@ export function updateEntityMeshTexture(entity: Entity) {
   const node = SceneManager.findByEntity(entity);
   const isCube = node && node.name.startsWith('Cube_');
   
+  let baseUVs: Vector2[] | undefined;
+
   if (isCube) {
     const baseMesh = settings.mappingMode === 'face' 
       ? spawnPrimitive.getShadeSmoothFaceUVCube()
       : spawnPrimitive.getShadeSmoothStretchedUVCube();
-      
-    const rotatedUVs = getRotatedUVs(baseMesh[1], settings.rotation);
-    entity.mesh.create(baseMesh[0], rotatedUVs, baseMesh[2]);
+    baseUVs = baseMesh[1];
+    const transformedUVs = applyUVTransformations(baseUVs, settings);
+    entity.mesh.create(baseMesh[0], transformedUVs, baseMesh[2]);
   } else {
-    const existingUVs = entity.mesh.uvs;
-    if (existingUVs && existingUVs.length > 0 && existingUVs.length % 4 === 0) {
-      const rotatedUVs = getRotatedUVs(existingUVs, settings.rotation);
-      entity.mesh.create(entity.mesh.verts, rotatedUVs, entity.mesh.triangles);
+    // Check if we have registered base UVs for this entity
+    if (entity.nodeID) {
+      baseUVs = entityBaseUVs.get(entity.nodeID);
+    }
+    
+    // If not, try to clone from the entity's existing UVs
+    if (!baseUVs && entity.mesh.uvs && entity.mesh.uvs.length > 0) {
+      baseUVs = entity.mesh.uvs.map(uv => new Vector2(uv.x, uv.y));
+      if (entity.nodeID) {
+        entityBaseUVs.set(entity.nodeID, baseUVs);
+      }
+    }
+
+    if (baseUVs && baseUVs.length > 0) {
+      const transformedUVs = applyUVTransformations(baseUVs, settings);
+      entity.mesh.create(entity.mesh.verts, transformedUVs, entity.mesh.triangles);
     }
   }
   

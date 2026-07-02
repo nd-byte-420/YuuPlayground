@@ -7,6 +7,7 @@ import { LayoutContext, MenuComponent } from "./MenuComponent";
 import { createMenuButton } from "./MenuButton";
 import { createMenuLabel } from "./MenuLabel";
 import { ModelingTool } from "../Core/ModelingTool";
+import { entityBaseUVs } from "../Core/TextureEditor";
 import { parseText, FBXReader } from "../../fbx-parser";
 import { Player } from "../../Yuu API/Player";
 import { SceneManager } from "../Core/SceneManager";
@@ -154,31 +155,97 @@ export class ImportPanel implements MenuComponent {
       const fbxIndices = indicesNode.prop(0) as number[];
 
       const verts: Vector3[] = [];
-      for (let i = 0; i < fbxVerts.length; i += 3) {
-        verts.push(new Vector3(fbxVerts[i], fbxVerts[i+1], fbxVerts[i+2]));
-      }
-
       const uvs: Vector2[] = [];
-      for (let i = 0; i < verts.length; i++) {
-        uvs.push(new Vector2(0.5, 0.5));
-      }
-
-      // Triangulate FBX polygon indices
       const triangles: number[] = [];
-      let polygon: number[] = [];
-      for (let i = 0; i < fbxIndices.length; i++) {
-        let idx = fbxIndices[i];
-        let isLast = false;
-        if (idx < 0) {
-          idx = ~idx;
-          isLast = true;
-        }
-        polygon.push(idx);
-        if (isLast) {
-          for (let j = 1; j < polygon.length - 1; j++) {
-            triangles.push(polygon[0], polygon[j], polygon[j+1]);
+
+      // UV mapping data from FBX
+      const uvNode = geom.node('LayerElementUV');
+      const fbxUvs = uvNode?.node('UV')?.prop(0) as number[] || [];
+      const uvIndices = uvNode?.node('UVIndex')?.prop(0) as number[] || [];
+      const mappingType = uvNode?.node('MappingInformationType')?.prop(0) as string || 'ByPolygonVertex';
+      const referenceType = uvNode?.node('ReferenceInformationType')?.prop(0) as string || 'IndexToDirect';
+
+      if (fbxUvs.length > 0) {
+        // Vertex duplication map to split vertices when they share the same vertex index
+        // but have different UV coordinates (to prevent tearing).
+        // Map key is `fbxVertexIndex_uvIndex`. Value is index in uniqueVerts/uniqueUVs.
+        const vertMap = new Map<string, number>();
+
+        let polygonCornerIndex = 0;
+        let polygon: number[] = [];
+
+        for (let i = 0; i < fbxIndices.length; i++) {
+          let idx = fbxIndices[i];
+          let isLast = false;
+          if (idx < 0) {
+            idx = ~idx;
+            isLast = true;
           }
-          polygon = [];
+
+          // Resolve the UV coordinate index for this polygon corner
+          let uvIdx = 0;
+          if (mappingType === 'ByPolygonVertex') {
+            if (referenceType === 'IndexToDirect') {
+              uvIdx = uvIndices[polygonCornerIndex] !== undefined ? uvIndices[polygonCornerIndex] : polygonCornerIndex;
+            } else {
+              uvIdx = polygonCornerIndex;
+            }
+          } else if (mappingType === 'ByVertex') {
+            if (referenceType === 'IndexToDirect') {
+              uvIdx = uvIndices[idx] !== undefined ? uvIndices[idx] : idx;
+            } else {
+              uvIdx = idx;
+            }
+          }
+
+          // Get the actual UV coordinates (v is flipped vertically in FBX to match standard image space)
+          const u = fbxUvs[uvIdx * 2] !== undefined ? fbxUvs[uvIdx * 2] : 0.5;
+          const v = fbxUvs[uvIdx * 2 + 1] !== undefined ? 1.0 - fbxUvs[uvIdx * 2 + 1] : 0.5;
+
+          // Unique key to identify vertex-UV combination
+          const key = `${idx}_${uvIdx}`;
+          let finalIdx = vertMap.get(key);
+          if (finalIdx === undefined) {
+            finalIdx = verts.length;
+            vertMap.set(key, finalIdx);
+            verts.push(new Vector3(fbxVerts[idx * 3], fbxVerts[idx * 3 + 1], fbxVerts[idx * 3 + 2]));
+            uvs.push(new Vector2(u, v));
+          }
+
+          polygon.push(finalIdx);
+          polygonCornerIndex++;
+
+          if (isLast) {
+            // Triangulate the polygon (fan triangulation)
+            for (let j = 1; j < polygon.length - 1; j++) {
+              triangles.push(polygon[0], polygon[j], polygon[j + 1]);
+            }
+            polygon = [];
+          }
+        }
+      } else {
+        // Fallback if no UVs are present
+        for (let i = 0; i < fbxVerts.length; i += 3) {
+          verts.push(new Vector3(fbxVerts[i], fbxVerts[i+1], fbxVerts[i+2]));
+          uvs.push(new Vector2(0.5, 0.5));
+        }
+
+        // Triangulate FBX polygon indices
+        let polygon: number[] = [];
+        for (let i = 0; i < fbxIndices.length; i++) {
+          let idx = fbxIndices[i];
+          let isLast = false;
+          if (idx < 0) {
+            idx = ~idx;
+            isLast = true;
+          }
+          polygon.push(idx);
+          if (isLast) {
+            for (let j = 1; j < polygon.length - 1; j++) {
+              triangles.push(polygon[0], polygon[j], polygon[j+1]);
+            }
+            polygon = [];
+          }
         }
       }
 
@@ -194,6 +261,8 @@ export class ImportPanel implements MenuComponent {
 
       if (entity.mesh.nodeID) {
         entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Convex');
+        // Store base UVs so TextureEditor can transform them later!
+        entityBaseUVs.set(entity.mesh.nodeID, uvs.map(uv => new Vector2(uv.x, uv.y)));
       }
 
       entity.rayClick.initialize(false);
