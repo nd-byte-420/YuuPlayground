@@ -171,7 +171,7 @@ function dumpObject(obj: any, name: string): void {
 }
 
 function spawnCube(pos: Vector3) {
-  const cube = spawnPrimitive.cube(pos, new Vector3(0.05, 2.25, 0.05), Quaternion.fromEuler(new Vector3((Math.PI / 6), 0, 0)), Color.white, 1, true, 'Static', undefined);
+  const cube = spawnPrimitive.cube(pos, new Vector3(1,1,1), Quaternion.one, Color.white, 1, true, 'Static', undefined);
   
   let foundBase: 'user://templates' | 'user://worlds' | 'vm' | null = null;
   let foundSub: string = '';
