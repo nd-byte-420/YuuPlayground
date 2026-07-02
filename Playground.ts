@@ -175,66 +175,109 @@ function spawnCube(pos: Vector3) {
   
   console.log("--- VM PROBE START ---");
   
-  // 1. Dump API structure
-  dumpObject(Godot, "Godot");
-  dumpObject(Godot.files, "Godot.files");
-  dumpObject(Godot.image, "Godot.image");
+  let foundPath: string | null = null;
+  let foundBase: 'user://templates' | 'user://worlds' | 'vm' | null = null;
+  let foundSub: string = '';
 
-  // 2. Probe direct file loading APIs
-  const pathsToTest = [
-    "bedrock.png",
-    "/bedrock.png",
-    "vm/bedrock.png",
-    "vmFolder/bedrock.png",
-    "user://worlds/bedrock.png"
-  ];
-
-  for (const path of pathsToTest) {
-    // Try Godot.image.create with string
-    try {
-      const res = (Godot.image as any).create(path);
-      console.log(`PROBE: Godot.image.create("${path}") => ${res}`);
-    } catch (e: any) {
-      console.log(`PROBE: Godot.image.create("${path}") error: ${e.message}`);
+  // 1. Search 'user://templates'
+  try {
+    const templates = Godot.files.folder.getContents('user://templates', true);
+    console.log("DEBUG: templates count = " + templates.length);
+    for (const f of templates) {
+      console.log(`DEBUG: template file = ${f[0]} / ${f[1]} . ${f[2]}`);
+      if (f[1].toLowerCase() === 'bedrock' && f[2].toLowerCase() === 'png') {
+        foundBase = 'user://templates';
+        foundSub = f[0].substring('user://templates'.length);
+        foundPath = f[0];
+        console.log(`DEBUG: Found bedrock.png in templates: ${f[0]}/${f[1]}`);
+      }
     }
+  } catch (e: any) {
+    console.log("DEBUG: failed listing templates: " + e.message);
+  }
 
-    // Try Godot.image.load if it exists
+  // 2. Search 'user://worlds'
+  try {
+    const worlds = Godot.files.folder.getContents('user://worlds', true);
+    console.log("DEBUG: worlds count = " + worlds.length);
+    for (const f of worlds) {
+      console.log(`DEBUG: world file = ${f[0]} / ${f[1]} . ${f[2]}`);
+      if (f[1].toLowerCase() === 'bedrock' && f[2].toLowerCase() === 'png') {
+        foundBase = 'user://worlds';
+        foundSub = f[0].substring('user://worlds'.length);
+        foundPath = f[0];
+        console.log(`DEBUG: Found bedrock.png in worlds: ${f[0]}/${f[1]}`);
+      }
+    }
+  } catch (e: any) {
+    console.log("DEBUG: failed listing worlds: " + e.message);
+  }
+
+  // 3. Search 'vm' path
+  try {
+    const vmPath = Godot.files.folder.getVMPath();
+    const vmFiles = Godot.files.folder.getContents(vmPath, true);
+    console.log("DEBUG: vm files count = " + vmFiles.length);
+    for (const f of vmFiles) {
+      console.log(`DEBUG: vm file = ${f[0]} / ${f[1]} . ${f[2]}`);
+      if (f[1].toLowerCase() === 'bedrock' && f[2].toLowerCase() === 'png') {
+        foundBase = 'vm';
+        foundSub = f[0].substring(vmPath.length);
+        foundPath = f[0];
+        console.log(`DEBUG: Found bedrock.png in vm path: ${f[0]}/${f[1]}`);
+      }
+    }
+  } catch (e: any) {
+    console.log("DEBUG: failed listing vm files: " + e.message);
+  }
+
+  // 4. Try reading the file if found
+  if (foundBase && foundPath) {
     try {
-      if ((Godot.image as any).load) {
-        const res = (Godot.image as any).load(path);
-        console.log(`PROBE: Godot.image.load("${path}") => ${res}`);
+      console.log(`DEBUG: Attempting to read bedrock.png from base=${foundBase}, sub=${foundSub}`);
+      const content = Files.text.get(foundBase as any, foundSub, 'bedrock', '.png');
+
+      if (content) {
+        console.log(`DEBUG: Read successful! Length = ${content.length}`);
+        const codes = [];
+        for (let i = 0; i < Math.min(content.length, 10); i++) {
+          codes.push(content.charCodeAt(i));
+        }
+        console.log(`DEBUG: First 10 charCodes: ${codes.join(', ')}`);
+
+        // If we can read it, let's convert it to hex text right here on device!
+        let hex = '';
+        for (let i = 0; i < content.length; i++) {
+          const byte = content.charCodeAt(i) & 0xff;
+          hex += byte.toString(16).padStart(2, '0');
+        }
+        console.log("DEBUG: Hex conversion length = " + hex.length);
+        
+        // Write the converted hex to bedrock_png.txt in the same directory!
+        const writeSuccess = Godot.files.text.create(foundPath, 'bedrock_png', '.txt', hex);
+        console.log(`DEBUG: Converted hex text file created: ${writeSuccess}`);
+      } else {
+        console.log("DEBUG: Read returned empty or undefined!");
       }
     } catch (e: any) {
-      console.log(`PROBE: Godot.image.load("${path}") error: ${e.message}`);
+      console.log("DEBUG: Error reading bedrock.png: " + e.message);
     }
-    
-    // Try Godot.files.exists
-    try {
-      console.log(`PROBE: Godot.files.exists("${path}") => ${Godot.files.exists(path)}`);
-    } catch (e: any) {
-      console.log(`PROBE: Godot.files.exists("${path}") error: ${e.message}`);
-    }
+  } else {
+    console.log("DEBUG: bedrock.png was NOT found anywhere!");
   }
-
-  // Try reading text file as binary
-  try {
-    const rawContent = Files.text.get('vm', '', 'bedrock_png', '.txt');
-    console.log(`PROBE: Files.text.get('vm', '', 'bedrock_png', '.txt') length = ${rawContent ? rawContent.length : 'undefined'}`);
-  } catch (e: any) {
-    console.log(`PROBE: Files.text.get error: ${e.message}`);
-  }
-
 
   console.log("--- VM PROBE END ---");
 
-  // Fallback to our existing hex-loader for now so it doesn't break
-  const texture = loadPNGToTexture('vm', '', 'bedrock_png');
+  // Load the texture from the directory where it was found and converted
+  const texture = loadPNGToTexture((foundBase || 'vm') as any, foundSub, 'bedrock_png');
+
   if (texture) {
     cube.mesh.texture.set(texture, false);
   } else {
     console.log("Failed to dynamically load bedrock.png texture");
   }
 }
+
 
 
 
