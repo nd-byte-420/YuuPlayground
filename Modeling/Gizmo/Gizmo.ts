@@ -71,18 +71,48 @@ export const Gizmo = {
     this.destroyArrows();
     if (!this.visible) return;
 
+    let scaleFactor = 1.0;
+    const target = EditMode.active ? EditMode.targetEntity : ModelingTool.selectedEntity;
+    if (target) {
+      const baseScale = target.scale;
+      let meshWidth = 1.0;
+      let meshHeight = 1.0;
+      let meshDepth = 1.0;
+      if (target.mesh && target.mesh.verts.length > 0) {
+        let minX = target.mesh.verts[0].x, maxX = target.mesh.verts[0].x;
+        let minY = target.mesh.verts[0].y, maxY = target.mesh.verts[0].y;
+        let minZ = target.mesh.verts[0].z, maxZ = target.mesh.verts[0].z;
+        for (const v of target.mesh.verts) {
+          if (v.x < minX) minX = v.x;
+          if (v.x > maxX) maxX = v.x;
+          if (v.y < minY) minY = v.y;
+          if (v.y > maxY) maxY = v.y;
+          if (v.z < minZ) minZ = v.z;
+          if (v.z > maxZ) maxZ = v.z;
+        }
+        meshWidth = maxX - minX;
+        meshHeight = maxY - minY;
+        meshDepth = maxZ - minZ;
+      }
+      const sizeX = meshWidth * baseScale.x;
+      const sizeY = meshHeight * baseScale.y;
+      const sizeZ = meshDepth * baseScale.z;
+      const maxDim = Math.max(sizeX, sizeY, sizeZ);
+      scaleFactor = Math.max(1.0, (maxDim * 0.5 + 0.15) / 0.18);
+    }
+
     const xArrow = createArrow(
-      this.center, 'X', new Color(0.9, 0.1, 0.1),
+      this.center, 'X', new Color(0.9, 0.1, 0.1), scaleFactor,
       (axis, hit) => this.onArrowClick(axis, hit),
       (axis, hit) => this.onArrowHeld(axis, hit)
     );
     const yArrow = createArrow(
-      this.center, 'Y', new Color(0.1, 0.9, 0.1),
+      this.center, 'Y', new Color(0.1, 0.9, 0.1), scaleFactor,
       (axis, hit) => this.onArrowClick(axis, hit),
       (axis, hit) => this.onArrowHeld(axis, hit)
     );
     const zArrow = createArrow(
-      this.center, 'Z', new Color(0.1, 0.1, 0.9),
+      this.center, 'Z', new Color(0.1, 0.1, 0.9), scaleFactor,
       (axis, hit) => this.onArrowClick(axis, hit),
       (axis, hit) => this.onArrowHeld(axis, hit)
     );

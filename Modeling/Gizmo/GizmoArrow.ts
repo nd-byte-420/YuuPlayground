@@ -18,13 +18,14 @@ export function createArrow(
   center: Vector3,
   axis: 'X' | 'Y' | 'Z',
   color: Color,
+  scaleFactor: number,
   onArrowClick: (axis: 'X' | 'Y' | 'Z', hit: any) => void,
   onArrowHeld:  (axis: 'X' | 'Y' | 'Z', hit: any) => void
 ): Entity {
   // Spawn a root entity at gizmo center
   const parentEntity = new Entity(center, Quaternion.one, Vector3.one, undefined, 'Static');
 
-  let stemScale = new Vector3(0.015, 0.16, 0.015);
+  let stemScale = new Vector3(0.015, 0.16 * scaleFactor, 0.015);
   let stemPos   = Vector3.zero;
   let tipPos    = Vector3.zero;
   let arrowRot  = Quaternion.one;
@@ -32,24 +33,25 @@ export function createArrow(
   const rad90 = Math.PI / 2;
 
   if (axis === 'X') {
-    stemScale = new Vector3(0.16, 0.015, 0.015);
-    stemPos   = new Vector3(0.08, 0, 0);
-    tipPos    = new Vector3(0.18, 0, 0);
+    stemScale = new Vector3(0.16 * scaleFactor, 0.015, 0.015);
+    stemPos   = new Vector3(0.08 * scaleFactor, 0, 0);
+    tipPos    = new Vector3(0.18 * scaleFactor, 0, 0);
     arrowRot  = Quaternion.fromEuler(new Vector3(0, 0, -rad90));
   } else if (axis === 'Y') {
-    stemScale = new Vector3(0.015, 0.16, 0.015);
-    stemPos   = new Vector3(0, 0.08, 0);
-    tipPos    = new Vector3(0, 0.18, 0);
+    stemScale = new Vector3(0.015, 0.16 * scaleFactor, 0.015);
+    stemPos   = new Vector3(0, 0.08 * scaleFactor, 0);
+    tipPos    = new Vector3(0, 0.18 * scaleFactor, 0);
     arrowRot  = Quaternion.one;
   } else if (axis === 'Z') {
-    stemScale = new Vector3(0.015, 0.015, 0.16);
-    stemPos   = new Vector3(0, 0, 0.08);
-    tipPos    = new Vector3(0, 0, 0.18);
+    stemScale = new Vector3(0.015, 0.015, 0.16 * scaleFactor);
+    stemPos   = new Vector3(0, 0, 0.08 * scaleFactor);
+    tipPos    = new Vector3(0, 0, 0.18 * scaleFactor);
     arrowRot  = Quaternion.fromEuler(new Vector3(rad90, 0, 0));
   }
 
   const stem = spawnPrimitive.cube(stemPos, stemScale, Quaternion.one, color, 1.0, true, 'Static', parentEntity);
-  const tip  = spawnPrimitive.cone(16, tipPos, 0.035, arrowRot, color, 1.0, 'Convex', 'Static', parentEntity);
+  const tipRadius = 0.035 * Math.min(2.0, Math.max(1.0, scaleFactor * 0.5));
+  const tip  = spawnPrimitive.cone(16, tipPos, tipRadius, arrowRot, color, 1.0, 'Convex', 'Static', parentEntity);
 
   stem.rayClick.initialize(false);
   stem.rayClick.setClickFunction((hit: any) => onArrowClick(axis, hit));
