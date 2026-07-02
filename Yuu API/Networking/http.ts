@@ -2,7 +2,7 @@
 
 // Consider using a class so that it works async
 
-import { DirectoryBasePaths, Files } from "../files";
+import { DirectoryBasePaths, Files } from "../files/index";
 
 
 export const http = {

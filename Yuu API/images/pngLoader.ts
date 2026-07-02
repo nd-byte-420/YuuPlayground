@@ -1,4 +1,4 @@
-import { Files, DirectoryBasePaths } from "../files";
+import { Files, DirectoryBasePaths } from "../files/index";
 import { Texture } from "./Texture";
 import { PNGDecoder, hexToBytes } from "./pngDecoder";
 import { Color } from "../Basic Types/Color";

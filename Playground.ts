@@ -6,12 +6,12 @@ import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { Entity } from "./Yuu API/Entity";
 import { Paint } from "./Yuu API/Paint";
 import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
-import { Texture, loadPNGToTexture } from "./Yuu API/images";
+import { Texture, loadPNGToTexture } from "./Yuu API/images/index";
 import { Events } from "./Yuu API/Events";
 import { Player } from "./Yuu API/Player";
 import { createUIElement } from "./Yuu API/CreateUIElement";
 import { Raycast } from "./Yuu API/Raycast";
-import { DirectoryBasePaths } from "./Yuu API/files";
+import { DirectoryBasePaths } from "./Yuu API/files/index";
 
 export const playgroundDemos = {
   colorPicker,
