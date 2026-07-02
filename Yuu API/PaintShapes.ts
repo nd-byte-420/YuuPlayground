@@ -1,6 +1,6 @@
 import { Color } from "./Basic Types/Color";
 import { Vector2 } from "./Basic Types/Vector2";
-import { Texture } from "./images";
+import { Texture } from "./images/index";
 
 
 export const paintShapes = {
