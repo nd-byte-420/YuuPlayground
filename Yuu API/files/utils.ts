@@ -1,4 +1,4 @@
-export type DirectoryBasePaths = 'user://worlds' | 'user://profile' | 'vm';
+export type DirectoryBasePaths = 'user://worlds' | 'user://profile' | 'vm' | 'user://templates';
 
 let vmFolderPath = '';
 

@@ -7,10 +7,11 @@ import { Entity } from "./Yuu API/Entity";
 import { Paint } from "./Yuu API/Paint";
 import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
 import { Texture, loadPNGToTexture } from "./Yuu API/images";
-
-
-
-
+import { Events } from "./Yuu API/Events";
+import { Player } from "./Yuu API/Player";
+import { createUIElement } from "./Yuu API/CreateUIElement";
+import { Raycast } from "./Yuu API/Raycast";
+import { DirectoryBasePaths } from "./Yuu API/files";
 
 export const playgroundDemos = {
   colorPicker,
@@ -167,13 +168,208 @@ function dumpObject(obj: any, name: string): void {
   }
 }
 
+let activeCube: Entity | undefined;
+let selectedPNGName: string = 'bedrock_png';
+
+type LoadablePNG = {
+  base: DirectoryBasePaths;
+  sub: string;
+  name: string; // e.g. 'bedrock_png'
+  displayName: string; // e.g. 'bedrock.png'
+};
+
+function findLoadablePNGs(): LoadablePNG[] {
+  const list: LoadablePNG[] = [];
+  const searchBases: DirectoryBasePaths[] = ['vm', 'user://templates', 'user://worlds'];
+  
+  for (const base of searchBases) {
+    try {
+      const basePath = base === 'vm' ? Godot.files.folder.getVMPath() : base;
+      const files = Godot.files.folder.getContents(basePath, true);
+      for (const f of files) {
+        const dirPath = f[0];
+        const name = f[1];
+        const ext = f[2];
+        if (ext.toLowerCase() === 'txt' && name.toLowerCase().endsWith('_png')) {
+          let sub = '';
+          if (base === 'vm') {
+            sub = dirPath.substring(basePath.length);
+          } else {
+            sub = dirPath.substring(base.length);
+          }
+          
+          let cleanName = name.substring(0, name.length - 4); // Remove '_png'
+          list.push({
+            base,
+            sub,
+            name,
+            displayName: `${cleanName}.png`
+          });
+        }
+      }
+    } catch (e: any) {
+      console.log(`Failed listing files in ${base}: ${e.message}`);
+    }
+  }
+  return list;
+}
+
+let uiBorder: Entity | undefined;
+let uiPanelRoot: Entity | undefined;
+let uiButtons: { button: Entity; pngName: string }[] = [];
+let loadablePNGs: LoadablePNG[] = [];
+
+function updateHandUI(deltaTime: number) {
+  const handPos = Player.leftHand.position.get();
+  const handRot = Player.leftHand.rotation.get();
+  const handForward = Player.leftHand.forward.get();
+  const handUp = Player.leftHand.up.get();
+  
+  if (handPos && handRot && handForward && handUp) {
+    // Lazy load the PNG list if empty
+    if (loadablePNGs.length === 0) {
+      loadablePNGs = findLoadablePNGs();
+    }
+    
+    // Create UI Panel if not initialized
+    if (!uiPanelRoot) {
+      const width = 0.28;
+      const height = 0.38;
+      
+      // Spawns outline border backing plane ( Indigo background )
+      uiBorder = spawnPrimitive.plane(
+        'Front',
+        handPos,
+        new Vector3(width + 0.01, height + 0.01, 0.005),
+        handRot,
+        new Color(0.4, 0.2, 0.9), // electric indigo
+        1,
+        'None',
+        'Static',
+        undefined
+      );
+      
+      // Spawns main dark panel (Rich Obsidian)
+      uiPanelRoot = spawnPrimitive.plane(
+        'Front',
+        new Vector3(0, 0, 0.001),
+        new Vector3(width, height, 0.005),
+        Quaternion.one,
+        new Color(0.08, 0.08, 0.1),
+        0.95,
+        'None',
+        'Static',
+        uiBorder
+      );
+      
+      // Text Title
+      const titleText = new Entity(
+        new Vector3(0, height / 2 - 0.04, 0.002),
+        Quaternion.one,
+        Vector3.one,
+        uiPanelRoot,
+        'Static'
+      );
+      titleText.text.create('TEXTURES', 18, 1);
+      titleText.text.doubleSided.set(false);
+      titleText.text.color.set(new Color(1, 1, 1));
+      titleText.text.outline.color.set(new Color(0.4, 0.2, 0.9));
+      
+      // Button Generation
+      const maxButtons = 5;
+      const displayPNGs = loadablePNGs.slice(0, maxButtons);
+      const btnWidth = width - 0.04;
+      const btnHeight = 0.045;
+      const btnSpacing = 0.055;
+      const startY = height / 2 - 0.10;
+      
+      uiButtons = [];
+      
+      for (let i = 0; i < displayPNGs.length; i++) {
+        const png = displayPNGs[i];
+        const btnY = startY - i * btnSpacing;
+        
+        const btn = createUIElement.button(
+          new Vector3(0, btnY, 0.002),
+          new Vector3(btnWidth, btnHeight, 0.005),
+          Quaternion.one,
+          png.displayName,
+          new Color(0.7, 0.7, 0.7),
+          12,
+          new Color(0.14, 0.14, 0.16),
+          uiPanelRoot
+        );
+        
+        btn.rayClick.initialize(false);
+        btn.rayClick.setClickFunction(() => {
+          console.log(`Texture selected: ${png.displayName}`);
+          const texture = loadPNGToTexture(png.base, png.sub, png.name);
+          if (texture && activeCube) {
+            activeCube.mesh.texture.set(texture, false);
+            selectedPNGName = png.name;
+          }
+        });
+        
+        uiButtons.push({
+          button: btn,
+          pngName: png.name
+        });
+      }
+    }
+    
+    // Position/orient UI to follow left hand
+    const offset = handUp.multiply(0.15).add(handForward.multiply(0.08));
+    if (uiBorder) {
+      uiBorder.pos = handPos.add(offset);
+      uiBorder.rot = handRot;
+      uiBorder.visible.set(true);
+    }
+    
+    // Check hover states from right hand pointer
+    const rightHandPos = Player.rightHand.position.get();
+    const rightHandForward = Player.rightHand.forward.get();
+    let hoveredNodeID: number | undefined;
+    
+    if (rightHandPos && rightHandForward) {
+      const hit = Raycast.directional(rightHandPos, rightHandForward, 5, { getEntity: true });
+      if (hit && hit.entity) {
+        hoveredNodeID = hit.entity.nodeID;
+      }
+    }
+    
+    // Color styling update
+    for (const item of uiButtons) {
+      const isSelected = item.pngName === selectedPNGName;
+      const isHovered = item.button.nodeID === hoveredNodeID;
+      const bg = item.button;
+      const textEnt = bg.childEntities[0];
+      
+      if (isSelected) {
+        bg.mesh.color.set(new Color(0.4, 0.2, 0.9), 1.0);
+        if (textEnt) textEnt.text.color.set(new Color(1, 1, 1));
+      } else if (isHovered) {
+        bg.mesh.color.set(new Color(0.24, 0.24, 0.28), 1.0);
+        if (textEnt) textEnt.text.color.set(new Color(0.95, 0.95, 0.95));
+      } else {
+        bg.mesh.color.set(new Color(0.14, 0.14, 0.16), 1.0);
+        if (textEnt) textEnt.text.color.set(new Color(0.7, 0.7, 0.7));
+      }
+    }
+  } else {
+    // Hide panel if hand tracking is lost
+    if (uiBorder) {
+      uiBorder.visible.set(false);
+    }
+  }
+}
+
 function spawnCube(pos: Vector3) {
   const cube = spawnPrimitive.cube(pos, new Vector3(1,1,1), Quaternion.one, Color.white, 1, true, 'Static', undefined);
+  activeCube = cube;
   
   let foundBase: 'user://templates' | 'user://worlds' | 'vm' | null = null;
   let foundSub: string = '';
 
-  // 1. Search 'vm' path first (prioritizes correct bundled assets)
   try {
     const vmPath = Godot.files.folder.getVMPath();
     const vmFiles = Godot.files.folder.getContents(vmPath, true);
@@ -189,7 +385,6 @@ function spawnCube(pos: Vector3) {
     console.log("Failed listing VM files: " + e.message);
   }
 
-  // 2. Search 'user://templates'
   if (!foundBase) {
     try {
       const templates = Godot.files.folder.getContents('user://templates', true);
@@ -206,7 +401,6 @@ function spawnCube(pos: Vector3) {
     }
   }
 
-  // 3. Search 'user://worlds'
   if (!foundBase) {
     try {
       const worlds = Godot.files.folder.getContents('user://worlds', true);
@@ -223,7 +417,6 @@ function spawnCube(pos: Vector3) {
     }
   }
 
-  // Load the texture from the directory where the pre-converted hex text was found
   const texture = loadPNGToTexture((foundBase || 'vm') as any, foundSub, 'bedrock_png');
 
   if (texture) {
@@ -231,6 +424,9 @@ function spawnCube(pos: Vector3) {
   } else {
     console.log("Failed to dynamically load bedrock.png texture");
   }
+
+  // Register hand UI loop
+  Events.onUpdate(updateHandUI);
 }
 
 
