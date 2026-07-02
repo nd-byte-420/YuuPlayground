@@ -8,6 +8,9 @@ import { Paint } from "./Yuu API/Paint";
 import { Player } from "./Yuu API/Player";
 import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
 import { Texture } from "./Yuu API/Texture";
+import { loadPNGToTexture } from "./Yuu API/PNGParser";
+
+
 
 
 export const playgroundDemos = {
@@ -138,5 +141,12 @@ function spawnPaintableSphere(pos: Vector3) {
 }
 
 function spawnCube(pos: Vector3) {
-  spawnPrimitive.cube(pos, new Vector3(0.05, 2.25, 0.05), Quaternion.fromEuler(new Vector3((Math.PI / 6), 0, 0)), Color.white, 1, true, 'Static', undefined);
+  const cube = spawnPrimitive.cube(pos, new Vector3(0.05, 2.25, 0.05), Quaternion.fromEuler(new Vector3((Math.PI / 6), 0, 0)), Color.white, 1, true, 'Static', undefined);
+  const texture = loadPNGToTexture('vm', '', 'bedrock');
+  if (texture) {
+    cube.mesh.texture.set(texture, false);
+  } else {
+    console.log("Failed to dynamically load bedrock.png texture");
+  }
 }
+
