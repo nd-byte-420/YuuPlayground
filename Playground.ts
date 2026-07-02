@@ -219,8 +219,11 @@ let uiPanelRoot: Entity | undefined;
 let uiButtons: { button: Entity; pngName: string }[] = [];
 let loadablePNGs: LoadablePNG[] = [];
 let textureMappingMode: 'wrap' | 'face' = 'wrap';
+let textureRotation: 0 | 90 | 180 | 270 = 0;
 let wrapModeButton: Entity | undefined;
 let faceModeButton: Entity | undefined;
+let rotCWButton: Entity | undefined;
+let rotCCWButton: Entity | undefined;
 
 function updateHandUI(deltaTime: number) {
   const handPos = Player.leftHand.position.get();
@@ -237,7 +240,7 @@ function updateHandUI(deltaTime: number) {
     // Create UI Panel if not initialized
     if (!uiPanelRoot) {
       const width = 0.28;
-      const height = 0.45;
+      const height = 0.51;
       
       // Spawns outline border backing plane ( Indigo background )
       uiBorder = spawnPrimitive.plane(
@@ -321,7 +324,7 @@ function updateHandUI(deltaTime: number) {
 
       // Wrap Mode Button
       wrapModeButton = createUIElement.button(
-        new Vector3(-0.06, -0.165, 0.002),
+        new Vector3(-0.06, -0.155, 0.002),
         new Vector3(0.11, 0.04, 0.005),
         Quaternion.one,
         'Wrap',
@@ -336,19 +339,13 @@ function updateHandUI(deltaTime: number) {
         if (textureMappingMode !== 'wrap') {
           textureMappingMode = 'wrap';
           console.log(`Texture mapping mode set to wrap`);
-          if (activeCube) {
-            const currentTexture = activeCube.mesh.texture.get();
-            activeCube.mesh.create(...spawnPrimitive.getShadeSmoothStretchedUVCube());
-            if (currentTexture) {
-              activeCube.mesh.texture.set(currentTexture, false);
-            }
-          }
+          updateCubeMesh();
         }
       });
 
       // Face Mode Button
       faceModeButton = createUIElement.button(
-        new Vector3(0.06, -0.165, 0.002),
+        new Vector3(0.06, -0.155, 0.002),
         new Vector3(0.11, 0.04, 0.005),
         Quaternion.one,
         'Face',
@@ -363,14 +360,46 @@ function updateHandUI(deltaTime: number) {
         if (textureMappingMode !== 'face') {
           textureMappingMode = 'face';
           console.log(`Texture mapping mode set to face`);
-          if (activeCube) {
-            const currentTexture = activeCube.mesh.texture.get();
-            activeCube.mesh.create(...spawnPrimitive.getShadeSmoothFaceUVCube());
-            if (currentTexture) {
-              activeCube.mesh.texture.set(currentTexture, false);
-            }
-          }
+          updateCubeMesh();
         }
+      });
+
+      // Rotate CW Button
+      rotCWButton = createUIElement.button(
+        new Vector3(-0.06, -0.21, 0.002),
+        new Vector3(0.11, 0.04, 0.005),
+        Quaternion.one,
+        'Rot CW',
+        new Color(0.7, 0.7, 0.7),
+        10,
+        new Color(0.14, 0.14, 0.16),
+        uiPanelRoot
+      );
+      
+      rotCWButton.rayClick.initialize(false);
+      rotCWButton.rayClick.setClickFunction(() => {
+        textureRotation = ((textureRotation + 90) % 360) as any;
+        console.log(`Texture rotation set to ${textureRotation}`);
+        updateCubeMesh();
+      });
+
+      // Rotate CCW Button
+      rotCCWButton = createUIElement.button(
+        new Vector3(0.06, -0.21, 0.002),
+        new Vector3(0.11, 0.04, 0.005),
+        Quaternion.one,
+        'Rot CCW',
+        new Color(0.7, 0.7, 0.7),
+        10,
+        new Color(0.14, 0.14, 0.16),
+        uiPanelRoot
+      );
+      
+      rotCCWButton.rayClick.initialize(false);
+      rotCCWButton.rayClick.setClickFunction(() => {
+        textureRotation = ((textureRotation + 270) % 360) as any;
+        console.log(`Texture rotation set to ${textureRotation}`);
+        updateCubeMesh();
       });
     }
     
@@ -435,6 +464,23 @@ function updateHandUI(deltaTime: number) {
         }
       }
     }
+
+    if (rotCWButton && rotCCWButton) {
+      const actionButtons = [rotCWButton, rotCCWButton];
+      for (const btn of actionButtons) {
+        const isHovered = btn.nodeID === hoveredNodeID;
+        const bg = btn;
+        const textEnt = bg.childEntities[0];
+        
+        if (isHovered) {
+          bg.mesh.color.set(new Color(0.24, 0.24, 0.28), 1.0);
+          if (textEnt) textEnt.text.color.set(new Color(0.95, 0.95, 0.95));
+        } else {
+          bg.mesh.color.set(new Color(0.14, 0.14, 0.16), 1.0);
+          if (textEnt) textEnt.text.color.set(new Color(0.7, 0.7, 0.7));
+        }
+      }
+    }
   } else {
     // Hide panel if hand tracking is lost
     if (uiBorder) {
@@ -443,12 +489,68 @@ function updateHandUI(deltaTime: number) {
   }
 }
 
+function getRotatedUVs(baseUVs: Vector2[], rotationAngle: 0 | 90 | 180 | 270): Vector2[] {
+  if (rotationAngle === 0) {
+    return baseUVs;
+  }
+  
+  const rotated = baseUVs.map(uv => new Vector2(uv.x, uv.y));
+  const numFaces = Math.floor(baseUVs.length / 4);
+  const steps = rotationAngle / 90;
+  
+  for (let step = 0; step < steps; step++) {
+    for (let face = 0; face < numFaces; face++) {
+      const idxs = [4 * face, 4 * face + 1, 4 * face + 2, 4 * face + 3];
+      
+      // Calculate center of this face's UVs
+      let sumX = 0;
+      let sumY = 0;
+      for (const i of idxs) {
+        sumX += rotated[i].x;
+        sumY += rotated[i].y;
+      }
+      const centerX = sumX / 4;
+      const centerY = sumY / 4;
+      
+      // Rotate 90 deg CW
+      const orig = idxs.map(i => new Vector2(rotated[i].x, rotated[i].y));
+      for (let k = 0; k < 4; k++) {
+        const i = idxs[k];
+        const u = orig[k].x;
+        const v = orig[k].y;
+        rotated[i].x = centerX - (v - centerY);
+        rotated[i].y = centerY + (u - centerX);
+      }
+    }
+  }
+  
+  return rotated;
+}
+
+function updateCubeMesh() {
+  if (!activeCube) return;
+  
+  const currentTexture = activeCube.mesh.texture.get();
+  
+  const baseMesh = textureMappingMode === 'face' 
+    ? spawnPrimitive.getShadeSmoothFaceUVCube()
+    : spawnPrimitive.getShadeSmoothStretchedUVCube();
+    
+  const rotatedUVs = getRotatedUVs(baseMesh[1], textureRotation);
+  
+  activeCube.mesh.create(baseMesh[0], rotatedUVs, baseMesh[2]);
+  
+  if (currentTexture) {
+    activeCube.mesh.texture.set(currentTexture, false);
+  }
+}
+
 function spawnCube(pos: Vector3) {
   const cube = spawnPrimitive.cube(pos, new Vector3(1,1,1), Quaternion.one, Color.white, 1, true, 'Static', undefined);
   activeCube = cube;
   
-  if (textureMappingMode === 'face') {
-    cube.mesh.create(...spawnPrimitive.getShadeSmoothFaceUVCube());
+  if (textureMappingMode === 'face' || textureRotation !== 0) {
+    updateCubeMesh();
   }
   
   let foundBase: 'user://templates' | 'user://worlds' | 'vm' | null = null;
