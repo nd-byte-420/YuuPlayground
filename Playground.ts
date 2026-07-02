@@ -218,6 +218,9 @@ let uiBorder: Entity | undefined;
 let uiPanelRoot: Entity | undefined;
 let uiButtons: { button: Entity; pngName: string }[] = [];
 let loadablePNGs: LoadablePNG[] = [];
+let textureMappingMode: 'wrap' | 'face' = 'wrap';
+let wrapModeButton: Entity | undefined;
+let faceModeButton: Entity | undefined;
 
 function updateHandUI(deltaTime: number) {
   const handPos = Player.leftHand.position.get();
@@ -234,7 +237,7 @@ function updateHandUI(deltaTime: number) {
     // Create UI Panel if not initialized
     if (!uiPanelRoot) {
       const width = 0.28;
-      const height = 0.38;
+      const height = 0.45;
       
       // Spawns outline border backing plane ( Indigo background )
       uiBorder = spawnPrimitive.plane(
@@ -270,7 +273,7 @@ function updateHandUI(deltaTime: number) {
         uiPanelRoot,
         'Static'
       );
-      titleText.text.create('TEXTURES', 3, 1);
+      titleText.text.create('TEXTURES', 1, 1);
       titleText.text.doubleSided.set(false);
       titleText.text.color.set(new Color(1, 1, 1));
       titleText.text.outline.color.set(new Color(0.4, 0.2, 0.9));
@@ -315,6 +318,60 @@ function updateHandUI(deltaTime: number) {
           pngName: png.name
         });
       }
+
+      // Wrap Mode Button
+      wrapModeButton = createUIElement.button(
+        new Vector3(-0.06, -0.165, 0.002),
+        new Vector3(0.11, 0.04, 0.005),
+        Quaternion.one,
+        'Wrap',
+        new Color(0.7, 0.7, 0.7),
+        10,
+        new Color(0.14, 0.14, 0.16),
+        uiPanelRoot
+      );
+      
+      wrapModeButton.rayClick.initialize(false);
+      wrapModeButton.rayClick.setClickFunction(() => {
+        if (textureMappingMode !== 'wrap') {
+          textureMappingMode = 'wrap';
+          console.log(`Texture mapping mode set to wrap`);
+          if (activeCube) {
+            const currentTexture = activeCube.mesh.texture.get();
+            activeCube.mesh.create(...spawnPrimitive.getShadeSmoothStretchedUVCube());
+            if (currentTexture) {
+              activeCube.mesh.texture.set(currentTexture, false);
+            }
+          }
+        }
+      });
+
+      // Face Mode Button
+      faceModeButton = createUIElement.button(
+        new Vector3(0.06, -0.165, 0.002),
+        new Vector3(0.11, 0.04, 0.005),
+        Quaternion.one,
+        'Face',
+        new Color(0.7, 0.7, 0.7),
+        10,
+        new Color(0.14, 0.14, 0.16),
+        uiPanelRoot
+      );
+      
+      faceModeButton.rayClick.initialize(false);
+      faceModeButton.rayClick.setClickFunction(() => {
+        if (textureMappingMode !== 'face') {
+          textureMappingMode = 'face';
+          console.log(`Texture mapping mode set to face`);
+          if (activeCube) {
+            const currentTexture = activeCube.mesh.texture.get();
+            activeCube.mesh.create(...spawnPrimitive.getShadeSmoothFaceUVCube());
+            if (currentTexture) {
+              activeCube.mesh.texture.set(currentTexture, false);
+            }
+          }
+        }
+      });
     }
     
     // Position/orient UI to follow left hand
@@ -355,6 +412,29 @@ function updateHandUI(deltaTime: number) {
         if (textEnt) textEnt.text.color.set(new Color(0.7, 0.7, 0.7));
       }
     }
+    
+    if (wrapModeButton && faceModeButton) {
+      const modeItems = [
+        { button: wrapModeButton, isSelected: textureMappingMode === 'wrap' },
+        { button: faceModeButton, isSelected: textureMappingMode === 'face' }
+      ];
+      for (const item of modeItems) {
+        const isHovered = item.button.nodeID === hoveredNodeID;
+        const bg = item.button;
+        const textEnt = bg.childEntities[0];
+        
+        if (item.isSelected) {
+          bg.mesh.color.set(new Color(0.4, 0.2, 0.9), 1.0);
+          if (textEnt) textEnt.text.color.set(new Color(1, 1, 1));
+        } else if (isHovered) {
+          bg.mesh.color.set(new Color(0.24, 0.24, 0.28), 1.0);
+          if (textEnt) textEnt.text.color.set(new Color(0.95, 0.95, 0.95));
+        } else {
+          bg.mesh.color.set(new Color(0.14, 0.14, 0.16), 1.0);
+          if (textEnt) textEnt.text.color.set(new Color(0.7, 0.7, 0.7));
+        }
+      }
+    }
   } else {
     // Hide panel if hand tracking is lost
     if (uiBorder) {
@@ -366,6 +446,10 @@ function updateHandUI(deltaTime: number) {
 function spawnCube(pos: Vector3) {
   const cube = spawnPrimitive.cube(pos, new Vector3(1,1,1), Quaternion.one, Color.white, 1, true, 'Static', undefined);
   activeCube = cube;
+  
+  if (textureMappingMode === 'face') {
+    cube.mesh.create(...spawnPrimitive.getShadeSmoothFaceUVCube());
+  }
   
   let foundBase: 'user://templates' | 'user://worlds' | 'vm' | null = null;
   let foundSub: string = '';
