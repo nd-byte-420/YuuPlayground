@@ -18,7 +18,7 @@ export function deleteFolderContents(baseDirPath: DirectoryBasePaths, subDirPath
 }
 
 export function getFolderContents(baseDirPath: DirectoryBasePaths, subDirPath: string, isRecursive: boolean): [string, string, string][] {
-  return Godot.files.folder.getContents(combineBaseAndSubPaths(baseDirPath, subDirPath), isRecursive);
+  return Godot.files.folder.getContents(combineBaseAndSubPaths(baseDirPath, subDirPath), isRecursive) || [];
 }
 
 export function transpileTSFolderToJSFolder(baseDirPathToTranspile: DirectoryBasePaths, subDirPathToTranspile: string, baseSaveToDirPath: DirectoryBasePaths, subSaveToDirPath: string): boolean {

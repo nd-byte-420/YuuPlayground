@@ -185,7 +185,7 @@ function findLoadablePNGs(): LoadablePNG[] {
   for (const base of searchBases) {
     try {
       const basePath = base === 'vm' ? Godot.files.folder.getVMPath() : base;
-      const files = Godot.files.folder.getContents(basePath, true);
+      const files = Godot.files.folder.getContents(basePath, true) || [];
       for (const f of files) {
         const dirPath = f[0];
         const name = f[1];
@@ -372,7 +372,7 @@ function spawnCube(pos: Vector3) {
 
   try {
     const vmPath = Godot.files.folder.getVMPath();
-    const vmFiles = Godot.files.folder.getContents(vmPath, true);
+    const vmFiles = Godot.files.folder.getContents(vmPath, true) || [];
     for (const f of vmFiles) {
       if (f[1].toLowerCase() === 'bedrock_png' && f[2].toLowerCase() === 'txt') {
         foundBase = 'vm';
@@ -387,7 +387,7 @@ function spawnCube(pos: Vector3) {
 
   if (!foundBase) {
     try {
-      const templates = Godot.files.folder.getContents('user://templates', true);
+      const templates = Godot.files.folder.getContents('user://templates', true) || [];
       for (const f of templates) {
         if (f[1].toLowerCase() === 'bedrock_png' && f[2].toLowerCase() === 'txt') {
           foundBase = 'user://templates';
@@ -403,7 +403,7 @@ function spawnCube(pos: Vector3) {
 
   if (!foundBase) {
     try {
-      const worlds = Godot.files.folder.getContents('user://worlds', true);
+      const worlds = Godot.files.folder.getContents('user://worlds', true) || [];
       for (const f of worlds) {
         if (f[1].toLowerCase() === 'bedrock_png' && f[2].toLowerCase() === 'txt') {
           foundBase = 'user://worlds';
@@ -426,7 +426,7 @@ function spawnCube(pos: Vector3) {
   }
 
   // Register hand UI loop
-  Events.onUpdate(updateHandUI);
+  Events.onPhysicsUpdate(updateHandUI);
 }
 
 
