@@ -217,8 +217,21 @@ export class PNGDecoder {
 }
 
 export function loadPNGToTexture(baseDirPath: DirectoryBasePaths, subDirPath: string, fileName: string): Texture | undefined {
+  console.log(`loadPNGToTexture: Loading ${fileName}.png from base=${baseDirPath}, sub=${subDirPath}`);
   const content = Files.text.get(baseDirPath, subDirPath, fileName, ".png");
-  if (!content) return undefined;
+  if (!content) {
+    console.log(`loadPNGToTexture: Files.text.get returned undefined or empty for ${fileName}.png`);
+    return undefined;
+  }
+
+  console.log(`loadPNGToTexture: File read successful. Length: ${content.length} characters.`);
+  
+  // Log first few character codes to check signature/binary safety
+  const sampleCodes: number[] = [];
+  for (let i = 0; i < Math.min(content.length, 10); i++) {
+    sampleCodes.push(content.charCodeAt(i));
+  }
+  console.log(`loadPNGToTexture: First 10 charCodes read: ${sampleCodes.join(', ')}`);
 
   const bytes = new Uint8Array(content.length);
   for (let i = 0; i < content.length; i++) {
@@ -228,6 +241,8 @@ export function loadPNGToTexture(baseDirPath: DirectoryBasePaths, subDirPath: st
   try {
     const decoder = new PNGDecoder(bytes);
     const { width, height, pixels } = decoder.decode();
+
+    console.log(`loadPNGToTexture: Decode successful. Dimensions: ${width}x${height}`);
 
     const texture = new Texture(width, height);
     
@@ -259,9 +274,11 @@ export function loadPNGToTexture(baseDirPath: DirectoryBasePaths, subDirPath: st
     }
 
     texture.updateTexture();
+    console.log(`loadPNGToTexture: Texture update complete.`);
     return texture;
-  } catch (err) {
-    console.log("Error loading PNG texture:", err);
+  } catch (err: any) {
+    console.log("Error loading PNG texture:", err.message || err);
     return undefined;
   }
 }
+

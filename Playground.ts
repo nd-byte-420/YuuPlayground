@@ -9,6 +9,8 @@ import { Player } from "./Yuu API/Player";
 import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
 import { Texture } from "./Yuu API/Texture";
 import { loadPNGToTexture } from "./Yuu API/PNGParser";
+import { Files } from "./Yuu API/Files";
+
 
 
 
@@ -142,6 +144,19 @@ function spawnPaintableSphere(pos: Vector3) {
 
 function spawnCube(pos: Vector3) {
   const cube = spawnPrimitive.cube(pos, new Vector3(0.05, 2.25, 0.05), Quaternion.fromEuler(new Vector3((Math.PI / 6), 0, 0)), Color.white, 1, true, 'Static', undefined);
+  
+  // Debug checking file locations
+  try {
+    console.log("DEBUG: bedrock.png exists in 'vm' root? " + Files.exists('vm', 'bedrock.png'));
+    console.log("DEBUG: bedrock.png exists in 'vm' sub? " + Files.exists('vm', '/bedrock.png'));
+    console.log("DEBUG: bedrock.png exists in 'user://worlds'? " + Files.exists('user://worlds', 'bedrock.png'));
+    
+    const contents = Files.folder.getContents('vm', '', true);
+    console.log("DEBUG: VM files list: " + JSON.stringify(contents));
+  } catch (e: any) {
+    console.log("DEBUG: error checking files: " + e.message);
+  }
+
   const texture = loadPNGToTexture('vm', '', 'bedrock');
   if (texture) {
     cube.mesh.texture.set(texture, false);
@@ -149,4 +164,6 @@ function spawnCube(pos: Vector3) {
     console.log("Failed to dynamically load bedrock.png texture");
   }
 }
+
+
 
