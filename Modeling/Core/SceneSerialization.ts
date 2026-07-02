@@ -4,7 +4,7 @@ import { Vector2 } from "../../Yuu API/Basic Types/Vector2";
 import { Vector3 } from "../../Yuu API/Basic Types/Vector3";
 import { Entity } from "../../Yuu API/Entity";
 import { spawnPrimitive } from "../../Yuu API/SpawnPrimitive";
-import { Files } from "../../Yuu API/files";
+import { Files } from "../../Yuu API/files/index";
 import { ModelingTool } from "./ModelingTool";
 import { SceneManager, SceneNode } from "./SceneManager";
 

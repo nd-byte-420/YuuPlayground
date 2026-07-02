@@ -1,4 +1,4 @@
-import { type DirectoryBasePaths, Files } from "./files";
+import { type DirectoryBasePaths, Files } from "./files/index";
 
 
 // Need to know which VMs were opened by a VM, and close them when that VM is closed

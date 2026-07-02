@@ -1,4 +1,4 @@
-import { Files } from "./files";
+import { Files } from "./files/index";
 
 
 export const PersistentStorage = {
