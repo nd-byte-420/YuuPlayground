@@ -1,6 +1,7 @@
 import { Color } from "../../Yuu API/Basic Types/Color";
 import { Quaternion } from "../../Yuu API/Basic Types/Quaternion";
 import { Vector3 } from "../../Yuu API/Basic Types/Vector3";
+import { Vector2 } from "../../Yuu API/Basic Types/Vector2";
 import { Entity } from "../../Yuu API/Entity";
 import { spawnPrimitive } from "../../Yuu API/SpawnPrimitive";
 import { RayHit } from "../../Yuu API/Raycast";
@@ -11,12 +12,18 @@ import { snap, snapVector, conjugate, rotateVector } from "../Core/MathUtils";
 import { ModelingTool } from "../Core/ModelingTool";
 import { EditMode } from "../EditMode/EditMode";
 import { createArrow } from "./GizmoArrow";
+import { getTextureSettings, updateEntityMeshTexture } from "../Core/TextureEditor";
 
 export const Gizmo = {
   arrows: [] as Entity[],
   centerCube: undefined as Entity | undefined,
   visible: false,
   center: Vector3.zero,
+
+  // Texture drag states
+  textureGizmoMode: 'Offset' as 'Offset' | 'Tile',
+  dragStartTextureOffset: undefined as Vector2 | undefined,
+  dragStartTextureScale: undefined as Vector2 | undefined,
 
   // Arrow-axis drag states
   activeAxis: undefined as 'X' | 'Y' | 'Z' | undefined,
@@ -121,7 +128,11 @@ export const Gizmo = {
       this.dragStartParam = this.getClosestPointOnAxis(this.dragStartPos, axisDir, handPos, handFwd);
     }
 
-    if (EditMode.active) {
+    if (ModelingTool.currentMode === 'Texture' && ModelingTool.selectedEntity) {
+      const settings = getTextureSettings(ModelingTool.selectedEntity);
+      this.dragStartTextureOffset = new Vector2(settings.offset.x, settings.offset.y);
+      this.dragStartTextureScale = new Vector2(settings.scale.x, settings.scale.y);
+    } else if (EditMode.active) {
       this.dragStartVertPositions.clear();
       const vertsToMove = EditMode.getSelectedUniqueVertexIndices();
       for (const vIdx of vertsToMove) {
@@ -139,7 +150,11 @@ export const Gizmo = {
       this.centerDragDistance = handPos.distanceTo(this.center);
     }
 
-    if (EditMode.active) {
+    if (ModelingTool.currentMode === 'Texture' && ModelingTool.selectedEntity) {
+      const settings = getTextureSettings(ModelingTool.selectedEntity);
+      this.dragStartTextureOffset = new Vector2(settings.offset.x, settings.offset.y);
+      this.dragStartTextureScale = new Vector2(settings.scale.x, settings.scale.y);
+    } else if (EditMode.active) {
       this.centerDragStartVertPositions.clear();
       this.centerDragInitialLocalDragPos = EditMode.worldToLocal(this.center);
       const vertsToMove = EditMode.getSelectedUniqueVertexIndices();
@@ -165,7 +180,26 @@ export const Gizmo = {
         newWorldPos = snapVector(newWorldPos, ModelingTool.gridResolution);
       }
 
-      if (EditMode.active) {
+      if (ModelingTool.currentMode === 'Texture' && ModelingTool.selectedEntity) {
+        const entity = ModelingTool.selectedEntity;
+        const settings = getTextureSettings(entity);
+        const startPos = this.centerCube ? this.centerCube.pos : this.center;
+        const worldOffset = newWorldPos.subtract(startPos);
+        const localOffset = this.worldToLocalOffset(worldOffset);
+
+        if (this.textureGizmoMode === 'Offset') {
+          if (this.dragStartTextureOffset) {
+            settings.offset.x = this.dragStartTextureOffset.x + localOffset.x;
+            settings.offset.y = this.dragStartTextureOffset.y + localOffset.y;
+          }
+        } else {
+          if (this.dragStartTextureScale) {
+            settings.scale.x = Math.max(0.1, this.dragStartTextureScale.x + localOffset.x);
+            settings.scale.y = Math.max(0.1, this.dragStartTextureScale.y + localOffset.y);
+          }
+        }
+        updateEntityMeshTexture(entity);
+      } else if (EditMode.active) {
         const newLocalPos = EditMode.worldToLocal(newWorldPos);
         const localDelta = newLocalPos.subtract(this.centerDragInitialLocalDragPos);
         this.centerDragStartVertPositions.forEach((startLocalPos, vIdx) => {
@@ -198,7 +232,34 @@ export const Gizmo = {
         worldOffset = snappedPos.subtract(this.dragStartPos);
       }
 
-      if (EditMode.active) {
+      if (ModelingTool.currentMode === 'Texture' && ModelingTool.selectedEntity) {
+        const entity = ModelingTool.selectedEntity;
+        const settings = getTextureSettings(entity);
+        const localOffset = this.worldToLocalOffset(worldOffset);
+
+        if (this.textureGizmoMode === 'Offset') {
+          if (this.dragStartTextureOffset) {
+            if (axis === 'X') {
+              settings.offset.x = this.dragStartTextureOffset.x + localOffset.x;
+            } else if (axis === 'Y') {
+              settings.offset.y = this.dragStartTextureOffset.y + localOffset.y;
+            } else if (axis === 'Z') {
+              settings.offset.x = this.dragStartTextureOffset.x + localOffset.z;
+            }
+          }
+        } else {
+          if (this.dragStartTextureScale) {
+            if (axis === 'X') {
+              settings.scale.x = Math.max(0.1, this.dragStartTextureScale.x + localOffset.x);
+            } else if (axis === 'Y') {
+              settings.scale.y = Math.max(0.1, this.dragStartTextureScale.y + localOffset.y);
+            } else if (axis === 'Z') {
+              settings.scale.x = Math.max(0.1, this.dragStartTextureScale.x + localOffset.z);
+            }
+          }
+        }
+        updateEntityMeshTexture(entity);
+      } else if (EditMode.active) {
         const localOffset = this.worldToLocalOffset(worldOffset);
         this.dragStartVertPositions.forEach((startPos, vIdx) => {
           EditMode.uniquePositions[vIdx] = startPos.add(localOffset);
@@ -238,12 +299,13 @@ export const Gizmo = {
   },
 
   worldToLocalOffset(worldOffset: Vector3): Vector3 {
-    if (!EditMode.targetEntity) return worldOffset;
-    const rotConj = conjugate(EditMode.targetEntity.rot);
+    const target = EditMode.active ? EditMode.targetEntity : ModelingTool.selectedEntity;
+    if (!target) return worldOffset;
+    const rotConj = conjugate(target.rot);
     const rotated = rotateVector(worldOffset, rotConj);
-    const sx = Math.max(0.001, EditMode.targetEntity.scale.x);
-    const sy = Math.max(0.001, EditMode.targetEntity.scale.y);
-    const sz = Math.max(0.001, EditMode.targetEntity.scale.z);
+    const sx = Math.max(0.001, target.scale.x);
+    const sy = Math.max(0.001, target.scale.y);
+    const sz = Math.max(0.001, target.scale.z);
     return new Vector3(rotated.x / sx, rotated.y / sy, rotated.z / sz);
   },
 
@@ -265,7 +327,7 @@ export const Gizmo = {
       const hasSelection = EditMode.getSelectedUniqueVertexIndices().size > 0;
       shouldBeVisible = EditMode.tool === 'Move' && hasSelection;
     } else {
-      shouldBeVisible = ModelingTool.currentMode === 'Move' && ModelingTool.selectedEntity !== undefined;
+      shouldBeVisible = (ModelingTool.currentMode === 'Move' || ModelingTool.currentMode === 'Texture') && ModelingTool.selectedEntity !== undefined;
     }
 
     if (shouldBeVisible !== this.visible) {

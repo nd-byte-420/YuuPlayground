@@ -14,7 +14,7 @@ import {
   updateEntityMeshTexture, 
   applyTextureToEntity 
 } from "../Core/TextureEditor";
-
+import { Gizmo } from "../Gizmo/Gizmo";
 export class ToolsPanel implements MenuComponent {
   constructor(private rebuild: () => void) {}
 
@@ -78,7 +78,25 @@ export class ToolsPanel implements MenuComponent {
           context.yPos -= 0.042;
         }
 
-        context.yPos -= 0.01;
+        // Gizmo Drag Mode
+        const gizmoLabelPos = new Vector3(context.offset.x - 0.08, context.yPos + context.offset.y, context.offset.z);
+        elements.push(createMenuLabel(parent, 'Gizmo Drag:', gizmoLabelPos, 1.1, Color.white));
+        
+        const gizmoModeSize = new Vector3(0.055, 0.03, 0.01);
+        const offsetDragPos = new Vector3(context.offset.x + 0.015, context.yPos + context.offset.y, context.offset.z);
+        const offsetDragColor = Gizmo.textureGizmoMode === 'Offset' ? new Color(0.3, 0.5, 0.3) : new Color(0.2, 0.2, 0.2);
+        elements.push(createMenuButton(parent, 'Offset', offsetDragPos, gizmoModeSize, offsetDragColor, () => {
+          Gizmo.textureGizmoMode = 'Offset';
+          this.rebuild();
+        }));
+
+        const tileDragPos = new Vector3(context.offset.x + 0.075, context.yPos + context.offset.y, context.offset.z);
+        const tileDragColor = Gizmo.textureGizmoMode === 'Tile' ? new Color(0.3, 0.5, 0.3) : new Color(0.2, 0.2, 0.2);
+        elements.push(createMenuButton(parent, 'Tile', tileDragPos, gizmoModeSize, tileDragColor, () => {
+          Gizmo.textureGizmoMode = 'Tile';
+          this.rebuild();
+        }));
+        context.yPos -= 0.04;
 
         // Mapping Mode (Wrap / Face) side-by-side
         const modeBtnSize = new Vector3(0.07, 0.032, 0.01);
@@ -104,6 +122,67 @@ export class ToolsPanel implements MenuComponent {
           }
         });
         elements.push(faceBtn);
+
+        context.yPos -= 0.04;
+
+        // Projection mapping - Row 2 (X, Y, Z planes)
+        const row2BtnSize = new Vector3(0.045, 0.032, 0.01);
+        const planarXPos = new Vector3(context.offset.x - 0.05, context.yPos + context.offset.y, context.offset.z);
+        const planarXColor = settings.mappingMode === 'planar-x' ? new Color(0.3, 0.5, 0.3) : new Color(0.2, 0.2, 0.2);
+        const planarXBtn = createMenuButton(parent, 'Proj X', planarXPos, row2BtnSize, planarXColor, () => {
+          settings.mappingMode = 'planar-x';
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        });
+        elements.push(planarXBtn);
+
+        const planarYPos = new Vector3(context.offset.x, context.yPos + context.offset.y, context.offset.z);
+        const planarYColor = settings.mappingMode === 'planar-y' ? new Color(0.3, 0.5, 0.3) : new Color(0.2, 0.2, 0.2);
+        const planarYBtn = createMenuButton(parent, 'Proj Y', planarYPos, row2BtnSize, planarYColor, () => {
+          settings.mappingMode = 'planar-y';
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        });
+        elements.push(planarYBtn);
+
+        const planarZPos = new Vector3(context.offset.x + 0.05, context.yPos + context.offset.y, context.offset.z);
+        const planarZColor = settings.mappingMode === 'planar-z' ? new Color(0.3, 0.5, 0.3) : new Color(0.2, 0.2, 0.2);
+        const planarZBtn = createMenuButton(parent, 'Proj Z', planarZPos, row2BtnSize, planarZColor, () => {
+          settings.mappingMode = 'planar-z';
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        });
+        elements.push(planarZBtn);
+
+        context.yPos -= 0.04;
+
+        // Projection mapping - Row 3 (Triplanar, Spherical, Cylindrical)
+        const triplanarPos = new Vector3(context.offset.x - 0.05, context.yPos + context.offset.y, context.offset.z);
+        const triplanarColor = settings.mappingMode === 'triplanar' ? new Color(0.3, 0.5, 0.3) : new Color(0.2, 0.2, 0.2);
+        const triplanarBtn = createMenuButton(parent, 'Tripln', triplanarPos, row2BtnSize, triplanarColor, () => {
+          settings.mappingMode = 'triplanar';
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        });
+        elements.push(triplanarBtn);
+
+        const sphericalPos = new Vector3(context.offset.x, context.yPos + context.offset.y, context.offset.z);
+        const sphericalColor = settings.mappingMode === 'spherical' ? new Color(0.3, 0.5, 0.3) : new Color(0.2, 0.2, 0.2);
+        const sphericalBtn = createMenuButton(parent, 'Sphere', sphericalPos, row2BtnSize, sphericalColor, () => {
+          settings.mappingMode = 'spherical';
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        });
+        elements.push(sphericalBtn);
+
+        const cylindricalPos = new Vector3(context.offset.x + 0.05, context.yPos + context.offset.y, context.offset.z);
+        const cylindricalColor = settings.mappingMode === 'cylindrical' ? new Color(0.3, 0.5, 0.3) : new Color(0.2, 0.2, 0.2);
+        const cylindricalBtn = createMenuButton(parent, 'Cylndr', cylindricalPos, row2BtnSize, cylindricalColor, () => {
+          settings.mappingMode = 'cylindrical';
+          updateEntityMeshTexture(ent);
+          this.rebuild();
+        });
+        elements.push(cylindricalBtn);
 
         context.yPos -= 0.04;
 
