@@ -17,10 +17,6 @@ export class Entity {
   public type: BaseNodeTypes | undefined;
   private childNodeIDs: number[] = [];
 
-  public customColor: Color = Color.white;
-  public customAlpha: number = 1.0;
-  public customShader: string | undefined = undefined;
-
   public parent: Entity | undefined;
   public childEntities: Entity[] = [];
 
@@ -208,6 +204,7 @@ export class Entity {
 
   changeType(type: BaseNodeTypes) {
     if (this.nodeID) {
+      this.type = type;
       this.nodeID = Godot.node.changeType(this.nodeID, type) ?? this.nodeID;
     }
   }
@@ -333,15 +330,8 @@ export class Entity {
 
   mesh = {
     nodeID: undefined as number | undefined,
-    verts: [] as Vector3[],
-    uvs: [] as Vector2[],
-    triangles: [] as number[],
 
     create: (verts: Vector3[], uvs: Vector2[], triangles: number[]) => {
-      this.mesh.verts = verts.map(v => v.clone());
-      this.mesh.uvs = uvs.map(u => u.clone());
-      this.mesh.triangles = [...triangles];
-
       if (this.nodeID) {
         this.mesh.destroy();
 
@@ -912,10 +902,6 @@ export class Entity {
       if (this.nodeID) {
         this.text.nodeID = Godot.node.create.text(this.nodeID, text, fontSize, outlineSize);
       }
-    },
-
-    set: (text: string) => {
-      this.text.display.set(text);
     },
 
     display: {
