@@ -1,4 +1,4 @@
-import { DirectoryBasePaths, combineBaseAndSubPaths } from "./utils";
+import { type DirectoryBasePaths, combineBaseAndSubPaths } from "./utils";
 
 export function doesFolderExist(baseDirPath: DirectoryBasePaths, subDirPath: string): boolean {
   return Godot.files.folder.exists(combineBaseAndSubPaths(baseDirPath, subDirPath));

@@ -30,4 +30,4 @@ export const Files = {
   },
 };
 
-export { DirectoryBasePaths } from "./utils";
+export type { DirectoryBasePaths } from "./utils";

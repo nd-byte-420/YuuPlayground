@@ -1,4 +1,4 @@
-import { DirectoryBasePaths, combineBaseAndSubPaths } from "./utils";
+import { type DirectoryBasePaths, combineBaseAndSubPaths } from "./utils";
 
 export function createTextFile(baseDirPath: DirectoryBasePaths, subDirPath: string, fileName: string, fileExtension: string, content: string): void {
   const dirPath = combineBaseAndSubPaths(baseDirPath, subDirPath);

@@ -11,7 +11,7 @@ import { Events } from "./Yuu API/Events";
 import { Player } from "./Yuu API/Player";
 import { createUIElement } from "./Yuu API/CreateUIElement";
 import { Raycast } from "./Yuu API/Raycast";
-import { DirectoryBasePaths } from "./Yuu API/files/index";
+import type { DirectoryBasePaths } from "./Yuu API/files/index";
 
 export const playgroundDemos = {
   colorPicker,

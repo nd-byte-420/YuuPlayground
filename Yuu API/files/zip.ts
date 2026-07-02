@@ -1,4 +1,4 @@
-import { DirectoryBasePaths, combineBaseAndSubPaths } from "./utils";
+import { type DirectoryBasePaths, combineBaseAndSubPaths } from "./utils";
 
 export function compressFolderToZip(baseDirPathToCompress: DirectoryBasePaths, subDirPathToCompress: string, baseSaveZipToDirPath: DirectoryBasePaths, subSaveZipToDirPath: string, zipFileName: string): boolean {
   return Godot.files.zip.compressFolder(combineBaseAndSubPaths(baseDirPathToCompress, subDirPathToCompress), combineBaseAndSubPaths(baseSaveZipToDirPath, subSaveZipToDirPath), zipFileName);
