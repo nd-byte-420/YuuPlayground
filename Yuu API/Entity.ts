@@ -4,7 +4,7 @@ import { Quaternion } from "./Basic Types/Quaternion";
 import { Vector2 } from "./Basic Types/Vector2";
 import { Vector3 } from "./Basic Types/Vector3";
 import { RayHit } from "./Raycast";
-import { Texture } from "./Texture";
+import { Texture } from "./images";
 import { spawnPrimitive } from "./SpawnPrimitive";
 import { entity_Data, OccupiedTriggerPayload, OnUpdatePayload, WhatCanTrigger } from "./Entity_Data";
 

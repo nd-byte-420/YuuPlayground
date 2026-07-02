@@ -5,11 +5,8 @@ import { Vector2 } from "./Yuu API/Basic Types/Vector2";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { Entity } from "./Yuu API/Entity";
 import { Paint } from "./Yuu API/Paint";
-import { Player } from "./Yuu API/Player";
 import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
-import { Texture } from "./Yuu API/Texture";
-import { loadPNGToTexture } from "./Yuu API/PNGParser";
-import { Files } from "./Yuu API/Files";
+import { Texture, loadPNGToTexture } from "./Yuu API/images";
 
 
 
