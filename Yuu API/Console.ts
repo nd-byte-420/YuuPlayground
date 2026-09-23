@@ -21,7 +21,7 @@ function start() {
     const orgLog = console.log;
 
     console.log = (...args: any[]) => {
-      orgLog(history.length + ":", ...args);
+      orgLog(...args);
 
       history.push({ timestamp: (Date.now() - startedTime) / 1000, args: args });
 
