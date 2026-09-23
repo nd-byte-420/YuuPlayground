@@ -10,8 +10,10 @@ export const spawnPrimitive = {
   plane,
   sphere,
   cone,
-  getShadeSmoothStretchedUVCube,
-  getShadeSmoothFaceUVCube,
+  cubeScaled,
+  door,
+  chamber,
+  nissanGtr32Exp
 }
 
 /**
@@ -41,6 +43,22 @@ function cube(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alpha
   return entity;
 }
 
+function cubeScaled(pos: Vector3, scale: Vector3, rot: Quaternion, color: Color, alphaTransparency: number, hasCollider: boolean, type: BaseNodeTypes, parent: Entity | undefined): Entity {
+  const entity = new Entity(pos, rot, Vector3.one, parent, type);
+
+  entity.mesh.create(...getShadeSmoothStretchedUVCube());
+
+  entity.mesh.color.set(color, Math.min(1, alphaTransparency));
+
+  if (hasCollider && entity.mesh.nodeID) {
+    entity.collider.createBox(Vector3.one); // Note: Keep this at Vector3.one since the entity scale handles the collider size too
+  }
+
+  // Keep your original entity scaling intact!
+  entity.scale = scale;
+
+  return entity;
+}
 
 
 
@@ -247,73 +265,6 @@ function getShadeSmoothStretchedUVCube(): [Vector3[], Vector2[], number[]] {
 
   return stretchedUVCube;
 }
-
-let faceUVCube: [Vector3[], Vector2[], number[]] | undefined;
-
-function getShadeSmoothFaceUVCube(): [Vector3[], Vector2[], number[]] {
-  if (faceUVCube === undefined) {
-    const verts: Vector3[] = [
-      new Vector3(0.5, 0.5, -0.5), //Top Forward Left
-      new Vector3(0.5, 0.5, 0.5), //Top Forward Right
-      new Vector3(-0.5, 0.5, -0.5), //Top Back Left
-      new Vector3(-0.5, 0.5, 0.5), //Top Back Right
-
-      new Vector3(0.5, -0.5, -0.5), //Bottom Forward Left
-      new Vector3(0.5, -0.5, 0.5), //Bottom Forward Right
-      new Vector3(-0.5, -0.5, -0.5), //Bottom Back Left
-      new Vector3(-0.5, -0.5, 0.5), //Bottom Back Right
-
-      new Vector3(-0.5, 0.5, -0.5), //Top Back Left
-      new Vector3(-0.5, 0.5, 0.5), //Top Back Right
-      new Vector3(-0.5, -0.5, -0.5), //Bottom Back Left
-      new Vector3(-0.5, -0.5, 0.5), //Bottom Back Right
-
-      new Vector3(-0.5, 0.5, 0.5), //Top Back Right
-      new Vector3(0.5, 0.5, 0.5), //Top Forward Right
-      new Vector3(-0.5, -0.5, 0.5), //Bottom Back Right
-      new Vector3(0.5, -0.5, 0.5), //Bottom Forward Right
-
-      new Vector3(0.5, 0.5, -0.5), //Top Forward Left
-      new Vector3(-0.5, 0.5, -0.5), //Top Back Left
-      new Vector3(0.5, -0.5, -0.5), //Bottom Forward Left
-      new Vector3(-0.5, -0.5, -0.5), //Bottom Back Left
-
-      new Vector3(0.5, 0.5, 0.5), //Top Forward Right
-      new Vector3(0.5, 0.5, -0.5), //Top Forward Left
-      new Vector3(0.5, -0.5, 0.5), //Bottom Forward Right
-      new Vector3(0.5, -0.5, -0.5), //Bottom Forward Left
-    ];
-
-    const uvs: Vector2[] = [];
-    for (let face = 0; face < 6; face++) {
-      if (face === 1) { // Bottom face
-        uvs.push(new Vector2(0, 0)); // sw
-        uvs.push(new Vector2(1, 0)); // se
-        uvs.push(new Vector2(0, 1)); // nw
-        uvs.push(new Vector2(1, 1)); // ne
-      } else {
-        uvs.push(new Vector2(0, 1)); // nw
-        uvs.push(new Vector2(1, 1)); // ne
-        uvs.push(new Vector2(0, 0)); // sw
-        uvs.push(new Vector2(1, 0)); // se
-      }
-    }
-
-    const triangles: number[] = [
-      ...getQuadTriangles(0, 1, 3, 2), //Top
-      ...getQuadTriangles(6, 7, 5, 4), //Bottom
-      ...getQuadTriangles(8, 9, 11, 10), //Back
-      ...getQuadTriangles(12, 13, 15, 14), //Right
-      ...getQuadTriangles(16, 17, 19, 18), //Left
-      ...getQuadTriangles(20, 21, 23, 22), //Front
-    ];
-
-    faceUVCube = [verts, uvs, triangles];
-  }
-
-  return faceUVCube;
-}
-
 
 function getShadeSmoothPlane(drawSide: 'Front' | 'Back' | 'Both'): [Vector3[], Vector2[], number[]] {
   const verts: Vector3[] = [
@@ -565,3 +516,5 @@ function getCone(columns: number): [Vector3[], Vector2[], number[]] {
     return [verts, uvs, triangles];
   }
 }
+
+

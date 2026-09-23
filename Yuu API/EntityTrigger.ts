@@ -2,7 +2,6 @@ import { Vector3 } from "./Basic Types/Vector3";
 import { Entity } from "./Entity";
 import { entity_Data } from "./Entity_Data";
 import { Events } from "./Events";
-import { Player } from "./Player";
 import { registerStart } from "./RegisterStart";
 
 
@@ -12,38 +11,26 @@ function start() {
 }
 
 function onUpdate(deltaTime: number) {
-  const entityPositionsMap = new Map<string, Vector3[]>();
+  const playerPositions: Vector3[] = [];
 
-  entity_Data.triggerDetectableEntities.forEach((id) => {
-    const entity = Entity.getEntityByID(id);
+  // What about triggers that only detect specific body parts
+  addToArray(playerPositions, Godot.localPlayer.head.position.get());
+  addToArray(playerPositions, Godot.localPlayer.body.position.get());
+  addToArray(playerPositions, Godot.localPlayer.leftHand.position.get());
+  addToArray(playerPositions, Godot.localPlayer.rightHand.position.get());
+  addToArray(playerPositions, Godot.localPlayer.foot.position.get());
 
-    if (entity) {
-      const tags = entity.tags.get();
-
-      if (tags.length > 0) {
-        const pos = entity.pos;
-
-        entity.tags.get().forEach((tag) => {
-          const array = entityPositionsMap.get(tag) ?? [];
-          entityPositionsMap.set(tag, array);
-
-          array.push(pos);
-        });
-      }
+  // Also check CubeEntity instances from the cube gun
+  Entity.getAllEntities().forEach((entity) => {
+    if ((entity as any).isCubeEntity) {
+      addToArray(playerPositions, entity.pos);
     }
   });
-
-  const headPos = Player.head.position.get() ?? Vector3.zero;
-  const bodyPos = Player.body.position.get() ?? Vector3.zero;
-  const leftHandPos = Player.leftHand.position.get() ?? Vector3.zero;
-  const rightHandPos = Player.rightHand.position.get() ?? Vector3.zero;
-  const footPos = Player.foot.position.get() ?? Vector3.zero;
 
   entity_Data.triggerMap.forEach((payload, entityNodeID) => {
     // Current Sphere / Cylinder triggers only work upright
     // Need Cube triggers with directions badly
 
-    // We need the callback function to return the WhatCanTrigger type and the Entity if it is an Entity
 
     // Is this necessary if we make sure that deleting the entity deletes the trigger?
 
@@ -62,55 +49,46 @@ function onUpdate(deltaTime: number) {
       }
 
       let didTrigger = false;
-      const positions: Vector3[] = [];
+      const positions: Vector3[] = []
 
-      const checkPositions: Vector3[] = [];
-
-      if (payload.whatCanTrigger.includes('Body')) {
-        checkPositions.push(bodyPos);
-      }
-
-      if (payload.whatCanTrigger.includes('Entity')) {
-        payload.entityTags.forEach((tag) => {
-          const tagPosArray = entityPositionsMap.get(tag);
-
-          if (tagPosArray) {
-            tagPosArray.forEach((pos) => {
-              if (!checkPositions.includes(pos)) {
-                checkPositions.push(pos);
-              }
-            });
-          }
-        });
-      }
-
-      if (payload.whatCanTrigger.includes('Foot')) {
-        checkPositions.push(footPos);
-      }
-
-      if (payload.whatCanTrigger.includes('Head')) {
-        checkPositions.push(headPos);
-      }
-
-      if (payload.whatCanTrigger.includes('Left Hand')) {
-        checkPositions.push(leftHandPos);
-      }
-
-      if (payload.whatCanTrigger.includes('Right Hand')) {
-        checkPositions.push(rightHandPos);
-      }
-
-      checkPositions.forEach((pos) => {
+      playerPositions.forEach((pos) => {
         let isInTrigger = false;
 
-        if (payload.yRadius === undefined) {
-          isInTrigger = entityPos.distanceTo(pos) < payload.triggerRadius;
+        if (payload.boxSize) {
+          const offset = pos.subtract(entityPos);
+          let rightAxis = entity.right;
+          let upAxis = entity.up;
+          let forwardAxis = entity.forward;
+
+          const rMag = rightAxis.magnitude();
+          if (rMag > 0) rightAxis = rightAxis.divide(rMag);
+          const uMag = upAxis.magnitude();
+          if (uMag > 0) upAxis = upAxis.divide(uMag);
+          const fMag = forwardAxis.magnitude();
+          if (fMag > 0) forwardAxis = forwardAxis.divide(fMag);
+
+          const localX = offset.dot(rightAxis);
+          const localY = offset.dot(upAxis);
+          const localZ = offset.dot(forwardAxis);
+
+          if (
+            Math.abs(localX) <= payload.boxSize.x * 0.5 &&
+            Math.abs(localY) <= payload.boxSize.y * 0.5 &&
+            Math.abs(localZ) <= payload.boxSize.z * 0.5
+          ) {
+            isInTrigger = true;
+          }
+        }
+        else if (payload.yRadius === undefined) {
+          if (payload.triggerRadius !== undefined) {
+            isInTrigger = entityPos.distanceTo(pos) < payload.triggerRadius;
+          }
         }
         else {
           const distVec = entityPos.subtract(pos);
 
           if (Math.abs(distVec.y) < payload.yRadius) {
-            if (((distVec.x * distVec.x) + (distVec.z * distVec.z)) < (payload.triggerRadius * payload.triggerRadius)) {
+            if (payload.triggerRadius !== undefined && ((distVec.x * distVec.x) + (distVec.z * distVec.z)) < (payload.triggerRadius * payload.triggerRadius)) {
               isInTrigger = true;
             }
           }
@@ -145,4 +123,11 @@ function onUpdate(deltaTime: number) {
       }
     }
   });
+}
+
+
+function addToArray(array: Vector3[], item: { x: number; y: number; z: number; } | undefined) {
+  if (item) {
+    array.push(new Vector3(item.x, item.y, item.z));
+  }
 }
