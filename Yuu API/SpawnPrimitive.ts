@@ -11,9 +11,6 @@ export const spawnPrimitive = {
   sphere,
   cone,
   cubeScaled,
-  door,
-  chamber,
-  nissanGtr32Exp
 }
 
 /**
