@@ -192,7 +192,7 @@ export async function spawnScene() {
   // Spawn worldspawn_1_10455
   const worldspawn110455 = spawnModel(
     getWorldspawn110455,
-    new Vector3(-0.094278, 0.170410, -2.494232),
+    new Vector3(-0.094278, 1.170410, -2.494232),
     new Vector3(0.010000, 0.010000, 0.010000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
