@@ -48,6 +48,9 @@ function spawnModel(
   type: BaseNodeTypes = 'Static',
   parent: Entity | undefined = undefined
 ): Entity {
+
+  const increasedPos = pos.add(new Vector3(0, 10, 0));
+
   const entity = new Entity(pos, rot, Vector3.one, parent, type);
   entity.mesh.create(...getMesh());
   entity.mesh.color.set(color, Math.min(1, alphaTransparency));
@@ -192,7 +195,7 @@ export async function spawnScene() {
   // Spawn worldspawn_1_10455
   const worldspawn110455 = spawnModel(
     getWorldspawn110455,
-    new Vector3(-0.094278, 1.170410, -2.494232),
+    new Vector3(-0.094278, 0.170410, -2.494232),
     new Vector3(0.010000, 0.010000, 0.010000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -339,14 +342,3 @@ export async function spawnScene() {
 
   applyTextureToEntity(propStatic55866, 'flower_barrel');
 }
-
-const chamberShader = `
-shader_type spatial;
-render_mode cull_disabled;
-
-uniform vec4 wall_color : source_color = vec4(0.8, 0.8, 0.8, 1.0);
-
-void fragment() {
-    ALBEDO = wall_color.rgb;
-}
-`;
