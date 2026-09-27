@@ -4,6 +4,7 @@ import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { Vector2 } from "./Yuu API/Basic Types/Vector2";
 import { Entity } from "./Yuu API/Entity";
 import { getPropStatic55863 } from "./Yuu API/propStatic55863Model";
+import { applyTextureToEntity } from "./Textures/loader";
 
 export const scene = {
   spawnScene,
@@ -33,12 +34,14 @@ function spawnModel(
 export async function spawnScene() {
 
   // Spawn prop_static_55863
-  spawnModel(
+  const propStatic55863 = spawnModel(
     getPropStatic55863,
     new Vector3(-0.094280, 0.207397, 0.138733),
     new Vector3(0.010000, 0.010000, 0.010000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
+
+  applyTextureToEntity(propStatic55863, 'footpath');
 
 }
 
