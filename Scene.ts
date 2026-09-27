@@ -48,10 +48,7 @@ function spawnModel(
   type: BaseNodeTypes = 'Static',
   parent: Entity | undefined = undefined
 ): Entity {
-
-  const increasedPos = pos.add(new Vector3(0, 10, 0));
-
-  const entity = new Entity(increasedPos, rot, Vector3.one, parent, type);
+  const entity = new Entity(pos, rot, Vector3.one, parent, type);
   entity.mesh.create(...getMesh());
   entity.mesh.color.set(color, Math.min(1, alphaTransparency));
   if (hasCollider && entity.mesh.nodeID) {
@@ -342,3 +339,14 @@ export async function spawnScene() {
 
   applyTextureToEntity(propStatic55866, 'flower_barrel');
 }
+
+const chamberShader = `
+shader_type spatial;
+render_mode cull_disabled;
+
+uniform vec4 wall_color : source_color = vec4(0.8, 0.8, 0.8, 1.0);
+
+void fragment() {
+    ALBEDO = wall_color.rgb;
+}
+`;

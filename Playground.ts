@@ -9,7 +9,7 @@ registerStart(start);
 async function start() {
   scene.spawnScene();
 
-  Player.position.set(new Vector3(0, 11, 0));
+  Player.position.set(new Vector3(0, 13, 0));
 
   // if you press right trigger go up 11 units
 
