@@ -48,8 +48,8 @@ function spawnModel(
   type: BaseNodeTypes = 'Static',
   parent: Entity | undefined = undefined
 ): Entity {
-  const entity = new Entity(pos, rot, Vector3.one, parent, type);
-  entity.mesh.create(...getMesh());
+  const increasedPos = pos.add(new Vector3(0, 10, 0));
+  const entity = new Entity(increasedPos, rot, Vector3.one, parent, type);  entity.mesh.create(...getMesh());
   entity.mesh.color.set(color, Math.min(1, alphaTransparency));
   if (hasCollider && entity.mesh.nodeID) {
     entity.collider.createFromMeshNode(entity.mesh.nodeID, 'Concave');
