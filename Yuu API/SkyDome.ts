@@ -13,14 +13,9 @@ import { Async } from "./Async";
 export const skyShaderCode = `
 shader_type sky;
 
-group_uniforms Textures;
-// Equirectangular panorama of the starfield
 uniform sampler2D starfield_texture : filter_linear, repeat_enable;
-// 2D Time-of-Day LUT (mazskygrad)
 uniform sampler2D gradient_lut : filter_linear, repeat_enable;
 
-group_uniforms TimeAndAtmosphere;
-// 0.0 = Midnight, 0.5 = Sunrise/Dawn, 0.75 = Midday Blue, 0.9 = Sunset
 uniform float time_of_day : hint_range(0.0, 1.0) = 0.0;
 uniform float starfield_intensity : hint_range(0.0, 3.0) = 1.0;
 uniform float gradient_intensity : hint_range(0.0, 3.0) = 1.0;
@@ -28,58 +23,42 @@ uniform float gradient_intensity : hint_range(0.0, 3.0) = 1.0;
 const float PI = 3.14159265358979323846;
 
 void sky() {
-    // -------------------------------------------------------------
     // 1. Equirectangular UV Projection for Starfield
-    // -------------------------------------------------------------
     vec2 star_uv;
     star_uv.x = atan(EYEDIR.x, -EYEDIR.z) / (2.0 * PI) + 0.5;
     star_uv.y = acos(clamp(EYEDIR.y, -1.0, 1.0)) / PI;
     vec3 stars = texture(starfield_texture, star_uv).rgb * starfield_intensity;
 
-    // -------------------------------------------------------------
     // 2. Time-of-Day LUT Sampling
-    // -------------------------------------------------------------
     float altitude = clamp(EYEDIR.y, 0.0, 1.0);
     vec2 lut_uv = vec2(time_of_day, 1.0 - altitude);
     vec3 sky_gradient = texture(gradient_lut, lut_uv).rgb * gradient_intensity;
 
-    // -------------------------------------------------------------
     // 3. Additive Blending
-    // -------------------------------------------------------------
     COLOR = stars + sky_gradient;
 }
 `;
 
 /**
  * Spatial Shader (shader_type spatial) for an in-world SkyDome mesh entity.
- * Uses cull_front and unshaded to render the interior of the dome.
+ * Uses cull_disabled and unshaded so it renders both interior and exterior cleanly.
+ * Computes world ray direction directly via INV_VIEW_MATRIX in fragment().
  * Includes both texture sampling and an automatic procedural fallback
  * for seamless operation without external LUT/star textures.
  */
 export const spatialSkyShaderCode = `
 shader_type spatial;
-render_mode unshaded, cull_front, depth_draw_never;
+render_mode unshaded, cull_disabled;
 
-group_uniforms Textures;
 uniform sampler2D starfield_texture : filter_linear, repeat_enable;
 uniform sampler2D gradient_lut : filter_linear, repeat_enable;
 
-group_uniforms TimeAndAtmosphere;
 uniform float time_of_day : hint_range(0.0, 1.0) = 0.0;
 uniform float starfield_intensity : hint_range(0.0, 3.0) = 1.0;
 uniform float gradient_intensity : hint_range(0.0, 3.0) = 1.0;
-
-// 1.0 = procedural gradient/stars fallback, 0.0 = sample textures
 uniform float use_procedural_fallback : hint_range(0.0, 1.0) = 1.0;
 
 const float PI = 3.14159265358979323846;
-
-varying vec3 v_world_dir;
-
-void vertex() {
-    // Direction vector from the center of the sphere in local/world orientation
-    v_world_dir = normalize((MODEL_MATRIX * vec4(VERTEX, 0.0)).xyz);
-}
 
 // Procedural LUT Fallback: replicates Mazskygrad 2D Time-of-Day atmospheric gradient
 vec3 sample_procedural_sky(float tod, float altitude) {
@@ -146,7 +125,9 @@ vec3 sample_procedural_stars(vec2 uv, float tod) {
 }
 
 void fragment() {
-    vec3 eye_dir = normalize(v_world_dir);
+    // In view space, VERTEX is the direction from camera to surface point.
+    // Multiplying with INV_VIEW_MATRIX calculates the world ray direction (identical to EYEDIR).
+    vec3 eye_dir = normalize((INV_VIEW_MATRIX * vec4(VERTEX, 0.0)).xyz);
 
     // 1. Equirectangular UV Projection for Starfield
     vec2 star_uv;
@@ -177,7 +158,7 @@ void fragment() {
 
 export interface SkyDomeOptions {
   /**
-   * Diameter of the dome sphere in meters (default: 500)
+   * Diameter of the dome sphere in meters (default: 80, keeping it inside camera far plane)
    */
   diameter?: number;
   /**
@@ -214,9 +195,11 @@ let currentTimeOfDay: number = 0.0;
 function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
   SkyDome.customShader.destroy();
 
-  const diameter = options.diameter ?? 500;
+  const diameter = options.diameter ?? 80;
   currentTimeOfDay = options.timeOfDay ?? 0.0;
   const initialPos = Player.position.get() ?? Vector3.zero;
+
+  console.log(`SkyDome: Spawning SkyDome entity (diameter: ${diameter}, pos: ${initialPos.x}, ${initialPos.y}, ${initialPos.z})`);
 
   activeSkyDomeEntity = spawnPrimitive.sphere(
     32,
@@ -227,12 +210,15 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
     Color.white,
     1,
     'None',
-    'Static',
+    'Empty',
     undefined
   );
 
-  if (activeSkyDomeEntity.mesh.nodeID) {
-    activeSkyDomeEntity.mesh.shader.set(spatialSkyShaderCode);
+  const meshNodeID = activeSkyDomeEntity.mesh.nodeID;
+  if (meshNodeID) {
+    const success = activeSkyDomeEntity.mesh.shader.set(spatialSkyShaderCode);
+    console.log(`SkyDome: Shader applied to meshNodeID ${meshNodeID}, success: ${success}`);
+
     activeSkyDomeEntity.mesh.shader.updateNumber("time_of_day", currentTimeOfDay);
     activeSkyDomeEntity.mesh.shader.updateNumber("starfield_intensity", options.starfieldIntensity ?? 1.0);
     activeSkyDomeEntity.mesh.shader.updateNumber("gradient_intensity", options.gradientIntensity ?? 1.0);
@@ -240,6 +226,8 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
       "use_procedural_fallback",
       (options.useProceduralFallback ?? true) ? 1.0 : 0.0
     );
+  } else {
+    console.error("SkyDome: Failed to retrieve meshNodeID for SkyDome entity!");
   }
 
   const followPlayer = options.followPlayer ?? true;

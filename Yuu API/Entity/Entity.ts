@@ -464,10 +464,11 @@ export class Entity {
      * Shader code is not safely implemented, use this feature with caution.
      */
     shader: {
-      set: (shaderCode: string) => {
+      set: (shaderCode: string): boolean => {
         if (this.mesh.nodeID) {
-          Godot.shader.applyToMesh(this.mesh.nodeID, shaderCode);
+          return Godot.shader.applyToMesh(this.mesh.nodeID, shaderCode);
         }
+        return false;
       },
 
       updateNumber: (parameterName: string, value: number) => {

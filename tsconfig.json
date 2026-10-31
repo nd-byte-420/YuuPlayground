@@ -6,6 +6,7 @@
   },
   "exclude": [
     "Yuu API-2",
+    "Yuu-android",
     "Scene.ts"
   ]
 }
