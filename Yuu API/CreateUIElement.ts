@@ -1,7 +1,7 @@
 import { Color } from "./Basic Types/Color";
 import { Quaternion } from "./Basic Types/Quaternion";
 import { Vector3 } from "./Basic Types/Vector3";
-import { Entity } from "./Entity";
+import { Entity } from "./Entity/Entity";
 import { spawnPrimitive } from "./SpawnPrimitive";
 
 

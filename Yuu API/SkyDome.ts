@@ -25,10 +25,18 @@ export const SkyDome = {
       set: (value: number): boolean => { return Godot.skyDome.ambientLight.skyColorContribution.set(value); },
       get: (): number | undefined => { return Godot.skyDome.ambientLight.skyColorContribution.get(); },
     },
+    setToDefaults: setAmbientLightToDefaults,
   },
   skyMaterial: {
     setProceduralSkyMaterial,
+    setToDefaults: setProceduralSkyMaterialToDefaults,
   },
+}
+
+function setAmbientLightToDefaults() {
+  SkyDome.ambientLight.baseColor.set(Color.white);
+  SkyDome.ambientLight.energy.set(1);
+  SkyDome.ambientLight.skyColorContribution.set(0);
 }
 
 /**
@@ -57,4 +65,8 @@ function setProceduralSkyMaterial(
     bottomHorizonColor ? { r: bottomHorizonColor.r, g: bottomHorizonColor.g, b: bottomHorizonColor.b } : undefined,
     bottomCurve,
   );
+}
+
+function setProceduralSkyMaterialToDefaults() {
+  setProceduralSkyMaterial(new Color(0.07, 0.48, 0.99), new Color(0.73, 0.89, 0.94), 0.15, new Color(0.2, 0.42, 0.14), new Color(0.73, 0.89, 0.94), 0.0199);
 }

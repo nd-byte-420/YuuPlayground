@@ -1,6 +1,6 @@
 import { Quaternion } from "./Basic Types/Quaternion";
 import { Vector3 } from "./Basic Types/Vector3";
-import { Entity } from "./Entity";
+import { Entity } from "./Entity/Entity";
 import { Events } from "./Events";
 import { registerStart } from "./RegisterStart";
 

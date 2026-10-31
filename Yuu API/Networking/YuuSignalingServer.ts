@@ -77,8 +77,6 @@ async function getServerCode(isPublic: boolean, username: string, planetName: st
 
 function findServer(code: string) {
   socket = initializeNewSocket();
-
-
 }
 
 

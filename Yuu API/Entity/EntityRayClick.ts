@@ -1,15 +1,15 @@
-import { Quaternion } from "./Basic Types/Quaternion";
-import { Vector2 } from "./Basic Types/Vector2";
-import { Vector3 } from "./Basic Types/Vector3";
-import { Controller } from "./Controller";
+import { Quaternion } from "../Basic Types/Quaternion";
+import { Vector3 } from "../Basic Types/Vector3";
+import { Controller } from "../Controller";
+import { Events } from "../Events";
+import { Paint } from "../Paint";
+import { Player } from "../Player";
+import { Raycast } from "../Raycast";
+import { registerStart } from "../RegisterStart";
 import { Entity } from "./Entity";
-import { entity_Data } from "./Entity_Data";
-import { entityRayClick_Data } from "./EntityRayClick_Data";
-import { Events } from "./Events";
-import { Paint } from "./Paint";
-import { Player } from "./Player";
-import { Raycast, RayHit } from "./Raycast";
-import { registerStart } from "./RegisterStart";
+import { entityData } from "./Entity_Data";
+import { entityRayClick_Data, RayPropertiesPerHand } from "./EntityRayClick_Data";
+
 
 
 // Need to bring back color on these when pointed at a paintable entity
@@ -20,62 +20,31 @@ registerStart(start);
 function start() {
   Events.onPhysicsUpdate(onUpdate);
 
-  connectControllerEvents('leftTrigger', leftRayProperties);
-  connectControllerEvents('rightTrigger', rightRayProperties);
+  connectControllerEvents('leftTrigger', entityRayClick_Data.leftRayProperties);
+  connectControllerEvents('rightTrigger', entityRayClick_Data.rightRayProperties);
 }
 
-function connectControllerEvents(buttonConnected: ControllerButtonPressed, rayProperties: RayProperties) {
+function connectControllerEvents(buttonConnected: ControllerButtonPressed, rayProperties: RayPropertiesPerHand) {
   Controller.subscribe(buttonConnected, 'Pressed', () => { callRayHitCallback(rayProperties, 'Clicked'); });
   Controller.subscribe(buttonConnected, 'Update', () => { callRayHitCallback(rayProperties, 'Held'); });
   Controller.subscribe(buttonConnected, 'Released', () => { callRayHitCallback(rayProperties, 'Released'); });
 }
 
 function onUpdate(deltaTime: number) {
-  if (entity_Data.rayClickMap.size > 0) {
+  if (entityData.rayClickMap.size > 0) {
     rayClick();
   }
 }
 
 
-type RayProperties = {
-  lastHitUVEntity: Entity | undefined,
-  isVisible: boolean,
-  isIndexPressed: boolean,
-  currentEntity: Entity | undefined,
-  currentClickedEntity: Entity | undefined,
-  rayHit: RayHit | undefined,
-  lastUV: Vector2 | undefined;
-}
-
-const leftRayProperties: RayProperties = {
-  lastHitUVEntity: undefined,
-  isVisible: true,
-  isIndexPressed: false,
-  currentEntity: undefined,
-  currentClickedEntity: undefined,
-  rayHit: undefined,
-  lastUV: undefined,
-}
-
-const rightRayProperties: RayProperties = {
-  lastHitUVEntity: undefined,
-  isVisible: true,
-  isIndexPressed: false,
-  currentEntity: undefined,
-  currentClickedEntity: undefined,
-  rayHit: undefined,
-  lastUV: undefined,
-}
-
-
 function rayClick() {
   if (entityRayClick_Data.leftPointer && entityRayClick_Data.rightPointer) {
-    perHandRayClick(leftRayProperties, entityRayClick_Data.leftPointer, Player.leftHand.position.get(), Player.leftHand.forward.get(), Player.leftHand.rotation.get());
-    perHandRayClick(rightRayProperties, entityRayClick_Data.rightPointer, Player.rightHand.position.get(), Player.rightHand.forward.get(), Player.rightHand.rotation.get());
+    perHandRayClick(entityRayClick_Data.leftRayProperties, entityRayClick_Data.leftPointer, Player.leftHand.position.get(), Player.leftHand.forward.get(), Player.leftHand.rotation.get());
+    perHandRayClick(entityRayClick_Data.rightRayProperties, entityRayClick_Data.rightPointer, Player.rightHand.position.get(), Player.rightHand.forward.get(), Player.rightHand.rotation.get());
   }
 }
 
-function perHandRayClick(rayProperties: RayProperties, pointer: Entity, pos: Vector3 | undefined, forward: Vector3 | undefined, rotation: Quaternion | undefined) {
+function perHandRayClick(rayProperties: RayPropertiesPerHand, pointer: Entity, pos: Vector3 | undefined, forward: Vector3 | undefined, rotation: Quaternion | undefined) {
   if (pos && forward && rotation) {
     rayProperties.currentEntity = undefined;
 
@@ -91,9 +60,9 @@ function perHandRayClick(rayProperties: RayProperties, pointer: Entity, pos: Vec
     if (rayHit?.entity) {
       rayProperties.currentEntity = rayHit.entity;
 
-      const hitUVEntity = entity_Data.uvEntities.includes(rayHit.entity.nodeID ?? -1);
-      const hitPaintableEntity = entity_Data.paintableEntities.includes(rayHit.entity.nodeID ?? -1);
-      const hitClickableEntity = entity_Data.rayClickMap.has(rayHit.entity.nodeID ?? -1);
+      const hitUVEntity = entityData.uvEntities.includes(rayHit.entity.nodeID ?? -1);
+      const hitPaintableEntity = entityData.paintableEntities.includes(rayHit.entity.nodeID ?? -1);
+      const hitClickableEntity = entityData.rayClickMap.has(rayHit.entity.nodeID ?? -1);
 
       if (hitPaintableEntity || hitClickableEntity) {
         const placementPos = pos.add(forward.multiply(rayHit.distance / 2));
@@ -133,14 +102,14 @@ function perHandRayClick(rayProperties: RayProperties, pointer: Entity, pos: Vec
   }
 }
 
-function callRayHitCallback(rayProperties: RayProperties, type: 'Clicked' | 'Held' | 'Released') {
+function callRayHitCallback(rayProperties: RayPropertiesPerHand, type: 'Clicked' | 'Held' | 'Released') {
   if (type === 'Clicked') {
     rayProperties.isIndexPressed = true;
     rayProperties.currentClickedEntity = undefined;
   }
 
   if (rayProperties.currentEntity && rayProperties.rayHit) {
-    const payload = entity_Data.rayClickMap.get(rayProperties.currentEntity.nodeID ?? -1);
+    const payload = entityData.rayClickMap.get(rayProperties.currentEntity.nodeID ?? -1);
 
     if (payload) {
       if (type === 'Held') {

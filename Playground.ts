@@ -1,13 +1,15 @@
 import { registerStart } from "./Yuu API/RegisterStart";
 
-import { scene } from "./Scene";
+// import { scene } from "./Scene";
 import { Player } from "./Yuu API/Player";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { Controller } from "./Yuu API/Controller";
 
 registerStart(start);
 async function start() {
-  scene.spawnScene();
+  // scene.spawnScene();
+
+
 
   Player.position.set(new Vector3(0, 13, 0));
 

@@ -18,6 +18,26 @@ type ColliderTypes = 'Convex' | 'Concave';
 
 type ControllerButtonPressed = 'rightA' | 'rightB' | 'leftX' | 'leftY' | 'leftMenu' | 'leftTrigger' | 'rightTrigger' | 'leftGrip' | 'rightGrip' | 'leftThumbstick' | 'rightThumbstick'; // 'rightHome' is used for the right menu button, but on Quest is never triggered as the app is exited when the button is clicked
 
+/**
+ * Options used to select what type of 3D shape that the particle effects can exist within
+ * - Point: Spawns all particles at the emitter's origin.
+ * - Sphere: Spawns particles randomly within a spherical volume.
+ * - Sphere Surface: Spawns particles randomly on the surface of a sphere.
+ * - Box: Spawns particles randomly within a box-shaped volume.
+ * - Ring: Spawns particles within a ring-shaped area around the emitter.
+ *  */
+type ParticlesEmissionShape = 'Point' | 'Sphere' | 'Sphere Surface' | 'Box' | 'Ring';
+
+/**
+ * In particle emission: the positional alignment of particles. Useful for billboarding and aligning to velocity.
+ * - Disabled: no alignment of particle transform relative to camera or velocity.
+ * - Billboard: aligns particle's Z axis to face the camera
+ * - AlignToVelocity: aligns each particle's Y axis to the velocity vector. 
+ * - BillboardAlignToVelocity: align each particle's Z axis to the camera and Y axis to the velocity vector
+ * - LocalBillboard: aligns each particle's Z axis to face the camera while preserving the y axis
+ *  */
+type ParticlesTransformAlignment = 'Disabled' | 'Billboard' | 'AlignToVelocity' | 'BillboardAlignToVelocity' | 'LocalBillboard';
+
 
 // declare namespace console {
 //   function log(msg: any): boolean;
@@ -51,6 +71,27 @@ declare namespace Godot {
      * @returns boolean true if the timer was found and cleared
      */
     clearTimer: (id: number) => boolean;
+  }
+
+  const crypto: {
+    /**
+     * Generate a cryptographically secure v4 UUID using the format 4-2-2-2-6: "00000000-0000-0000-0000-00000000000"
+     */
+    generateRandomV4UUID: () => string | undefined;
+
+    /**
+     * Generate an array of cryptographically secure bytes
+     * @param amount of bytes to generate
+     * @returns byte array as ArrayBuffer, can be used via `new Uint8Array(buffer)`
+     */
+    generateRandomBytes: (amount: number) => ArrayBuffer | undefined;
+
+    /**
+     * Get the SHA-256 hash of a string
+     * @param content to hash
+     * @returns string
+     */
+    getSHA256Hash: (content: string) => string;
   }
 
   const events: {
@@ -91,40 +132,14 @@ declare namespace Godot {
   }
 
 
-
-  // Things needed to be able to "travel to a new world"
-  // - Download zip from git hub
-  // - Unzip (should be done on separate thread)
-  // - Get contents of a folder
-
-  // Ideally a user could type in their git repo, it would download into a templates folder
-  // The user could then select a template to open
-  // Eventually these would not just open, but would become world save files (will need some way to update the code once created)
-  // Will also need a way to delete templates (maybe built in can't be deleted)
-  // Long term need a way to transfer read/write files locally over LAN
-
-
   const files: {
-    zip: {
-      compressFolder: (dirPathToCompress: string, saveZipToDirPath: string, zipFileName: string) => boolean;
-      extractFiles: (zipDirPath: string, saveDirPath: string, unzippedFolderName: string) => boolean;
-    }
-    folder: {
-      /**
-       * Create a folder at the specified dirPath
-       * @param dirPath to create a folder in, path to directory will be created if it doesn't exist
-       * @param folderName to create
-       * @returns boolean true if successful
-       */
-      create: (dirPath: string, folderName: string) => boolean;
-      /**
-       * Get the contents of a dirPath
-       * @param dirPath to get contents of
-       * @param isRecursive if true will return contents of sub folders as well
-       * @returns array of [directory path, file/folder name, file extension, "?" if no extension, or "" empty string for folders]
-       */
-      getContents: (dirPath: string, isRecursive: boolean) => [string, string, string][];
-    }
+    /**
+     * Checks if a file exists and returns a boolean if true
+     * @param filePath to check including extension
+     * @returns boolean true if the file exists
+     */
+    exists: (filePath: string) => boolean;
+
     text: {
       /**
        * Create a text file at the specified directory with corresponding name and extension (overwrites if it already exists)
@@ -152,6 +167,97 @@ declare namespace Godot {
        * @returns string contents, or undefined if unsuccessful
        */
       get: (dirPath: string, fileName: string, fileExtension: string) => string | undefined;
+    }
+    folder: {
+      /**
+       * Checks if a folder exists and returns a boolean if true
+       * @param dirPath to check
+       * @returns boolean true if the directory exists
+       */
+      exists: (dirPath: string) => boolean;
+
+      /**
+       * Create a folder at the specified dirPath
+       * @param dirPath to create a folder at, recursive path to the directory will be created if it doesn't exist
+       * @returns boolean true if successful (false if already exists, or other error occurs)
+       */
+      create: (dirPath: string) => boolean;
+
+      /**
+       * Delete the folder and recursively delete contents at the specified dirPath
+       * @param dirPath to delete
+       * @returns boolean true if successful
+       */
+      delete: (dirPath: string) => boolean;
+
+      /**
+       * Get the contents of a dirPath
+       * @param dirPath to get contents of
+       * @param isRecursive if true will return contents of sub folders as well
+       * @returns array of [directory path, file/folder name, file extension, "?" if no extension, or "" empty string for folders]
+       */
+      getContents: (dirPath: string, isRecursive: boolean) => [string, string, string][];
+
+      /**
+       * Create a JS Virtual Machine
+       * @param jsPath folder of JS files to run
+       * @returns number id to close vm later, undefined if something went wrong
+       */
+      createJSVM: (jsPath: string) => number | undefined;
+      closeJSVM: (id: number) => boolean;
+
+      /**
+       * Get the VM Folder Path, useful for storing files related to the VM (stats, saves, etc)
+       * @returns the path of the root VM folder
+       */
+      getVMPath: () => string;
+    }
+    transpileTS: {
+      /**
+       * Transpile TS Files to JS, runs async, use isTranspileQueueCompleted to check when it is completed
+       * @param tsPath folder to transpile
+       * @param jsPath folder to store js files into
+       * @returns boolean true if successfully queued
+       */
+      folderToFolder: (tsPath: string, jsPath: string) => boolean;
+
+      queue: {
+        /**
+         * Add file to transpile queue
+         * @param dirPath to save the file to
+         * @param fileName to be saved (without extension)
+         * @param contents of the ts file to be transpiled to js
+         * @returns boolean true if successful
+         */
+        addFileTask: (dirPath: string, fileName: string, contents: string) => boolean;
+
+        /**
+         * Start the transpile queue
+         * @returns true if started, false if already running
+         */
+        start: () => boolean;
+
+        isCompleted: () => boolean;
+        filesRemaining: () => number;
+      }
+    }
+    zip: {
+      /**
+       * Compress the contents of a folder into a zip file at a specified location
+       * @param dirPathToCompress folder to compress into a zip
+       * @param saveZipToDirPath folder to save the zip file to
+       * @param zipFileName to use, without extension (ie. 'File_Name')
+       * @returns boolean true if successful
+       */
+      compressFolder: (dirPathToCompress: string, saveZipToDirPath: string, zipFileName: string) => boolean;
+
+      /**
+       * Extract files from a zip into a folder
+       * @param zipDirPath to extract from, inclusive of extension (ie. user://worlds/folder_name/world_name.zip)
+       * @param saveDirPath location to save the uncompressed files to
+       * @returns boolean true if successful
+       */
+      extractFiles: (zipDirPath: string, saveDirPath: string) => boolean;
     }
   }
 
@@ -416,6 +522,21 @@ declare namespace Godot {
        * @returns the id of the created node
        */
       text: (parentID: number, text: string, fontSize: number, outlineSize: number) => number | undefined;
+
+      /**
+       * Creates an audio node
+       * @param parentID to host the audio (for spatial audio this parent will determine the position)
+       * @param isSpatial if true the audio exists in 3D space (too many of these playing simultaneously will cause problems)
+       * @returns the id of the created node
+       */
+      audio: (parentID: number, isSpatial: boolean) => number | undefined;
+
+      /**
+       * Creates a particles node
+       * @param parentID to host and emit the particles
+       * @returns the id of the created node
+       */
+      particles: (parentID: number) => number | undefined;
     };
 
     /**
@@ -641,6 +762,478 @@ declare namespace Godot {
       billboard: {
         set: (id: number, isEnabled: boolean) => boolean,
         get: (id: number) => boolean | undefined,
+      },
+    };
+
+    audio: {
+      /**
+       * A stream must be set to play audio
+       */
+      stream: {
+        setFromFilePath: (id: number, filePath: string) => boolean,
+        setFromByteArray: (id: number, byteArray: Uint8Array | Int16Array, is16Bit: boolean) => boolean,
+      },
+
+      isPlaying: (id: number) => boolean,
+
+      playFromStart: (id: number) => boolean,
+      playFromPosInSeconds: (id: number, posInSeconds: number) => boolean,
+
+      pause: (id: number) => boolean,
+      resume: (id: number) => boolean,
+      stop: (id: number) => boolean,
+
+      currentPosInSeconds: {
+        set: (id: number, posInSeconds: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+
+      volume: {
+        set: (id: number, volume: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+
+      /**
+       * Default is 1, under 1 reduces the pitch, 0 is invalid
+       * Above 1 increases the pitch
+       */
+      pitch: {
+        set: (id: number, pitch: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+
+      /**
+       * Spatial audio plays from the position of the node, non spatial
+       * sounds like "global" audio in the users ears
+       */
+      spatial: {
+        set: (id: number, isSpatial: boolean) => boolean,
+        get: (id: number) => boolean | undefined,
+      },
+
+      /**
+       * Sets the max distance the audio can be heard at
+       * NOTE: this does not change the volume fall off rate (unitSize does that)
+       * 
+       * In general you likely want to adjust the unitSize in tandem
+       */
+      maxDistance: {
+        set: (id: number, maxDistance: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+
+      /**
+       * Adjusts the volume fall off (it feels like changing the distance at which the audio is heard)
+       * The smaller the unitSize, the faster the volume decreases, larger sizes extend the volume to greater distances
+       * You can think of the volume going down at each unit distance (ie. 1m vs 5m)
+       * 
+       * In general you likely want to adjust the maxDistance in tandem
+       * Though if you want a very hard volume fall off at the maxDistance, keeping unitSize large and shrinking maxDistance
+       * can create the effect of being outside a building, and when you go in you can hear the audio loud again
+       */
+      unitSize: {
+        set: (id: number, unitSize: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+
+      /**
+       * This adjusts how much spatial direction is perceived by the listener.
+       * Eg. if you set the value to 1 and face your left ear at the audio source,
+       * you will hear the audio at the intended volume in your left ear, but the right
+       * ear will hear nothing. The default value is 0.95 (this makes it 100% in left ear,
+       * 5% in right ear in the previous example). Setting to 0 makes it so both
+       * ears hear the volume the same. This creates a global sound where only the
+       * volume increase / decrease indicates that the audio is spatial. Not recommended
+       * for most cases as it makes the audio not feel spatial but still takes the extra
+       * processing power compared to non spatial "global" audio.
+       * 
+       * NOTE: has no effect on non spatial audio
+       */
+      panning: {
+        set: (id: number, panning: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+
+      /**
+       * Adjusts the angle that the audio can be heard from, is off by default,
+       * needs to be enabled and degrees set to be used.
+       */
+      emissionAngle: {
+        enabled: {
+          set: (id: number, enabled: boolean) => boolean,
+          get: (id: number) => boolean | undefined,
+        },
+        degrees: {
+          set: (id: number, degrees: number) => boolean,
+          get: (id: number) => number | undefined,
+        },
+
+        /**
+         * Decibel effect applied to the out of range area, the muffling effect.
+         * 
+         * Defaults to -24, values range from -80 to 0.
+         */
+        filter: {
+          set: (id: number, db: number) => boolean,
+          get: (id: number) => number | undefined,
+        },
+      },
+
+      /**
+       * Adjust the max number of times the audio can play over itself.
+       * Useful for rapid sounds, eg. a projectile launch sfx.
+       * 
+       * Imagine setting to 4, you call playFromStart every 100ms, once 4 launch effects are already playing,
+       * and you call playFromStart again, the first is stopped, and a new playback is started.
+       * 
+       * NOTE: because spatial audio allows for moving the audio playback position,
+       * this does not work well for sfx played at multiple positions simultaneously.
+       * In that case you will want to create multiple audio nodes (eg. a pool / array).
+       * 
+       * Defaults to 1, setting higher does make the play-pause APIs not work as intended
+       */
+      maxConcurrent: {
+        set: (id: number, maxConcurrent: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+
+      /**
+       * Allows you to set what bus the audio is played from
+       * 
+       * Eg. a "echo" audio bus could add reverb, etc.
+       * 
+       * NOTE: there is currently no way to create custom busses, and only "Master" exists
+       */
+      bus: {
+        set: (id: number, bus: string) => boolean,
+        get: (id: number) => string | undefined,
+      },
+
+      // We do not currently have a way to create a new Area3D Layer (or the ability to assign an audio bus to it)
+      // But once we do, this could allow you to make sounds heard/played (not sure) have an effect applied
+      // As an example a cathedral could sound echoey, or underwater could sound garbled
+      areaMask: {
+        set: (id: number, areaMaskID: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+    };
+
+    /**
+     * Note: default values listed currently/mostly refer to the entity_data.ts default values.
+     */
+    particles: {
+      initialize: (id: number) => boolean,
+
+      /**
+      * Set the draw pass mesh to a custom mesh, using the currently applied material.
+      */
+      mesh: {
+        set: (id: number, meshID: number) => boolean,
+      },
+
+      /**
+       * Adjusts the 3D shape in which the particles emit and exist in. Set to `Point` by default.
+       * - Point: Spawns all particles at the emitter's origin.
+       * - Sphere: Spawns particles randomly within a spherical volume.
+       * - Sphere Surface: Spawns particles randomly on the surface of a sphere.
+       * - Box: Spawns particles randomly within a box-shaped volume.
+       * - Ring: Spawns particles randomly within a ring-shaped area around the emitter.
+       */
+      shape: {
+        set: (id: number, shape: ParticlesEmissionShape) => boolean,
+        get: (id: number) => ParticlesEmissionShape | undefined,
+
+        sphere: {
+          /**
+           * Adjusts the radius in which the particles can emit. Set to 1.0 by default.
+           */
+          radius: {
+            set: (id: number, radius: number) => boolean,
+            get: (id: number) => number | undefined,
+          },
+        },
+        box: {
+          /**
+           * Defines the Vector3 extents in which the particles emit from the center point. Set to `(1, 1, 1)` by default.
+           */
+          extents: {
+            set: (id: number, x: number, y: number, z: number) => boolean,
+            get: (id: number) => { x: number, y: number, z: number } | undefined,
+          },
+        },
+        ring: {
+          /**
+           * Defines the tilt axis of the emission ring. Set to `0, 0, 0` by default.
+           * Note: a "lying flat" ring is `0, 90, 0`
+           */
+          axis: {
+            set: (id: number, x: number, y: number, z: number) => boolean,
+            get: (id: number) => { x: number, y: number, z: number } | undefined,
+          },
+          /**
+           * Defines the height in meters of the emission ring. Set to `1` by default.
+           */
+          height: {
+            set: (id: number, heightM: number) => boolean,
+            get: (id: number) => number | undefined,
+          },
+          /**
+           * Defines the radius of the emission ring. Set to `1` by default.
+           */
+          radius: {
+            set: (id: number, radius: number) => boolean,
+            get: (id: number) => number | undefined,
+          },
+          /**
+           * Defines the inner radius of the emission ring/cone. Set to `0` by default.
+           */
+          innerRadius: {
+            set: (id: number, radius: number) => boolean,
+            get: (id: number) => number | undefined,
+          },
+          /**
+           * Defines the angle of the emission ring/cone, ranging from 0-90 degrees.
+           * Set to `90 degrees` by default, which results in a ring shape, while `0 degrees` results in a cone.
+           */
+          coneAngle: {
+            set: (id: number, angle: number) => boolean,
+            get: (id: number) => number | undefined,
+          },
+        },
+      },
+
+      /**
+       * Whether or not a particle effect is actively emitting. Set to `true` by default.
+       */
+      isEmitting: {
+        set: (id: number, isEmitting: boolean) => boolean,
+        get: (id: number) => boolean | undefined,
+      },
+
+      /**
+       * When true, uses the "one-shot" effect, where only the number of particles equal to
+       * `amount` will be emitted, and sets `isEmitting` to `false` once completed.
+       * Is off by default.
+       */
+      isOneShot: {
+        set: (id: number, isOneShot: boolean) => boolean,
+        get: (id: number) => boolean | undefined,
+      },
+
+      /**
+       * Adjusts the explosive nature of the particles in a range from `0 - 1`. Set to 0 by default.
+       */
+      explosiveness: {
+        set: (id: number, explosiveness: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+
+      /**
+       * Adjusts the particle randomness in a range from `0 - 1`. Set to 0 by default.
+       */
+      randomness: {
+        set: (id: number, randomness: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+
+      /**
+       * Adjusts the amount of particles. Set to 20 by default.
+      */
+      amount: {
+        set: (id: number, amount: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+
+      /**
+       * Adjusts the particle lifetime in seconds. Set to 1.0 by default.
+       */
+      lifetime: {
+        set: (id: number, lifetimeInSeconds: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+
+      /**
+       * Adjusts the animation speed, slowing when below one, and speeding up when higher. Set to 1.0 by default.
+       * Note: gravity doesn't override, so at 0.5x, the gravity appears less than the set value,
+       * and at 2x particles appear to fall faster than gravity. 
+      */
+      speedScale: {
+        set: (id: number, speed: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+
+      /**
+       * Adjusts the min and max particle size, a random scale is selected between the range.
+       * Set to min: 0.1 and max: 1.0 by default.
+       */
+      scale: {
+        min: {
+          set: (id: number, min: number) => boolean,
+          get: (id: number) => number | undefined,
+        },
+        max: {
+          set: (id: number, max: number) => boolean,
+          get: (id: number) => number | undefined,
+        }
+      },
+
+      /**
+       * Adjusts the particles initial rotation when emitted.
+       * Default set to `false` and `(0, 0, 0)` for both min and max.
+       */
+      initialRotation: {
+        isEnabled: {
+          set: (id: number, isEnabled: boolean) => boolean,
+          get: (id: number) => number | undefined,
+        }
+        min: {
+          set: (id: number, x: number, y: number, z: number) => boolean,
+          get: (id: number) => { x: number, y: number, z: number } | undefined,
+        },
+        max: {
+          set: (id: number, x: number, y: number, z: number) => boolean,
+          get: (id: number) => { x: number, y: number, z: number } | undefined,
+        },
+      },
+
+      /**
+       * Adjusts the min and max initial velocity of the particles. Set to min: 0.25 and max: 1.0 by default.
+       */
+      initialVelocity: {
+        min: {
+          set: (id: number, min: number) => boolean,
+          get: (id: number) => number | undefined,
+        },
+        max: {
+          set: (id: number, max: number) => boolean,
+          get: (id: number) => number | undefined,
+        }
+      },
+
+      /**
+       * Adjusts the particles spin when emitted.
+       * Default set to `false` and `(0, 0, 0)` for both min and max.
+       */
+      rotationVelocity: {
+        isEnabled: {
+          set: (id: number, isEnabled: boolean) => boolean,
+          get: (id: number) => number | undefined,
+        }
+        min: {
+          set: (id: number, x: number, y: number, z: number) => boolean,
+          get: (id: number) => { x: number, y: number, z: number } | undefined,
+        },
+        max: {
+          set: (id: number, x: number, y: number, z: number) => boolean,
+          get: (id: number) => { x: number, y: number, z: number } | undefined,
+        },
+      },
+
+      /**
+       * Adjusts the gravity applied to each particle, is set to 0.0 by default.
+       * Earth gravity is about `0, -9.81, 0`.
+       */
+      gravity: {
+        set: (id: number, x: number, y: number, z: number) => boolean,
+        get: (id: number) => { x: number, y: number, z: number } | undefined,
+      },
+
+      /**
+       * Adjusts the direction in which the particles emit. Default set to up, `0, 1, 0`.
+       * Note: This is impacted by `particles.spread` which has a default angle of 180, so by default, direction is ignored and it fires in all directions.
+       */
+      direction: {
+        set: (id: number, x: number, y: number, z: number) => boolean,
+        get: (id: number) => { x: number, y: number, z: number } | undefined,
+      },
+
+      /**
+       * Adjusts the angle of spread for emitting particles ranging from `0 - 180`. Set to `180` by default.
+       * Note: Spread is in all directions at 180, below that, it goes in the direction specified by `particles.direction`
+       */
+      spread: {
+        set: (id: number, angle: number) => boolean,
+        get: (id: number) => number | undefined,
+      },
+
+      /**
+       * Adjusts a vortex like force, causing particles to move in a spiral. Defaults set to `0` for both min and max.
+       */
+      tangentialAcceleration: {
+        min: {
+          set: (id: number, min: number) => boolean,
+          get: (id: number) => number | undefined,
+        },
+        max: {
+          set: (id: number, max: number) => boolean,
+          get: (id: number) => number | undefined,
+        },
+      },
+
+      turbulence: {
+        /**
+         * Adjusts whether or not to enable the turbulence system, in practice it looks like wind.
+         * Set to `False` by default.
+         * Note: Enabling this has a high performance cost for the GPU. Use sparingly on only a few particle systems at once.
+         */
+        isEnabled: {
+          set: (id: number, isEnabled: boolean) => boolean,
+          get: (id: number) => boolean | undefined,
+        },
+        /**
+         * The turbulence noise strength. Higher values result in a stronger flow pattern. Set to `1` by default.
+         */
+        noiseStrength: {
+          set: (id: number, strength: number) => boolean,
+          get: (id: number) => number | undefined,
+        },
+        /**
+         * The overall frequency/scale of the turbulence noise pattern. Higher values result in smoother noise with larger features.
+         * Set to `9` by default.
+         */
+        noiseScale: {
+          set: (id: number, scale: number) => boolean,
+          get: (id: number) => number | undefined,
+        },
+        /**
+         * The directional trend for the pattern to move in over time. Set to `(0, 0, 0)` by default.
+         */
+        noiseSpeed: {
+          set: (id: number, x: number, y: number, z: number) => boolean,
+          get: (id: number) => { x: number, y: number, z: number } | undefined,
+        },
+        /**
+         * The randomness of the noise pattern over time. A value of `0` will result in a fixed pattern.
+         * Set to `0.2` by default.
+         */
+        noiseSpeedRandom: {
+          set: (id: number, randomness: number) => boolean,
+          get: (id: number) => number | undefined,
+        },
+      },
+
+      /**
+      * Adjusts the positional alignment of particles. Useful for billboarding and aligning to velocity.
+      */
+      transformAlign: {
+        set: (id: number, alignment: ParticlesTransformAlignment) => boolean,
+        get: (id: number) => ParticlesTransformAlignment | undefined,
+
+        /**
+         * Adjusts the min and max angle in degrees of the initial rotation for transform aligned particles.
+         * Min and max are set to 0 by default.
+         * Note: matching min and max values ensure all particles have the same rotation angle.
+         */
+        angle: {
+          min: {
+            set: (id: number, min: number) => boolean,
+            get: (id: number) => number | undefined,
+          },
+          max: {
+            set: (id: number, max: number) => boolean,
+            get: (id: number) => number | undefined,
+          }
+        },
       },
     };
 
@@ -881,11 +1474,13 @@ declare namespace Godot {
       getPackets: (id: number) => string[];
     },
 
-    /**
-     * WebRTCPeerConnection is not thread safe and needs to be run on the main thread (ie. no async)
-     */
     rtcPeer: {
+      /**
+       * @returns peer id, or -1 if there is an error
+       */
       create: () => number;
+
+      createOffer: (id: number) => boolean;
 
       close: (id: number) => boolean;
 
@@ -893,13 +1488,29 @@ declare namespace Godot {
 
       state: (id: number) => ('New' | 'Connecting' | 'Connected' | 'Disconnected' | 'Closed' | 'Failed') | undefined;
 
-      getOffer: (id: number) => { type: string, sdp: string } | undefined;
+      getLocalDescription: (id: number) => { type: string, sdp: string } | undefined;
 
       setRemoteDescription: (id: number, type: string, sdp: string) => boolean;
 
-      // sendText: (id: number, msg: string) => boolean;
+      // Would be wise to add a bool in the future for isGuaranteed/doesExpire (guaranteed is the current default, but time sensitive should drop rather than retry)
+      sendText: (id: number, msg: string) => boolean;
 
-      // getPackets: (id: number) => string[];
+      getPackets: (id: number) => string[];
+    },
+
+    http: {
+      getJSON: <T = unknown>(host: string, path: string) => T | undefined;
+
+      /**
+       * Download a zip from a url over http and save it to a folder with a given name
+       * Note: slow connections will time out after 10 seconds and fail
+       * @param hostURL domain to download from
+       * @param pathURL on the hostURLs domain to download from
+       * @param fileName to use without extension (ie. 'File_Name')
+       * @param folderPath to save the zip into
+       * @returns boolean true if successful
+       */
+      downloadZipToFolder: (hostURL: string, pathURL: string, fileName: string, folderPath: string) => boolean;
     },
   }
 

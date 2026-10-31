@@ -119,6 +119,9 @@ export class Vector3 {
   static get back(): Vector3 { return new Vector3(0, 0, 1); }
   static get left(): Vector3 { return new Vector3(-1, 0, 0); }
   static get right(): Vector3 { return new Vector3(1, 0, 0); }
+  static get earthGravity(): Vector3 { return new Vector3(0, -9.81, 0); }
+  static get moonGravity(): Vector3 { return new Vector3(0, -1.625, 0); }
+  static get marsGravity(): Vector3 { return new Vector3(0, -3.72, 0); }
 
   static add(v1: Vector3, v2: Vector3): Vector3 { return v1.add(v2); }
   static subtract(v1: Vector3, v2: Vector3): Vector3 { return v1.subtract(v2); }

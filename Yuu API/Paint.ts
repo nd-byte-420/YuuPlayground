@@ -1,7 +1,7 @@
 import { Async } from "./Async";
 import { Color } from "./Basic Types/Color";
 import { Vector2 } from "./Basic Types/Vector2";
-import { entityRayClick_Data } from "./EntityRayClick_Data";
+import { entityRayClick_Data } from "./Entity/EntityRayClick_Data";
 import { BrushShapes, paintShapes } from "./PaintShapes";
 import { Texture } from "./Texture";
 
