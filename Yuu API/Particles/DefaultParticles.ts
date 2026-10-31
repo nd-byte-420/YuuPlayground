@@ -107,7 +107,7 @@ function getHeartParticlesProperties(): Partial<ParticlesProperties> {
     gravity: Vector3.moonGravity,
     spread: 4,
 
-    transformAlign: 'Billboard',
+    transformAlign: { type: 'Billboard' },
   }
 }
 
@@ -135,7 +135,7 @@ function getSmokeParticlesProperties(color: Color | undefined): Partial<Particle
     gravity: new Vector3(0, 0.15, 0),
     spread: 25,
 
-    transformAlign: 'Billboard',
+    transformAlign: { type: 'Billboard' },
   }
 }
 
@@ -220,7 +220,7 @@ function getRainParticlesProperties(color: Color | undefined): Partial<Particles
     direction: Vector3.down,
     spread: 2,
 
-    transformAlign: 'AlignToVelocity',
+    transformAlign: { type: 'AlignToVelocity' },
   }
 }
 

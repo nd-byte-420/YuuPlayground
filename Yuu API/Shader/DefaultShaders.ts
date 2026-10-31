@@ -1,10 +1,14 @@
-import { Color } from "../Basic Types/Color"
+import { Color } from "../Basic Types/Color";
+import { skyShaderCode, spatialSkyShaderCode } from "../SkyDome";
 
 
 export const DefaultShaders = {
   getColorShader,
   getRainbowShader,
   getHeartShader,
+  getSkyShader: () => spatialSkyShaderCode,
+  skyShaderCode,
+  spatialSkyShaderCode,
 }
 
 /**

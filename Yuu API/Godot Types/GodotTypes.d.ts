@@ -1,4 +1,4 @@
-﻿
+
 
 /**
  * Options used to select what type of animation & physics a node will have, if any
@@ -1290,6 +1290,10 @@ declare namespace Godot {
         bottomHorizonColor: { r: number, g: number, b: number } | undefined,
         bottomCurve: number | undefined,
       ) => boolean;
+      /**
+       * Applies a custom sky shader (shader_type sky) if supported by the engine bridge
+       */
+      setShader?: (shaderCode: string) => boolean;
     };
   }
 

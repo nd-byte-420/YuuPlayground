@@ -2,6 +2,10 @@
   "compilerOptions": {
     "target": "es2020",
     "module": "esnext",
-    "strictNullChecks": true,
-  }
+    "strictNullChecks": true
+  },
+  "exclude": [
+    "Yuu API-2",
+    "Scene.ts"
+  ]
 }
