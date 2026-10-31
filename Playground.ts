@@ -29,7 +29,7 @@ function updateSkydome() {
 
 registerStart(start);
 async function start() {
-  // updateSkydome();
+  updateSkydome();
 
   Player.position.set(new Vector3(0, 13, 0));
 
