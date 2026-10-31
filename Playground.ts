@@ -23,13 +23,15 @@ function updateSkydome() {
   SkyDome.customShader.startDayNightCycle(120);
 
   // Native sky shader fallback if supported
-  SkyDome.skyMaterial.setShader(SkyDome.skyShaderCode);
+  // SkyDome.skyMaterial.setShader(SkyDome.skyShaderCode);
 }
 
 
 registerStart(start);
 async function start() {
   updateSkydome();
+
+  console.log('spawned skydome');
 
   Player.position.set(new Vector3(0, 13, 0));
 
