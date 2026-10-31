@@ -4,19 +4,6 @@ import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { Controller } from "./Yuu API/Controller";
 import { SkyDome } from "./Yuu API/SkyDome";
 
-registerStart(start);
-async function start() {
-  updateSkydome();
-
-  Player.position.set(new Vector3(0, 13, 0));
-
-  // if you press right trigger go up 11 units
-  Controller.subscribe('rightTrigger', 'Pressed', () => {
-    const prevpos = Player.position.get() || new Vector3(0, 0, 0);
-    const newPos = new Vector3(prevpos.x, prevpos.y + 11, prevpos.z);
-    Player.position.set(newPos);
-  });
-}
 
 function updateSkydome() {
   SkyDome.ambientLight.skyColorContribution.set(0.98);
@@ -38,4 +25,20 @@ function updateSkydome() {
   // Native sky shader fallback if supported
   SkyDome.skyMaterial.setShader(SkyDome.skyShaderCode);
 }
+
+
+registerStart(start);
+async function start() {
+  // updateSkydome();
+
+  Player.position.set(new Vector3(0, 13, 0));
+
+  // // if you press right trigger go up 11 units
+  // Controller.subscribe('rightTrigger', 'Pressed', () => {
+  //   const prevpos = Player.position.get() || new Vector3(0, 0, 0);
+  //   const newPos = new Vector3(prevpos.x, prevpos.y + 11, prevpos.z);
+  //   Player.position.set(newPos);
+  // });
+}
+
 
