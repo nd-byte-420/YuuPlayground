@@ -80,7 +80,7 @@ function getCachedPlaneMesh(type: FlowerParticleType): Entity {
  * - Amount: ~200-400 total (Pink: ~150, Red: ~100, Leaf: ~80)
  * - Lifetime: 4.0s
  * - Emission Shape: Box (extents: Vector3(2.5, 0.5, 2.5))
- * - Direction: Vector3(0.0, -0.25, -1.0).normalized()
+ * - Direction: Vector3(0.0, -0.25, -1.0).normalize()
  * - Spread: 15.0 deg
  * - Initial Velocity: 12.0 - 16.0 m/s
  * - Gravity: Vector3(0.0, -2.5, 0.0)
@@ -94,7 +94,7 @@ function getRampFlowerStreamProperties(type: FlowerParticleType = 'pink', count?
   const amount = count ?? defaultCount;
 
   // Normalized direction down the ramp slope
-  const dir = new Vector3(0.0, -0.25, -1.0).normalized();
+  const dir = new Vector3(0.0, -0.25, -1.0).normalize();
 
   return {
     meshNodeID: meshEntity.mesh.nodeID ?? -1,
