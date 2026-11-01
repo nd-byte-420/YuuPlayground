@@ -20,6 +20,9 @@ function updateSkydome() {
     starfieldIntensity: 1.0,
     gradientIntensity: 1.0,
     starSize: 0.14,
+    enableCelestialOrb: true,
+    moonSize: 0.08,
+    glowSize: 0.22,
     useProceduralFallback: true,
     followPlayer: true,
     autoRotateStars: true,
@@ -81,19 +84,13 @@ registerStart(start);
 async function start() {
   updateSkydome();
 
-  console.log('spawned skydome');
+  console.log('spawned skydome with celestial moon rendered directly on dome');
 
   Player.position.set(new Vector3(0, 13, 0));
 
-  spawnMoonBillboard(32);
-  console.log('spawned moon and glow billboard');
-
-  // // if you press right trigger go up 11 units
-  // Controller.subscribe('rightTrigger', 'Pressed', () => {
-  //   const prevpos = Player.position.get() || new Vector3(0, 0, 0);
-  //   const newPos = new Vector3(prevpos.x, prevpos.y + 11, prevpos.z);
-  //   Player.position.set(newPos);
-  // });
+  // The moon is now rendered directly on the skydome shader.
+  // If you ever want standalone billboard planes in addition, uncomment spawnMoonBillboard(32).
+  // spawnMoonBillboard(32);
 }
 
 

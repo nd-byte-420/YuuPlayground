@@ -14,17 +14,17 @@ export const skyShaderCode = `
 shader_type sky;
 
 group_uniforms Textures;
-uniform sampler2D starfield_texture : filter_linear, repeat_enable;
-uniform sampler2D gradient_lut : filter_linear, repeat_enable;
-uniform sampler2D moon_texture : filter_linear, repeat_disable;
-uniform sampler2D glow_texture : filter_linear, repeat_disable;
+uniform sampler2D starfield_tex : filter_linear, repeat_enable;
+uniform sampler2D skygrad_tex : filter_linear, repeat_enable;
+uniform sampler2D moon_tex : filter_linear, repeat_disable;
+uniform sampler2D glow_tex : filter_linear, repeat_disable;
+uniform sampler2D clouds_tex : filter_linear, repeat_enable;
 
 group_uniforms CelestialOrb;
-// Direction towards the orb (facing forward and slightly elevated above horizon)
-uniform vec3 orb_direction = vec3(0.0, 0.15, -1.0);
-uniform float moon_size : hint_range(0.0, 0.3) = 0.075;
-uniform float glow_size : hint_range(0.0, 1.0) = 0.175;
-uniform float enable_celestial_orb : hint_range(0.0, 1.0) = 0.0;
+uniform vec3 sun_moon_dir = vec3(0.0, 0.4, -1.0); // Celestial forward direction
+uniform float moon_size : hint_range(0.0, 0.5) = 0.08;
+uniform float glow_size : hint_range(0.0, 1.0) = 0.22;
+uniform float enable_celestial_orb : hint_range(0.0, 1.0) = 1.0;
 
 group_uniforms TimeAndAtmosphere;
 // 0.0 = Midnight, 0.5 = Dawn, 0.75 = Midday, 0.9 = Sunset
@@ -35,35 +35,35 @@ uniform float gradient_intensity : hint_range(0.0, 3.0) = 1.0;
 const float PI = 3.14159265358979323846;
 
 void sky() {
-    // ---------------------------------------------------------
-    // 1. Starfield (Equirectangular)
-    // ---------------------------------------------------------
-    vec2 star_uv;
-    star_uv.x = atan(EYEDIR.x, -EYEDIR.z) / (2.0 * PI) + 0.5;
-    star_uv.y = acos(clamp(EYEDIR.y, -1.0, 1.0)) / PI;
-    vec3 stars = texture(starfield_texture, star_uv).rgb * starfield_intensity;
+    vec3 dir = normalize(EYEDIR);
+    float elev = abs(dir.y); // Symmetric across horizon
 
-    // ---------------------------------------------------------
-    // 2. Day/Night Atmosphere LUT Gradient
-    // ---------------------------------------------------------
-    float altitude = clamp(EYEDIR.y, 0.0, 1.0);
-    vec2 lut_uv = vec2(time_of_day, 1.0 - altitude);
-    vec3 sky_gradient = texture(gradient_lut, lut_uv).rgb * gradient_intensity;
+    // 1. Base Starfield (Equirectangular)
+    vec2 star_uv = vec2(atan(dir.x, -dir.z) / (2.0 * PI) + 0.5, acos(clamp(dir.y, -1.0, 1.0)) / PI);
+    vec3 star_color = texture(starfield_tex, star_uv).rgb * starfield_intensity;
 
-    // ---------------------------------------------------------
-    // 3. Sun & Moon Celestial Orb
-    // ---------------------------------------------------------
-    vec3 norm_orb = normalize(orb_direction);
-    vec3 orb_emission = vec3(0.0);
+    // 2. Atmosphere Gradient (mazskygrad.png)
+    float grad_v = clamp(pow(elev, 1.6), 0.003, 0.995);
+    vec3 grad_color = texture(skygrad_tex, vec2(time_of_day, grad_v)).rgb * gradient_intensity;
 
-    // Only compute if looking towards the orb hemisphere and enabled
-    if (enable_celestial_orb > 0.5 && dot(EYEDIR, norm_orb) > 0.0) {
-        // Construct tangent projection basis
-        vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), norm_orb));
-        vec3 up = cross(norm_orb, right);
-        vec3 diff = EYEDIR - norm_orb;
+    // 3. 360-Degree Horizon Glow Band
+    float horizon_falloff = pow(clamp(1.0 - (elev / 0.28), 0.0, 1.0), 2.0);
+    vec3 horizon_tint = texture(skygrad_tex, vec2(time_of_day, 0.005)).rgb;
+    vec3 horizon_glow = horizon_tint * horizon_falloff * 1.5;
 
-        // Day factor: 0.0 at night (U=0.0-0.4), 1.0 at peak day (U=0.75)
+    // 4. Moon & Sun Celestial Orb (Dot product perspective projection)
+    vec3 celestial_color = vec3(0.0);
+    vec3 orb_dir = normalize(sun_moon_dir);
+    float cos_angle = dot(dir, orb_dir);
+
+    if (enable_celestial_orb > 0.5 && cos_angle > 0.0) {
+        // Construct tangent projection basis perpendicular to sun_moon_dir
+        vec3 up_hint = abs(orb_dir.y) > 0.99 ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0);
+        vec3 right = normalize(cross(up_hint, orb_dir));
+        vec3 up = cross(orb_dir, right);
+        vec3 diff = dir - orb_dir;
+
+        // Day factor: 0.0 at night, 1.0 at day
         float day_factor = clamp((sin((time_of_day - 0.5) * 2.0 * PI) + 1.0) * 0.5, 0.0, 1.0);
         float night_factor = 1.0 - day_factor;
 
@@ -75,24 +75,22 @@ void sky() {
         // Sample Glow Aura
         vec2 glow_uv = vec2(dot(diff, right), dot(diff, up)) / (2.0 * glow_size) + vec2(0.5);
         if (glow_uv.x >= 0.0 && glow_uv.x <= 1.0 && glow_uv.y >= 0.0 && glow_uv.y <= 1.0) {
-            float glow_alpha = texture(glow_texture, glow_uv).a;
-            orb_emission += current_glow_tint * glow_alpha;
+            float glow_alpha = texture(glow_tex, glow_uv).a;
+            celestial_color += current_glow_tint * glow_alpha * 1.2;
         }
 
-        // Sample Moon Disc (faded by night_factor)
+        // Sample Moon Texture Disc
         if (night_factor > 0.01) {
             vec2 moon_uv = vec2(dot(diff, right), dot(diff, up)) / (2.0 * moon_size) + vec2(0.5);
             if (moon_uv.x >= 0.0 && moon_uv.x <= 1.0 && moon_uv.y >= 0.0 && moon_uv.y <= 1.0) {
-                vec4 moon_sample = texture(moon_texture, moon_uv);
-                orb_emission += moon_sample.rgb * moon_sample.a * night_factor;
+                vec4 moon_sample = texture(moon_tex, moon_uv);
+                celestial_color += moon_sample.rgb * moon_sample.a * night_factor;
             }
         }
     }
 
-    // ---------------------------------------------------------
-    // 4. Final Additive Composition
-    // ---------------------------------------------------------
-    COLOR = stars + sky_gradient + orb_emission;
+    // 5. Additive Combination ($additive 1)
+    COLOR = star_color + grad_color + horizon_glow + celestial_color;
 }
 `;
 
@@ -115,10 +113,10 @@ uniform sampler2D glow_texture : filter_linear, repeat_disable;
 
 group_uniforms CelestialOrb;
 // Direction towards the orb (facing forward and slightly elevated above horizon)
-uniform vec3 orb_direction = vec3(0.0, 0.15, -1.0);
-uniform float moon_size : hint_range(0.0, 0.3) = 0.075;
-uniform float glow_size : hint_range(0.0, 1.0) = 0.175;
-uniform float enable_celestial_orb : hint_range(0.0, 1.0) = 0.0;
+uniform vec3 orb_direction = vec3(0.0, 0.4, -1.0);
+uniform float moon_size : hint_range(0.0, 0.5) = 0.08;
+uniform float glow_size : hint_range(0.0, 1.0) = 0.22;
+uniform float enable_celestial_orb : hint_range(0.0, 1.0) = 1.0;
 
 group_uniforms TimeAndAtmosphere;
 uniform float time_of_day : hint_range(0.0, 1.0) = 0.0;
@@ -316,15 +314,15 @@ export interface SkyDomeOptions {
    */
   starSize?: number;
   /**
-   * Moon disc size in UV space (default: 0.075)
+   * Moon disc size in UV space (default: 0.08)
    */
   moonSize?: number;
   /**
-   * Glow aura size in UV space (default: 0.175)
+   * Glow aura size in UV space (default: 0.22)
    */
   glowSize?: number;
   /**
-   * Render the celestial orb (sun/moon) directly in the background dome shader (default: false when using billboards)
+   * Render the celestial orb (sun/moon) directly in the background dome shader (default: true)
    */
   enableCelestialOrb?: boolean;
   /**
@@ -377,11 +375,11 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
     activeSkyDomeEntity.mesh.shader.updateNumber("starfield_intensity", options.starfieldIntensity ?? 1.0);
     activeSkyDomeEntity.mesh.shader.updateNumber("gradient_intensity", options.gradientIntensity ?? 1.0);
     activeSkyDomeEntity.mesh.shader.updateNumber("star_size", options.starSize ?? 0.14);
-    activeSkyDomeEntity.mesh.shader.updateNumber("moon_size", options.moonSize ?? 0.075);
-    activeSkyDomeEntity.mesh.shader.updateNumber("glow_size", options.glowSize ?? 0.175);
+    activeSkyDomeEntity.mesh.shader.updateNumber("moon_size", options.moonSize ?? 0.08);
+    activeSkyDomeEntity.mesh.shader.updateNumber("glow_size", options.glowSize ?? 0.22);
     activeSkyDomeEntity.mesh.shader.updateNumber(
       "enable_celestial_orb",
-      (options.enableCelestialOrb ?? false) ? 1.0 : 0.0
+      (options.enableCelestialOrb ?? true) ? 1.0 : 0.0
     );
     activeSkyDomeEntity.mesh.shader.updateNumber(
       "use_procedural_fallback",
