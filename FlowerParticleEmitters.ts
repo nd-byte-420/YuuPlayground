@@ -64,16 +64,23 @@ let cachedRedPlane: Entity | undefined;
 let cachedLeafPlane: Entity | undefined;
 
 function getCachedPlaneMesh(type: FlowerParticleType): Entity {
-  if (type === 'pink') {
-    if (!cachedPinkPlane) cachedPinkPlane = createParticlePlaneMesh('pink');
-    return cachedPinkPlane;
+  try {
+    if (type === 'pink') {
+      if (!cachedPinkPlane) cachedPinkPlane = createParticlePlaneMesh('pink');
+      return cachedPinkPlane;
+    }
+    if (type === 'red') {
+      if (!cachedRedPlane) cachedRedPlane = createParticlePlaneMesh('red');
+      return cachedRedPlane;
+    }
+    if (!cachedLeafPlane) cachedLeafPlane = createParticlePlaneMesh('leaf');
+    return cachedLeafPlane;
+  } catch (err: any) {
+    console.error(`Failed to create particle plane mesh for '${type}':`, err?.message || err);
+    // Fall back to pink or plain plane mesh so emitter doesn't crash
+    if (cachedPinkPlane) return cachedPinkPlane;
+    return createParticlePlaneMesh('pink');
   }
-  if (type === 'red') {
-    if (!cachedRedPlane) cachedRedPlane = createParticlePlaneMesh('red');
-    return cachedRedPlane;
-  }
-  if (!cachedLeafPlane) cachedLeafPlane = createParticlePlaneMesh('leaf');
-  return cachedLeafPlane;
 }
 
 /**
@@ -209,11 +216,15 @@ function spawnRampFlowerStream(pos: Vector3 = FlowerParticleEmitters.LOCATIONS.r
 
   const types: FlowerParticleType[] = ['pink', 'red', 'leaf'];
   for (const t of types) {
-    const props = getRampFlowerStreamProperties(t);
-    const emitter = new Entity(pos, Quaternion.one, Vector3.one, undefined, 'Static');
-    emitter.particles.setParticlesProperties(props);
-    emitter.particles.play();
-    entities.push(emitter);
+    try {
+      const props = getRampFlowerStreamProperties(t);
+      const emitter = new Entity(pos, Quaternion.one, Vector3.one, undefined, 'Static');
+      emitter.particles.setParticlesProperties(props);
+      emitter.particles.play();
+      entities.push(emitter);
+    } catch (err: any) {
+      console.error(`spawnRampFlowerStream: Error creating emitter for '${t}':`, err?.message || err);
+    }
   }
 
   return entities;
@@ -230,20 +241,28 @@ function spawnHexFlowerShooters(): { left: Entity[]; right: Entity[] } {
 
   // Left hex tower
   for (const t of types) {
-    const props = getHexFlowerShooterProperties(t);
-    const emitter = new Entity(FlowerParticleEmitters.LOCATIONS.hexTowerLeft, Quaternion.one, Vector3.one, undefined, 'Static');
-    emitter.particles.setParticlesProperties(props);
-    emitter.particles.play();
-    leftEntities.push(emitter);
+    try {
+      const props = getHexFlowerShooterProperties(t);
+      const emitter = new Entity(FlowerParticleEmitters.LOCATIONS.hexTowerLeft, Quaternion.one, Vector3.one, undefined, 'Static');
+      emitter.particles.setParticlesProperties(props);
+      emitter.particles.play();
+      leftEntities.push(emitter);
+    } catch (err: any) {
+      console.error(`spawnHexFlowerShooters: Error creating left emitter for '${t}':`, err?.message || err);
+    }
   }
 
   // Right hex tower
   for (const t of types) {
-    const props = getHexFlowerShooterProperties(t);
-    const emitter = new Entity(FlowerParticleEmitters.LOCATIONS.hexTowerRight, Quaternion.one, Vector3.one, undefined, 'Static');
-    emitter.particles.setParticlesProperties(props);
-    emitter.particles.play();
-    rightEntities.push(emitter);
+    try {
+      const props = getHexFlowerShooterProperties(t);
+      const emitter = new Entity(FlowerParticleEmitters.LOCATIONS.hexTowerRight, Quaternion.one, Vector3.one, undefined, 'Static');
+      emitter.particles.setParticlesProperties(props);
+      emitter.particles.play();
+      rightEntities.push(emitter);
+    } catch (err: any) {
+      console.error(`spawnHexFlowerShooters: Error creating right emitter for '${t}':`, err?.message || err);
+    }
   }
 
   return { left: leftEntities, right: rightEntities };
