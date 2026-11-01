@@ -249,3 +249,78 @@ export function applyTextureToEntity(
   console.log(`applyTextureToEntity: Failed to apply texture for:`, source);
   return undefined;
 }
+
+/**
+ * Shader for scrolling flowerriver texture based on Source VMT:
+ * "LightmappedGeneric" {
+ *   "$basetexture" "surreal/flowerriver"
+ *   "$nocull" "1"
+ *   Proxies {
+ *     TextureScroll {
+ *       texturescrollvar $basetexturetransform
+ *       texturescrollrate 1.25
+ *       texturescrollangle 270 (downward along V axis: vec2(0.0, 1.25))
+ *     }
+ *   }
+ * }
+ */
+export const flowerRiverScrollingShader = `
+shader_type spatial;
+render_mode cull_disabled;
+
+uniform sampler2D albedo_texture : source_color, filter_linear_mipmap, repeat_enable;
+uniform vec2 scroll_velocity = vec2(0.0, 1.25);
+
+void fragment() {
+    vec2 scrolled_uv = UV + scroll_velocity * TIME;
+    vec4 tex_color = texture(albedo_texture, scrolled_uv);
+    ALBEDO = tex_color.rgb;
+    ALPHA = tex_color.a;
+}
+`;
+
+/**
+ * Applies the flowerriver texture with scrolling UV animation to an Entity.
+ * Also sets cull_disabled ($nocull "1") and texturescrollrate 1.25 at angle 270.
+ */
+export function applyScrollingTextureToEntity(
+  entity: Entity,
+  textureName: string = 'flowerriver',
+  scrollRate: number = 1.25,
+  scrollAngleDegrees: number = 270,
+  noCull: boolean = true
+): Texture | undefined {
+  const tex = applyTextureToEntity(entity, textureName, true);
+  if (!entity.mesh) return tex;
+
+  // Convert angle (degrees) and rate into UV velocity:
+  // angle 270 deg -> cos(270) = 0, sin(270) = -1.
+  // In Source engine VMT TextureScroll, 270 scrolls downward along V axis (+V in UV space).
+  // vec2(cos(rad), -sin(rad)) or direct math:
+  const rad = (scrollAngleDegrees * Math.PI) / 180.0;
+  const vx = Math.cos(rad) * scrollRate;
+  const vy = -Math.sin(rad) * scrollRate; // 270 deg -> -sin(270) = -(-1) = +1 -> downward along V
+
+  const cullMode = noCull ? 'render_mode cull_disabled;' : '';
+  const shaderCode = `
+shader_type spatial;
+${cullMode}
+
+uniform sampler2D albedo_texture : source_color, filter_linear_mipmap, repeat_enable;
+
+void fragment() {
+    vec2 scrolled_uv = UV + vec2(${vx.toFixed(4)}, ${vy.toFixed(4)}) * TIME;
+    vec4 tex_color = texture(albedo_texture, scrolled_uv);
+    ALBEDO = tex_color.rgb;
+    ALPHA = tex_color.a;
+}
+`;
+
+  try {
+    entity.mesh.shader.set(shaderCode);
+  } catch (err: any) {
+    console.log(`Failed applying scrolling shader to entity:`, err?.message || err);
+  }
+
+  return tex;
+}

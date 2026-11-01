@@ -3,7 +3,7 @@ import { Quaternion } from "./Yuu API/Basic Types/Quaternion";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { Vector2 } from "./Yuu API/Basic Types/Vector2";
 import { Entity } from "./Yuu API/Entity";
-import { applyTextureToEntity } from "./Textures/loader";
+import { applyTextureToEntity, applyScrollingTextureToEntity } from "./Textures/loader";
 import { getFuncIllusionary146945316739 } from "./Yuu API/funcIllusionary146945316739Model";
 import { getFuncIllusionary146945316758 } from "./Yuu API/funcIllusionary146945316758Model";
 import { getFuncDetail3614836149 } from "./Yuu API/funcDetail3614836149Model";
@@ -1329,7 +1329,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19391, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19391, 'flowerriver');
 
   // Spawn worldspawn_1_9398
   const worldspawn19398 = spawnModel(
@@ -1339,7 +1339,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19398, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19398, 'flowerriver');
 
   // Spawn worldspawn_1_9405
   const worldspawn19405 = spawnModel(
@@ -1349,7 +1349,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19405, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19405, 'flowerriver');
 
   // Spawn worldspawn_1_9412
   const worldspawn19412 = spawnModel(
@@ -1359,7 +1359,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19412, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19412, 'flowerriver');
 
   // Spawn worldspawn_1_9419
   const worldspawn19419 = spawnModel(
@@ -1369,7 +1369,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19419, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19419, 'flowerriver');
 
   // Spawn worldspawn_1_9426
   const worldspawn19426 = spawnModel(
@@ -1379,7 +1379,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19426, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19426, 'flowerriver');
 
   // Spawn worldspawn_1_9433
   const worldspawn19433 = spawnModel(
@@ -1389,7 +1389,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19433, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19433, 'flowerriver');
 
   // Spawn worldspawn_1_9440
   const worldspawn19440 = spawnModel(
@@ -1399,7 +1399,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19440, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19440, 'flowerriver');
 
   // Spawn worldspawn_1_9447
   const worldspawn19447 = spawnModel(
@@ -1409,7 +1409,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19447, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19447, 'flowerriver');
 
   // Spawn worldspawn_1_9454
   const worldspawn19454 = spawnModel(
@@ -1999,7 +1999,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19860, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19860, 'flowerriver');
 
   // Spawn worldspawn_1_9867
   const worldspawn19867 = spawnModel(
@@ -2009,7 +2009,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19867, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19867, 'flowerriver');
 
   // Spawn worldspawn_1_9874
   const worldspawn19874 = spawnModel(
@@ -2019,7 +2019,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19874, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19874, 'flowerriver');
 
   // Spawn worldspawn_1_9881
   const worldspawn19881 = spawnModel(
@@ -2029,7 +2029,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19881, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19881, 'flowerriver');
 
   // Spawn worldspawn_1_9888
   const worldspawn19888 = spawnModel(
@@ -2039,7 +2039,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19888, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19888, 'flowerriver');
 
   // Spawn worldspawn_1_9895
   const worldspawn19895 = spawnModel(
@@ -2049,7 +2049,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19895, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19895, 'flowerriver');
 
   // Spawn worldspawn_1_9902
   const worldspawn19902 = spawnModel(
@@ -2059,7 +2059,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19902, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19902, 'flowerriver');
 
   // Spawn worldspawn_1_9909
   const worldspawn19909 = spawnModel(
@@ -2069,7 +2069,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19909, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19909, 'flowerriver');
 
   // Spawn worldspawn_1_9916
   const worldspawn19916 = spawnModel(
@@ -2079,7 +2079,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19916, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19916, 'flowerriver');
 
   // Spawn worldspawn_1_9923
   const worldspawn19923 = spawnModel(
@@ -2089,7 +2089,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19923, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19923, 'flowerriver');
 
   // Spawn worldspawn_1_9930
   const worldspawn19930 = spawnModel(
@@ -2099,7 +2099,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19930, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19930, 'flowerriver');
 
   // Spawn worldspawn_1_9937
   const worldspawn19937 = spawnModel(
@@ -2109,7 +2109,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19937, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19937, 'flowerriver');
 
   // Spawn worldspawn_1_9944
   const worldspawn19944 = spawnModel(
@@ -2119,7 +2119,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19944, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19944, 'flowerriver');
 
   // Spawn worldspawn_1_9951
   const worldspawn19951 = spawnModel(
@@ -2129,7 +2129,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19951, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19951, 'flowerriver');
 
   // Spawn worldspawn_1_9958
   const worldspawn19958 = spawnModel(
@@ -2139,7 +2139,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19958, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19958, 'flowerriver');
 
   // Spawn worldspawn_1_9965
   const worldspawn19965 = spawnModel(
@@ -2149,7 +2149,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19965, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19965, 'flowerriver');
 
   // Spawn worldspawn_1_9972
   const worldspawn19972 = spawnModel(
@@ -2159,7 +2159,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19972, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19972, 'flowerriver');
 
   // Spawn worldspawn_1_9979
   const worldspawn19979 = spawnModel(
@@ -2169,7 +2169,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19979, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn19979, 'flowerriver');
 
   // Spawn worldspawn_1_9986
   const worldspawn19986 = spawnModel(
@@ -2569,7 +2569,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn110259, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn110259, 'flowerriver');
 
   // Spawn worldspawn_1_10266
   const worldspawn110266 = spawnModel(
@@ -2579,7 +2579,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn110266, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn110266, 'flowerriver');
 
   // Spawn worldspawn_1_10273
   const worldspawn110273 = spawnModel(
@@ -2589,7 +2589,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn110273, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn110273, 'flowerriver');
 
   // Spawn worldspawn_1_10280
   const worldspawn110280 = spawnModel(
@@ -2599,7 +2599,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn110280, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn110280, 'flowerriver');
 
   // Spawn worldspawn_1_10287
   const worldspawn110287 = spawnModel(
@@ -2609,7 +2609,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn110287, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn110287, 'flowerriver');
 
   // Spawn worldspawn_1_10294
   const worldspawn110294 = spawnModel(
@@ -2719,7 +2719,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn110364, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn110364, 'flowerriver');
 
   // Spawn worldspawn_1_10371
   const worldspawn110371 = spawnModel(
@@ -2729,7 +2729,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn110371, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn110371, 'flowerriver');
 
   // Spawn worldspawn_1_10378
   const worldspawn110378 = spawnModel(
@@ -2739,7 +2739,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn110378, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn110378, 'flowerriver');
 
   // Spawn worldspawn_1_10385
   const worldspawn110385 = spawnModel(
@@ -2749,7 +2749,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn110385, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn110385, 'flowerriver');
 
   // Spawn worldspawn_1_10392
   const worldspawn110392 = spawnModel(
@@ -2759,7 +2759,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn110392, 'flowerriver');
+  applyScrollingTextureToEntity(worldspawn110392, 'flowerriver');
 
   // Spawn worldspawn_1_10399
   const worldspawn110399 = spawnModel(
