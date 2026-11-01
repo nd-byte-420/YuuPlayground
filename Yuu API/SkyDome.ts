@@ -5,6 +5,7 @@ import { Entity } from "./Entity/Entity";
 import { spawnPrimitive } from "./SpawnPrimitive";
 import { Player } from "./Player";
 import { Async } from "./Async";
+import { applyTextureToEntity } from "../Textures/loader";
 
 /**
  * Pure Godot 4 Sky Shader code (shader_type sky).
@@ -458,6 +459,8 @@ export interface SkyDomeOptions {
 }
 
 let activeSkyDomeEntity: Entity | undefined;
+let activeMoonPlane: Entity | undefined;
+let activeGlowPlane: Entity | undefined;
 let updateListenerId: number | undefined;
 let cycleTimerId: number | undefined;
 let currentTimeOfDay: number = 0.0;
@@ -485,6 +488,8 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
   );
 
   const meshNodeID = activeSkyDomeEntity.mesh.nodeID;
+  const enableCelestial = options.enableCelestialOrb ?? true;
+
   if (meshNodeID) {
     const success = activeSkyDomeEntity.mesh.shader.set(spatialSkyShaderCode);
     console.log(`SkyDome: Shader applied to meshNodeID ${meshNodeID}, success: ${success}`);
@@ -495,9 +500,10 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
     activeSkyDomeEntity.mesh.shader.updateNumber("star_size", options.starSize ?? 0.14);
     activeSkyDomeEntity.mesh.shader.updateNumber("moon_size", options.moonSize ?? 0.08);
     activeSkyDomeEntity.mesh.shader.updateNumber("glow_size", options.glowSize ?? 0.22);
+    // Disable procedural circle in the sphere shader when textured moon plane is mounted on dome
     activeSkyDomeEntity.mesh.shader.updateNumber(
       "enable_celestial_orb",
-      (options.enableCelestialOrb ?? true) ? 1.0 : 0.0
+      0.0
     );
     activeSkyDomeEntity.mesh.shader.updateNumber(
       "use_procedural_fallback",
@@ -505,6 +511,50 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
     );
   } else {
     console.error("SkyDome: Failed to retrieve meshNodeID for SkyDome entity!");
+  }
+
+  // Mount textured moon & glow planes directly on the SkyDome surface
+  if (enableCelestial) {
+    const radius = diameter / 2;
+    const orbDir = new Vector3(0.0, 0.4, -1.0).normalize();
+    const moonPos = orbDir.multiply(radius - 0.3);
+    const glowPos = orbDir.multiply(radius - 0.15);
+    const rot = Quaternion.lookAt(orbDir.negate(), Vector3.up);
+
+    const moonDiscSize = radius * (options.moonSize ?? 0.08) * 2;
+    const glowDiscSize = radius * (options.glowSize ?? 0.22) * 2;
+
+    // 1. Glow Aura Plane directly on the dome surface
+    activeGlowPlane = spawnPrimitive.plane(
+      'Both',
+      glowPos,
+      new Vector3(glowDiscSize, glowDiscSize, 1),
+      rot,
+      Color.white,
+      0.99,
+      'None',
+      'Static',
+      activeSkyDomeEntity
+    );
+    activeGlowPlane.mesh.material.emissionColor.set(Color.white);
+    activeGlowPlane.mesh.material.emissionStrength.set(0.8);
+    applyTextureToEntity(activeGlowPlane, 'glow');
+
+    // 2. Moon Disc Plane directly on the dome surface
+    activeMoonPlane = spawnPrimitive.plane(
+      'Both',
+      moonPos,
+      new Vector3(moonDiscSize, moonDiscSize, 1),
+      rot,
+      Color.white,
+      0.99,
+      'None',
+      'Static',
+      activeSkyDomeEntity
+    );
+    activeMoonPlane.mesh.material.emissionColor.set(Color.white);
+    activeMoonPlane.mesh.material.emissionStrength.set(1.0);
+    applyTextureToEntity(activeMoonPlane, 'moon');
   }
 
   const followPlayer = options.followPlayer ?? true;
@@ -529,6 +579,9 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
     });
   }
 
+  // Set initial day/night state on the textured moon
+  setTimeOfDay(currentTimeOfDay);
+
   return activeSkyDomeEntity;
 }
 
@@ -536,6 +589,19 @@ function setTimeOfDay(time: number) {
   currentTimeOfDay = ((time % 1.0) + 1.0) % 1.0;
   if (activeSkyDomeEntity?.mesh.nodeID) {
     activeSkyDomeEntity.mesh.shader.updateNumber("time_of_day", currentTimeOfDay);
+  }
+
+  // Modulate moon and glow emission with the day/night cycle
+  const dayFactor = Math.min(1.0, Math.max(0.0, (Math.sin((currentTimeOfDay - 0.5) * 2.0 * Math.PI) + 1.0) * 0.5));
+  const nightFactor = 1.0 - dayFactor;
+
+  if (activeMoonPlane?.mesh.nodeID) {
+    activeMoonPlane.mesh.material.emissionStrength.set(nightFactor);
+    activeMoonPlane.mesh.color.set(Color.white, Math.min(0.99, Math.max(0.01, nightFactor * 0.99)));
+  }
+  if (activeGlowPlane?.mesh.nodeID) {
+    activeGlowPlane.mesh.material.emissionStrength.set(nightFactor * 0.8);
+    activeGlowPlane.mesh.color.set(Color.white, Math.min(0.99, Math.max(0.01, nightFactor * 0.8)));
   }
 }
 
@@ -612,6 +678,16 @@ function destroy() {
   if (updateListenerId !== undefined) {
     Godot.events.unsubscribe(updateListenerId);
     updateListenerId = undefined;
+  }
+
+  if (activeMoonPlane) {
+    activeMoonPlane.destroy();
+    activeMoonPlane = undefined;
+  }
+
+  if (activeGlowPlane) {
+    activeGlowPlane.destroy();
+    activeGlowPlane = undefined;
   }
 
   if (activeSkyDomeEntity) {

@@ -1,26 +1,19 @@
 import { registerStart } from "./Yuu API/RegisterStart";
 import { Player } from "./Yuu API/Player";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
-import { Quaternion } from "./Yuu API/Basic Types/Quaternion";
-import { Color } from "./Yuu API/Basic Types/Color";
-import { Controller } from "./Yuu API/Controller";
 import { SkyDome } from "./Yuu API/SkyDome";
-import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
-import { Billboard } from "./Yuu API/Billboard";
-import { applyTextureToEntity } from "./Textures/loader";
-
 
 function updateSkydome() {
   SkyDome.ambientLight.skyColorContribution.set(0.98);
 
-  // Spawns the custom sky dome mesh with atmospheric gradient & starfield
+  // Spawns the custom sky dome mesh with atmospheric gradient, starfield & textured moon
   SkyDome.customShader.spawnSkyDome({
     diameter: 80,
     timeOfDay: 0.0,
     starfieldIntensity: 1.0,
     gradientIntensity: 1.0,
     starSize: 0.14,
-    enableCelestialOrb: false, // Disabled on dome shader so the textured moon billboard displays cleanly
+    enableCelestialOrb: true,
     moonSize: 0.08,
     glowSize: 0.22,
     useProceduralFallback: true,
@@ -29,66 +22,15 @@ function updateSkydome() {
   });
 
   // Start 24h day/night cycle (120 seconds per day)
-  SkyDome.customShader.startDayNightCycle(10);
-
-  // Native sky shader fallback if supportedgs
-  // SkyDome.skyMaterial.setShader(SkyDome.skyShaderCode);
+  SkyDome.customShader.startDayNightCycle(120);
 }
-
-function spawnMoonBillboard(distance: number = 32) {
-  const spawnCenter = Player.position.get() ?? new Vector3(0, 13, 0);
-
-  // Direction towards the moon/glow (matching sky celestial orb angle)
-  const dir = new Vector3(0, 0.4, -1.0).normalize();
-  const moonPos = spawnCenter.add(dir.multiply(distance));
-  // Place glow slightly behind the moon plane along the sightline
-  const glowPos = moonPos.add(dir.multiply(0.2));
-
-  // 1. Glow Billboard plane (rendered with Both sides, transparent)
-  const glowScale = new Vector3(7, 7, 1);
-  const glowPlane = spawnPrimitive.plane(
-    'Both',
-    glowPos,
-    glowScale,
-    Quaternion.one,
-    Color.white,
-    0.99,
-    'None',
-    'Static',
-    undefined
-  );
-  Billboard.start(glowPlane, 'Freely', { unshaded: true, followPlayer: true, lockPositionAxis: { y: true } });
-  applyTextureToEntity(glowPlane, 'glow');
-
-  // 2. Moon Billboard plane (rendered with Both sides, transparent)
-  const moonScale = new Vector3(5, 5, 1);
-  const moonPlane = spawnPrimitive.plane(
-    'Both',
-    moonPos,
-    moonScale,
-    Quaternion.one,
-    Color.white,
-    0.99,
-    'None',
-    'Static',
-    undefined
-  );
-  Billboard.start(moonPlane, 'Freely', { unshaded: true, followPlayer: true, lockPositionAxis: { y: true } });
-  applyTextureToEntity(moonPlane, 'moon');
-
-  return { moonPlane, glowPlane };
-}
-
 
 registerStart(start);
 async function start() {
   updateSkydome();
 
   Player.position.set(new Vector3(0, 13, 0));
-
-  // Spawn textured moon and glow billboard planes
-  spawnMoonBillboard(32);
-  console.log('spawned skydome with textured moon and glow billboard');
+  console.log('spawned skydome with textured moon directly on dome');
 }
 
 
