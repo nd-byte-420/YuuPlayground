@@ -20,7 +20,7 @@ function updateSkydome() {
     starfieldIntensity: 1.0,
     gradientIntensity: 1.0,
     starSize: 0.14,
-    enableCelestialOrb: true,
+    enableCelestialOrb: false, // Disabled on dome shader so the textured moon billboard displays cleanly
     moonSize: 0.08,
     glowSize: 0.22,
     useProceduralFallback: true,
@@ -38,8 +38,8 @@ function updateSkydome() {
 function spawnMoonBillboard(distance: number = 32) {
   const spawnCenter = Player.position.get() ?? new Vector3(0, 13, 0);
 
-  // Direction towards the moon/glow (facing forward and slightly elevated)
-  const dir = new Vector3(0, 0.15, -1.0).normalize();
+  // Direction towards the moon/glow (matching sky celestial orb angle)
+  const dir = new Vector3(0, 0.4, -1.0).normalize();
   const moonPos = spawnCenter.add(dir.multiply(distance));
   // Place glow slightly behind the moon plane along the sightline
   const glowPos = moonPos.add(dir.multiply(0.2));
@@ -84,13 +84,11 @@ registerStart(start);
 async function start() {
   updateSkydome();
 
-  console.log('spawned skydome with celestial moon rendered directly on dome');
-
   Player.position.set(new Vector3(0, 13, 0));
 
-  // The moon is now rendered directly on the skydome shader.
-  // If you ever want standalone billboard planes in addition, uncomment spawnMoonBillboard(32).
-  // spawnMoonBillboard(32);
+  // Spawn textured moon and glow billboard planes
+  spawnMoonBillboard(32);
+  console.log('spawned skydome with textured moon and glow billboard');
 }
 
 

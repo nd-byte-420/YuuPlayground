@@ -289,10 +289,37 @@ vec3 sample_procedural_orb(vec3 eye_dir, float tod) {
         float glow = exp(-dist / (glow_size * 0.45));
         emission += current_glow_tint * glow * 0.8;
 
-        // Procedural moon disc
+        // Procedural moon disc with lunar maria & crater details
         if (night_factor > 0.01) {
-            float disc = smoothstep(moon_size, moon_size * 0.92, dist);
-            emission += vec3(0.95, 0.97, 1.0) * disc * night_factor;
+            float disc = smoothstep(moon_size, moon_size * 0.94, dist);
+            if (disc > 0.0) {
+                vec2 p = orb_coords / moon_size;
+                float r2 = dot(p, p);
+                float z = sqrt(max(0.0, 1.0 - r2));
+                vec3 norm = vec3(p, z);
+
+                // Multi-octave hash noise for dark basaltic maria
+                vec2 moon_p = p * 2.5;
+                float n1 = star_hash(floor(moon_p * 3.0));
+                float n2 = star_hash(floor(moon_p * 7.0));
+                float n3 = star_hash(floor(moon_p * 15.0));
+                float maria = smoothstep(0.3, 0.75, n1 * 0.55 + n2 * 0.3 + n3 * 0.15);
+
+                // Procedural crater rims
+                vec2 crater_gv = fract(moon_p * 5.0) - 0.5;
+                float crater_d = length(crater_gv);
+                float crater_rim = smoothstep(0.24, 0.32, crater_d) * (1.0 - smoothstep(0.32, 0.40, crater_d));
+
+                // Shaded lunar surface color palette
+                vec3 surface_color = mix(vec3(0.55, 0.58, 0.62), vec3(0.92, 0.94, 0.97), maria);
+                surface_color += vec3(0.18) * crater_rim;
+
+                // Spherical normal lighting & limb darkening
+                float spherical_light = clamp(dot(norm, normalize(vec3(-0.2, 0.3, 0.9))), 0.3, 1.0);
+                surface_color *= spherical_light;
+
+                emission += surface_color * disc * night_factor;
+            }
         }
     }
     return emission;
