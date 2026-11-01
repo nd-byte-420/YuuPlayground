@@ -20,7 +20,7 @@ function updateSkydome() {
   });
 
   // Start 24h day/night cycle (120 seconds per day)
-  SkyDome.customShader.startDayNightCycle(120);
+  SkyDome.customShader.startDayNightCycle(10.42);
 
   // Native sky shader fallback if supportedgs
   // SkyDome.skyMaterial.setShader(SkyDome.skyShaderCode);
