@@ -2,6 +2,7 @@ import { registerStart } from "./Yuu API/RegisterStart";
 import { Player } from "./Yuu API/Player";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { SkyDome } from "./Yuu API/SkyDome";
+import { FlowerParticleEmitters } from "./FlowerParticleEmitters";
 
 function updateSkydome() {
   SkyDome.ambientLight.skyColorContribution.set(0.98);
@@ -31,7 +32,12 @@ async function start() {
 
   Player.position.set(new Vector3(0, 13, 0));
   console.log('spawned skydome with textured moon directly on dome');
+
+  // Spawn flower particle emitters from particle-emitter-summary
+  FlowerParticleEmitters.spawnAllEmitters();
+  console.log('spawned flower particle emitters');
 }
+
 
 
 
