@@ -104,16 +104,29 @@ float star_hash(vec2 p) {
 }
 
 vec3 sample_procedural_stars(vec2 uv, float tod) {
-    vec2 grid_uv = uv * 320.0;
-    vec2 id = floor(grid_uv);
-    vec2 gv = fract(grid_uv) - 0.5;
-
-    float n = star_hash(id);
-    float star = 0.0;
-    if (n > 0.986) {
-        float d = length(gv);
-        star = smoothstep(0.25, 0.01, d) * (n - 0.986) * 75.0;
+    // Layer 1: Fine pinpoint stars
+    vec2 grid_uv1 = uv * 1100.0;
+    vec2 id1 = floor(grid_uv1);
+    vec2 gv1 = fract(grid_uv1) - 0.5;
+    float n1 = star_hash(id1);
+    float star1 = 0.0;
+    if (n1 > 0.989) {
+        float d1 = length(gv1);
+        star1 = smoothstep(0.06, 0.001, d1) * (n1 - 0.989) * 150.0;
     }
+
+    // Layer 2: Subtle medium stars
+    vec2 grid_uv2 = uv * 650.0;
+    vec2 id2 = floor(grid_uv2 + 17.3);
+    vec2 gv2 = fract(grid_uv2 + 17.3) - 0.5;
+    float n2 = star_hash(id2);
+    float star2 = 0.0;
+    if (n2 > 0.993) {
+        float d2 = length(gv2);
+        star2 = smoothstep(0.08, 0.002, d2) * (n2 - 0.993) * 180.0;
+    }
+
+    float star = star1 + star2;
 
     // Stars automatically fade during daylight (between 0.38 and 0.96)
     float day_fade = 1.0 - smoothstep(0.38, 0.52, tod) * (1.0 - smoothstep(0.88, 0.96, tod));

@@ -10,7 +10,7 @@ function updateSkydome() {
 
   // Spawns the custom sky dome mesh with atmospheric gradient & starfield
   SkyDome.customShader.spawnSkyDome({
-    diameter: 500,
+    diameter: 80,
     timeOfDay: 0.0,
     starfieldIntensity: 1.0,
     gradientIntensity: 1.0,
