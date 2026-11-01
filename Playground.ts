@@ -36,26 +36,26 @@ function spawnMoonBillboard(distance: number = 32) {
   const spawnCenter = Player.position.get() ?? new Vector3(0, 13, 0);
 
   // Direction towards the moon/glow (facing forward and slightly elevated)
-  const dir = new Vector3(0, 0.15, -1.0).normalize();
+  const dir = new Vector3(0, 0.10, -1.0).normalize();
   const moonPos = spawnCenter.add(dir.multiply(distance));
   // Place glow slightly behind the moon plane along the sightline
-  const glowPos = moonPos.add(dir.multiply(0.2));
+  // const glowPos = moonPos.add(dir.multiply(0.2));
 
-  // 1. Glow Billboard plane (rendered with Both sides, transparent)
-  const glowScale = new Vector3(14, 14, 1);
-  const glowPlane = spawnPrimitive.plane(
-    'Both',
-    glowPos,
-    glowScale,
-    Quaternion.one,
-    Color.white,
-    0.99,
-    'None',
-    'Static',
-    undefined
-  );
-  Billboard.start(glowPlane, 'Freely');
-  applyTextureToEntity(glowPlane, 'glow');
+  // // 1. Glow Billboard plane (rendered with Both sides, transparent)
+  // const glowScale = new Vector3(14, 14, 1);
+  // const glowPlane = spawnPrimitive.plane(
+  //   'Both',
+  //   glowPos,
+  //   glowScale,
+  //   Quaternion.one,
+  //   Color.white,
+  //   0.99,
+  //   'None',
+  //   'Static',
+  //   undefined
+  // );
+  // Billboard.start(glowPlane, 'Freely');
+  // applyTextureToEntity(glowPlane, 'glow');
 
   // 2. Moon Billboard plane (rendered with Both sides, transparent)
   const moonScale = new Vector3(5, 5, 1);
@@ -73,7 +73,7 @@ function spawnMoonBillboard(distance: number = 32) {
   Billboard.start(moonPlane, 'Freely');
   applyTextureToEntity(moonPlane, 'moon');
 
-  return { moonPlane, glowPlane };
+  return { moonPlane };
 }
 
 
