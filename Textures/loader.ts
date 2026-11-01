@@ -282,39 +282,19 @@ void vertex() {
 export function applyScrollingTextureToEntity(
   entity: Entity,
   textureName: string = 'flowerriver',
-  scrollRate: number = 1.25,
-  scrollAngleDegrees: number = 270,
-  noCull: boolean = true
+  _scrollRate: number = 1.25,
+  _scrollAngleDegrees: number = 270,
+  _noCull: boolean = true
 ): Texture | undefined {
-  const tex = applyTextureToEntity(entity, textureName, true);
-  if (!entity.mesh) return tex;
-
-  // Convert angle (degrees) and rate into UV velocity:
-  // angle 270 deg -> cos(270) = 0, sin(270) = -1.
-  // In Source engine VMT TextureScroll, 270 scrolls downward along V axis (+V in UV space).
-  const rad = (scrollAngleDegrees * Math.PI) / 180.0;
-  const vx = Math.cos(rad) * scrollRate;
-  const vy = -Math.sin(rad) * scrollRate; // 270 deg -> -sin(270) = -(-1) = +1 -> downward along V
-
-  const cullMode = noCull ? 'render_mode cull_disabled;' : '';
-  const shaderCode = `
-shader_type spatial;
-${cullMode}
-
-void vertex() {
-    UV += vec2(${vx.toFixed(4)}, ${vy.toFixed(4)}) * TIME;
-}
-`;
-
-  try {
-    entity.mesh.shader.set(shaderCode);
-    // Re-apply texture in case setting the shader reset the material/texture binding
-    if (tex && entity.mesh.nodeID) {
-      Godot.image.applyAsTextureToMesh(entity.mesh.nodeID, tex.imageID);
+  // Option A: Clean restore without shader or mipmaps to fix color & distance rendering
+  if (entity?.mesh?.nodeID) {
+    try {
+      entity.mesh.shader.remove();
+    } catch {
+      // ignore
     }
-  } catch (err: any) {
-    console.log(`Failed applying scrolling shader to entity:`, err?.message || err);
   }
 
+  const tex = applyTextureToEntity(entity, textureName, false);
   return tex;
 }
