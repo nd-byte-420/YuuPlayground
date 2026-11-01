@@ -3,6 +3,7 @@ import { Quaternion } from "./Yuu API/Basic Types/Quaternion";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { Vector2 } from "./Yuu API/Basic Types/Vector2";
 import { Entity } from "./Yuu API/Entity";
+import { Events } from "./Yuu API/Events";
 import { applyTextureToEntity, applyScrollingTextureToEntity } from "./Textures/loader";
 import { getFuncIllusionary146945316739 } from "./Yuu API/funcIllusionary146945316739Model";
 import { getFuncIllusionary146945316758 } from "./Yuu API/funcIllusionary146945316758Model";
@@ -3791,12 +3792,29 @@ export async function spawnScene() {
 
   applyTextureToEntity(propDynamic1233821, 'dev_red_a-05');
 
-  // Spawn prop_dynamic_1240861
+  // Spawn Oar_Paddle_Pivot
+  // Location: (0.0, -25.6, 115.44) in Source/Blender coordinates (Godot Y-up: Y=113.454994, Z=25.599998)
+  // Driven by continuous spin along X-axis: expression (frame - 1) * -0.091061 rad (phys_motor speed 125 deg/s = -2.1855 rad/s)
+  const oarPaddlePivot = new Entity(
+    new Vector3(0.000000, 113.454994, 25.599998),
+    Quaternion.one,
+    Vector3.one,
+    undefined,
+    'Animated'
+  );
+
+  // Spawn prop_dynamic_1240861 parented to Oar_Paddle_Pivot
+  // Relative offset: local X = 9.399699, Euler (0°, 22.5°, 0°)
   const propDynamic1240861 = spawnModel(
     getPropDynamic1240861,
-    new Vector3(9.399699, 113.454994, 25.599998),
+    new Vector3(9.399699, 0.000000, 0.000000),
     new Vector3(0.010000, 0.010000, 0.010000),
-    new Quaternion(0.000000, 0.000000, -0.195090, 0.980785)
+    new Quaternion(0.000000, 0.000000, -0.195090, 0.980785),
+    new Color(1, 1, 1),
+    1,
+    true,
+    'Animated',
+    oarPaddlePivot
   );
 
   applyTextureToEntity(propDynamic1240861, 'boatwood');
@@ -3811,15 +3829,30 @@ export async function spawnScene() {
 
   applyTextureToEntity(propStatic55859, 'prop_static_55855_atlas');
 
-  // Spawn prop_dynamic_1241014
+  // Spawn prop_dynamic_1241014 parented to Oar_Paddle_Pivot
+  // Relative offset: local X = -9.399699, Euler (0°, 22.5°, -180°)
   const propDynamic1241014 = spawnModel(
     getPropDynamic1241014,
-    new Vector3(-9.399699, 113.454994, 25.599998),
+    new Vector3(-9.399699, 0.000000, 0.000000),
     new Vector3(0.010000, 0.010000, 0.010000),
-    new Quaternion(0.195090, -0.980785, -0.000000, 0.000000)
+    new Quaternion(0.195090, -0.980785, -0.000000, 0.000000),
+    new Color(1, 1, 1),
+    1,
+    true,
+    'Animated',
+    oarPaddlePivot
   );
 
   applyTextureToEntity(propDynamic1241014, 'boatwood');
+
+  // Spin Oar_Paddle_Pivot along its X-axis continuously
+  // Rotation rate: -0.091061 rad/frame at 24fps = -2.185464 rad/sec (~ -125.22 deg/sec)
+  const PADDLE_SPIN_SPEED_RAD_PER_SEC = -2.185464;
+  let oarPaddleAngle = 0;
+  Events.onUpdate((delta: number) => {
+    oarPaddleAngle += PADDLE_SPIN_SPEED_RAD_PER_SEC * delta;
+    oarPaddlePivot.rot = Quaternion.fromEuler(new Vector3(oarPaddleAngle, 0, 0));
+  });
 
   // Spawn prop_static_55858
   const propStatic55858 = spawnModel(
