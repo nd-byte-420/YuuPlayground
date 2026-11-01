@@ -41,8 +41,12 @@ export const FlowerParticleEmitters = {
  * Creates a two-sided invisible plane entity with particle texture applied.
  */
 function createParticlePlaneMesh(type: FlowerParticleType, color: Color = Color.white): Entity {
-  const plane = spawnPrimitive.plane('Both', Vector3.zero, Vector3.one, Quaternion.one, color, 1, 'None', 'Empty', undefined);
+  // Alpha < 1.0 (e.g. 0.99) switches the Godot StandardMaterial3D to alpha transparency mode
+  const plane = spawnPrimitive.plane('Both', Vector3.zero, Vector3.one, Quaternion.one, color, 0.99, 'None', 'Empty', undefined);
   plane.visible.set(false);
+
+  // Set mesh color with alpha < 1 to ensure transparent material pipeline is active
+  plane.mesh.color.set(color, 0.99);
 
   const textureName = type === 'pink'
     ? 'pinkflowerparticle'
