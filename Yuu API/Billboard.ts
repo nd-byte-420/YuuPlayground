@@ -1,3 +1,4 @@
+import { Color } from "./Basic Types/Color";
 import { Quaternion } from "./Basic Types/Quaternion";
 import { Vector3 } from "./Basic Types/Vector3";
 import { Entity } from "./Entity/Entity";
@@ -14,6 +15,12 @@ function worldStart() {
 
 export type BillboardMode = 'YLock' | 'Freely';
 
+export interface BillboardOptions {
+  /**
+   * If true, makes the entity self-illuminating / unshaded so sky ambient light doesn't tint it (default: false)
+   */
+  unshaded?: boolean;
+}
 
 const billboardMap = new Map<Entity, BillboardMode>();
 
@@ -44,11 +51,19 @@ export const Billboard = {
 }
 
 
-function start(entity: Entity, mode: BillboardMode) {
+function start(entity: Entity, mode: BillboardMode, options?: BillboardOptions) {
   billboardMap.set(entity, mode);
+
+  if (options?.unshaded) {
+    // Enable full self-illumination (emission) with zero roughness so ambient diffuse sky lighting does not tint the texture
+    entity.mesh.material.emissionColor.set(Color.white);
+    entity.mesh.material.emissionStrength.set(1.0);
+    entity.mesh.material.roughness.set(0.0);
+  }
 }
 
 function stop(entity: Entity) {
   billboardMap.delete(entity);
 }
+
 

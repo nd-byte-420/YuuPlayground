@@ -54,7 +54,7 @@ function spawnMoonBillboard(distance: number = 32) {
     'Static',
     undefined
   );
-  Billboard.start(glowPlane, 'Freely');
+  Billboard.start(glowPlane, 'Freely', { unshaded: true });
   applyTextureToEntity(glowPlane, 'glow');
 
   // 2. Moon Billboard plane (rendered with Both sides, transparent)
@@ -70,7 +70,7 @@ function spawnMoonBillboard(distance: number = 32) {
     'Static',
     undefined
   );
-  Billboard.start(moonPlane, 'Freely');
+  Billboard.start(moonPlane, 'Freely', { unshaded: true });
   applyTextureToEntity(moonPlane, 'moon');
 
   return { moonPlane, glowPlane };
