@@ -14,11 +14,20 @@ export const skyShaderCode = `
 shader_type sky;
 
 group_uniforms Textures;
-uniform sampler2D starfield_tex : filter_linear, repeat_enable;
-uniform sampler2D skygrad_tex : filter_linear, repeat_enable;
+// mazskygrad.png: must have repeat_enable so time-of-day wraps smoothly around
+uniform sampler2D sky_gradient : filter_linear, repeat_enable;
+// Optional: sky_starfield_nm.tga or any equirectangular starfield panorama
+uniform sampler2D starfield : filter_linear, repeat_enable;
 uniform sampler2D moon_tex : filter_linear, repeat_disable;
 uniform sampler2D glow_tex : filter_linear, repeat_disable;
 uniform sampler2D clouds_tex : filter_linear, repeat_enable;
+
+group_uniforms Time_And_Cycle;
+// Manual time: 0.0 = Night, 0.5 = Dawn, 0.7 = Noon, 0.88 = Sunset
+uniform float time_of_day : hint_range(0.0, 1.0) = 0.0;
+uniform bool auto_advance = false;
+// Speed for one full 24h cycle (e.g. 0.02 = 50 seconds per cycle)
+uniform float cycle_speed = 0.02;
 
 group_uniforms CelestialOrb;
 uniform vec3 sun_moon_dir = vec3(0.0, 0.4, -1.0); // Celestial forward direction
@@ -26,71 +35,90 @@ uniform float moon_size : hint_range(0.0, 0.5) = 0.08;
 uniform float glow_size : hint_range(0.0, 1.0) = 0.22;
 uniform float enable_celestial_orb : hint_range(0.0, 1.0) = 1.0;
 
-group_uniforms TimeAndAtmosphere;
-// 0.0 = Midnight, 0.5 = Dawn, 0.75 = Midday, 0.9 = Sunset
-uniform float time_of_day : hint_range(0.0, 1.0) = 0.0;
+group_uniforms Horizon_Glow;
+uniform bool enable_horizon_glow = true;
+uniform float horizon_glow_height : hint_range(0.05, 1.0) = 0.35;
+uniform float horizon_glow_intensity : hint_range(0.0, 3.0) = 1.0;
+
+group_uniforms Intensities;
 uniform float starfield_intensity : hint_range(0.0, 3.0) = 1.0;
 uniform float gradient_intensity : hint_range(0.0, 3.0) = 1.0;
 
 const float PI = 3.14159265358979323846;
 
 void sky() {
+    // 1. Calculate time coordinate (U / X axis)
+    float current_time = time_of_day;
+    if (auto_advance) {
+        current_time = fract(current_time + TIME * cycle_speed);
+    }
+
+    // 2. Calculate elevation for the gradient (V / Y axis)
+    // In Godot UV space, V = 0 is TOP (Zenith), V = 1 is BOTTOM (Horizon).
+    // abs(EYEDIR.y) mirrors the top & bottom hemispheres.
+    // pow(..., 1.6) stretches horizon colors upward into the sky.
+    float elevation = pow(abs(EYEDIR.y), 1.6);
+    float grad_v = clamp(1.0 - elevation, 0.005, 0.995);
+
+    vec2 grad_uv = vec2(current_time, grad_v);
+    vec3 grad_color = texture(sky_gradient, grad_uv).rgb * gradient_intensity;
+
+    // 3. Sample equirectangular Starfield background
+    vec3 star_color = vec3(0.0);
+    vec2 star_uv = vec2(
+        atan(EYEDIR.x, -EYEDIR.z) / (2.0 * PI) + 0.5,
+        acos(clamp(EYEDIR.y, -1.0, 1.0)) / PI
+    );
+    star_color = texture(starfield, star_uv).rgb * starfield_intensity;
+
+    // 4. Additive blend: Starfield + Dynamic Sky Gradient ($additive 1)
+    vec3 final_color = star_color + grad_color;
+
+    // 5. Authentic Horizon Glow Band (Sampled at the horizon line: V ≈ 0.995)
+    if (enable_horizon_glow) {
+        float h_dist = clamp(abs(EYEDIR.y) / horizon_glow_height, 0.0, 1.0);
+        float h_falloff = pow(1.0 - h_dist, 2.0); // quadratic ease-out
+        vec3 horizon_tint = texture(sky_gradient, vec2(current_time, 0.995)).rgb;
+        final_color += horizon_tint * h_falloff * horizon_glow_intensity;
+    }
+
+    // 6. Moon & Sun Celestial Orb (Dot product perspective projection)
     vec3 dir = normalize(EYEDIR);
-    float elev = abs(dir.y); // Symmetric across horizon
-
-    // 1. Base Starfield (Equirectangular)
-    vec2 star_uv = vec2(atan(dir.x, -dir.z) / (2.0 * PI) + 0.5, acos(clamp(dir.y, -1.0, 1.0)) / PI);
-    vec3 star_color = texture(starfield_tex, star_uv).rgb * starfield_intensity;
-
-    // 2. Atmosphere Gradient (mazskygrad.png)
-    float grad_v = clamp(pow(elev, 1.6), 0.003, 0.995);
-    vec3 grad_color = texture(skygrad_tex, vec2(time_of_day, grad_v)).rgb * gradient_intensity;
-
-    // 3. 360-Degree Horizon Glow Band
-    float horizon_falloff = pow(clamp(1.0 - (elev / 0.28), 0.0, 1.0), 2.0);
-    vec3 horizon_tint = texture(skygrad_tex, vec2(time_of_day, 0.005)).rgb;
-    vec3 horizon_glow = horizon_tint * horizon_falloff * 1.5;
-
-    // 4. Moon & Sun Celestial Orb (Dot product perspective projection)
-    vec3 celestial_color = vec3(0.0);
     vec3 orb_dir = normalize(sun_moon_dir);
     float cos_angle = dot(dir, orb_dir);
 
     if (enable_celestial_orb > 0.5 && cos_angle > 0.0) {
-        // Construct tangent projection basis perpendicular to sun_moon_dir
         vec3 up_hint = abs(orb_dir.y) > 0.99 ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0);
         vec3 right = normalize(cross(up_hint, orb_dir));
         vec3 up = cross(orb_dir, right);
         vec3 diff = dir - orb_dir;
 
-        // Day factor: 0.0 at night, 1.0 at day
-        float day_factor = clamp((sin((time_of_day - 0.5) * 2.0 * PI) + 1.0) * 0.5, 0.0, 1.0);
+        // Day factor: 0.0 at night (U=0.0-0.45), 1.0 at noon (U=0.7)
+        float day_factor = clamp((sin((current_time - 0.45) * 2.0 * PI) + 1.0) * 0.5, 0.0, 1.0);
         float night_factor = 1.0 - day_factor;
 
-        // Dynamic Glow Tint: Cool Silver-White (Moon) -> Fiery Golden Sun
         vec3 moon_glow_tint = vec3(0.9, 0.95, 1.0);
         vec3 sun_glow_tint  = vec3(1.6, 0.85, 0.2);
         vec3 current_glow_tint = mix(moon_glow_tint, sun_glow_tint, day_factor);
 
-        // Sample Glow Aura
+        // Glow Aura
         vec2 glow_uv = vec2(dot(diff, right), dot(diff, up)) / (2.0 * glow_size) + vec2(0.5);
         if (glow_uv.x >= 0.0 && glow_uv.x <= 1.0 && glow_uv.y >= 0.0 && glow_uv.y <= 1.0) {
             float glow_alpha = texture(glow_tex, glow_uv).a;
-            celestial_color += current_glow_tint * glow_alpha * 1.2;
+            final_color += current_glow_tint * glow_alpha * 1.2;
         }
 
-        // Sample Moon Texture Disc
+        // Moon Texture Disc
         if (night_factor > 0.01) {
             vec2 moon_uv = vec2(dot(diff, right), dot(diff, up)) / (2.0 * moon_size) + vec2(0.5);
             if (moon_uv.x >= 0.0 && moon_uv.x <= 1.0 && moon_uv.y >= 0.0 && moon_uv.y <= 1.0) {
                 vec4 moon_sample = texture(moon_tex, moon_uv);
-                celestial_color += moon_sample.rgb * moon_sample.a * night_factor;
+                final_color += moon_sample.rgb * moon_sample.a * night_factor;
             }
         }
     }
 
-    // 5. Additive Combination ($additive 1)
-    COLOR = star_color + grad_color + horizon_glow + celestial_color;
+    COLOR = final_color;
 }
 `;
 
@@ -118,6 +146,11 @@ uniform float moon_size : hint_range(0.0, 0.5) = 0.08;
 uniform float glow_size : hint_range(0.0, 1.0) = 0.22;
 uniform float enable_celestial_orb : hint_range(0.0, 1.0) = 1.0;
 
+group_uniforms Horizon_Glow;
+uniform bool enable_horizon_glow = true;
+uniform float horizon_glow_height : hint_range(0.05, 1.0) = 0.35;
+uniform float horizon_glow_intensity : hint_range(0.0, 3.0) = 1.0;
+
 group_uniforms TimeAndAtmosphere;
 uniform float time_of_day : hint_range(0.0, 1.0) = 0.0;
 uniform float starfield_intensity : hint_range(0.0, 3.0) = 1.0;
@@ -127,42 +160,84 @@ uniform float star_size : hint_range(0.02, 0.4) = 0.14;
 
 // Procedural LUT Fallback: replicates Mazskygrad 2D Time-of-Day atmospheric gradient
 vec3 sample_procedural_sky(float tod, float altitude) {
-    vec3 midnight_zenith  = vec3(0.015, 0.02, 0.05);
-    vec3 midnight_horizon = vec3(0.03, 0.04, 0.09);
-
-    vec3 dawn_zenith      = vec3(0.12, 0.18, 0.38);
-    vec3 dawn_horizon     = vec3(0.96, 0.48, 0.22);
-
-    vec3 midday_zenith    = vec3(0.18, 0.44, 0.88);
-    vec3 midday_horizon   = vec3(0.68, 0.84, 0.98);
-
-    vec3 sunset_zenith    = vec3(0.16, 0.10, 0.34);
-    vec3 sunset_horizon   = vec3(0.96, 0.32, 0.14);
-
-    vec3 zenith_col;
-    vec3 horizon_col;
     float t = fract(tod);
 
-    if (t < 0.5) {
-        float f = smoothstep(0.0, 0.5, t);
-        zenith_col  = mix(midnight_zenith, dawn_zenith, f);
-        horizon_col = mix(midnight_horizon, dawn_horizon, f);
-    } else if (t < 0.75) {
-        float f = smoothstep(0.5, 0.75, t);
-        zenith_col  = mix(dawn_zenith, midday_zenith, f);
-        horizon_col = mix(dawn_horizon, midday_horizon, f);
-    } else if (t < 0.9) {
-        float f = smoothstep(0.75, 0.9, t);
-        zenith_col  = mix(midday_zenith, sunset_zenith, f);
-        horizon_col = mix(midday_horizon, sunset_horizon, f);
+    // Exact color keyframes extracted directly from mazskygrad.png
+    // Midnight (t ≈ 0.0 - 0.45)
+    vec3 mid_z = vec3(0.012, 0.012, 0.012);
+    vec3 mid_m = vec3(0.020, 0.016, 0.020);
+    vec3 mid_h = vec3(0.075, 0.078, 0.075);
+
+    // Dawn (t ≈ 0.50)
+    vec3 dawn_z = vec3(0.125, 0.137, 0.169);
+    vec3 dawn_m = vec3(0.220, 0.235, 0.251);
+    vec3 dawn_h = vec3(0.357, 0.247, 0.137);
+
+    // Sunrise Golden Hour (t ≈ 0.55)
+    vec3 sunr_z = vec3(0.188, 0.247, 0.357);
+    vec3 sunr_m = vec3(0.365, 0.435, 0.502);
+    vec3 sunr_h = vec3(0.678, 0.522, 0.365);
+
+    // Midday / Noon (t ≈ 0.70 - 0.75)
+    vec3 noon_z = vec3(0.035, 0.265, 0.590);
+    vec3 noon_m = vec3(0.172, 0.467, 0.732);
+    vec3 noon_h = vec3(0.659, 0.816, 0.847);
+
+    // Late Afternoon (t ≈ 0.88)
+    vec3 late_z = vec3(0.063, 0.204, 0.408);
+    vec3 late_m = vec3(0.176, 0.373, 0.576);
+    vec3 late_h = vec3(0.722, 0.737, 0.690);
+
+    // Sunset / Dusk (t ≈ 0.95)
+    vec3 dusk_z = vec3(0.176, 0.192, 0.239);
+    vec3 dusk_m = vec3(0.333, 0.341, 0.345);
+    vec3 dusk_h = vec3(0.490, 0.333, 0.176);
+
+    vec3 cur_z;
+    vec3 cur_m;
+    vec3 cur_h;
+
+    if (t < 0.45) {
+        cur_z = mid_z; cur_m = mid_m; cur_h = mid_h;
+    } else if (t < 0.50) {
+        float f = smoothstep(0.45, 0.50, t);
+        cur_z = mix(mid_z, dawn_z, f);
+        cur_m = mix(mid_m, dawn_m, f);
+        cur_h = mix(mid_h, dawn_h, f);
+    } else if (t < 0.55) {
+        float f = smoothstep(0.50, 0.55, t);
+        cur_z = mix(dawn_z, sunr_z, f);
+        cur_m = mix(dawn_m, sunr_m, f);
+        cur_h = mix(dawn_h, sunr_h, f);
+    } else if (t < 0.70) {
+        float f = smoothstep(0.55, 0.70, t);
+        cur_z = mix(sunr_z, noon_z, f);
+        cur_m = mix(sunr_m, noon_m, f);
+        cur_h = mix(sunr_h, noon_h, f);
+    } else if (t < 0.88) {
+        float f = smoothstep(0.70, 0.88, t);
+        cur_z = mix(noon_z, late_z, f);
+        cur_m = mix(noon_m, late_m, f);
+        cur_h = mix(noon_h, late_h, f);
+    } else if (t < 0.95) {
+        float f = smoothstep(0.88, 0.95, t);
+        cur_z = mix(late_z, dusk_z, f);
+        cur_m = mix(late_m, dusk_m, f);
+        cur_h = mix(late_h, dusk_h, f);
     } else {
-        float f = smoothstep(0.9, 1.0, t);
-        zenith_col  = mix(sunset_zenith, midnight_zenith, f);
-        horizon_col = mix(sunset_horizon, midnight_horizon, f);
+        float f = smoothstep(0.95, 1.0, t);
+        cur_z = mix(dusk_z, mid_z, f);
+        cur_m = mix(dusk_m, mid_m, f);
+        cur_h = mix(dusk_h, mid_h, f);
     }
 
-    float alt_factor = pow(altitude, 0.45);
-    return mix(horizon_col, zenith_col, alt_factor);
+    // Two-stage vertical interpolation mimicking mazskygrad power curve
+    float alt = clamp(altitude, 0.0, 1.0);
+    if (alt < 0.5) {
+        return mix(cur_h, cur_m, alt * 2.0);
+    } else {
+        return mix(cur_m, cur_z, (alt - 0.5) * 2.0);
+    }
 }
 
 // Procedural Starfield Generator
@@ -240,14 +315,30 @@ void fragment() {
         stars = texture(starfield_texture, star_uv).rgb * starfield_intensity;
     }
 
-    // 2. Time-of-Day Sampling
-    float altitude = clamp(eye_dir.y, 0.0, 1.0);
+    // 2. Time-of-Day Sampling (mazskygrad gradient)
+    // In Godot UV space, V = 0 is TOP (Zenith), V = 1 is BOTTOM (Horizon).
+    // abs(eye_dir.y) mirrors top and bottom hemispheres.
+    float elevation = pow(abs(eye_dir.y), 1.6);
+    float grad_v = clamp(1.0 - elevation, 0.005, 0.995);
     vec3 sky_gradient;
     if (use_procedural_fallback > 0.5) {
-        sky_gradient = sample_procedural_sky(time_of_day, altitude) * gradient_intensity;
+        sky_gradient = sample_procedural_sky(time_of_day, elevation) * gradient_intensity;
     } else {
-        vec2 lut_uv = vec2(time_of_day, 1.0 - altitude);
+        vec2 lut_uv = vec2(time_of_day, grad_v);
         sky_gradient = texture(gradient_lut, lut_uv).rgb * gradient_intensity;
+    }
+
+    // Horizon Glow Band (Sampled at the horizon line: V ≈ 0.995)
+    if (enable_horizon_glow) {
+        float h_dist = clamp(abs(eye_dir.y) / horizon_glow_height, 0.0, 1.0);
+        float h_falloff = pow(1.0 - h_dist, 2.0);
+        vec3 horizon_tint;
+        if (use_procedural_fallback > 0.5) {
+            horizon_tint = sample_procedural_sky(time_of_day, 0.005);
+        } else {
+            horizon_tint = texture(gradient_lut, vec2(time_of_day, 0.995)).rgb;
+        }
+        sky_gradient += horizon_tint * h_falloff * horizon_glow_intensity;
     }
 
     // 3. Sun & Moon Celestial Orb (Texture or Procedural Fallback)
