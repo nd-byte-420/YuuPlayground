@@ -20,20 +20,35 @@ export interface BillboardOptions {
    * If true, makes the entity self-illuminating / unshaded so sky ambient light doesn't tint it (default: false)
    */
   unshaded?: boolean;
+  /**
+   * If true, keeps celestial billboards (like the moon) at a constant relative offset from the player
+   * so they never get clipped or covered by the SkyDome mesh as the player moves.
+   */
+  followPlayer?: boolean;
 }
 
-const billboardMap = new Map<Entity, BillboardMode>();
+interface BillboardEntry {
+  mode: BillboardMode;
+  options?: BillboardOptions;
+  relativeOffset?: Vector3;
+}
+
+const billboardMap = new Map<Entity, BillboardEntry>();
 
 function billboardOnUpdate(deltaTime: number) {
   const localPlayerPos = Player.head.position.get();
   
   if (localPlayerPos) {
-    billboardMap.forEach((mode, entity) => {
-      const pos = entity.pos;
+    billboardMap.forEach((entry, entity) => {
+      // If celestial followPlayer is enabled, keep the billboard positioned relative to the player
+      if (entry.options?.followPlayer && entry.relativeOffset) {
+        entity.pos = localPlayerPos.add(entry.relativeOffset);
+      }
 
+      const pos = entity.pos;
       const direction = localPlayerPos.subtract(pos);
 
-      if (mode === 'YLock') {
+      if (entry.mode === 'YLock') {
         direction.y = 0;
       }
 
@@ -52,7 +67,13 @@ export const Billboard = {
 
 
 function start(entity: Entity, mode: BillboardMode, options?: BillboardOptions) {
-  billboardMap.set(entity, mode);
+  let relativeOffset: Vector3 | undefined;
+  if (options?.followPlayer) {
+    const playerPos = Player.head.position.get() ?? Player.position.get() ?? Vector3.zero;
+    relativeOffset = entity.pos.subtract(playerPos);
+  }
+
+  billboardMap.set(entity, { mode, options, relativeOffset });
 
   if (options?.unshaded) {
     // Disable diffuse emission blowout; set metallic to 1.0 and roughness to 1.0 so ambient lighting doesn't add specular or diffuse sky shine
