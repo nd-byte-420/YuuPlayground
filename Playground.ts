@@ -4,6 +4,7 @@ import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { SkyDome } from "./Yuu API/SkyDome";
 import { FlowerParticleEmitters } from "./FlowerParticleEmitters";
 import { scene } from "./Scene";
+import { Controller } from "./Yuu API/Controller";
 
 function updateSkydome() {
   SkyDome.ambientLight.skyColorContribution.set(0.98);
@@ -39,6 +40,16 @@ async function start() {
   console.log('spawned flower particle emitters');
 
   scene.spawnScene()
+
+  Player.position.set(new Vector3(0, 13, 0));
+
+  // if you press right trigger go up 11 units
+
+  Controller.subscribe('rightTrigger', 'Pressed', () => {
+    const prevpos = Player.position.get() || new Vector3(0, 0, 0);
+    const newPos = new Vector3(prevpos.x, prevpos.y + 11, prevpos.z);
+    Player.position.set(newPos);
+  })
 }
 
 
