@@ -3475,7 +3475,7 @@ export async function spawnScene() {
   // Spawn Emitter_RampFlowerStream
   spawnModel(
     getEmitterRampflowerstream,
-    new Vector3(0.000000, 25.199997, 120.320000),
+    new Vector3(0.000000, 25.200000, 120.320000),
     new Vector3(3.000000, 1.000000, 3.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -3483,7 +3483,7 @@ export async function spawnScene() {
   // Spawn Emitter_HexShooter_Left
   spawnModel(
     getEmitterHexshooterLeft,
-    new Vector3(-53.689999, 18.110001, 90.419998),
+    new Vector3(-53.690000, 18.110000, 90.420000),
     new Vector3(2.000000, 1.000000, 2.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
@@ -3491,7 +3491,7 @@ export async function spawnScene() {
   // Spawn Emitter_HexShooter_Right
   spawnModel(
     getEmitterHexshooterRight,
-    new Vector3(53.759998, 18.110001, 90.430000),
+    new Vector3(53.760000, 18.110000, 90.430000),
     new Vector3(2.000000, 1.000000, 2.000000),
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
