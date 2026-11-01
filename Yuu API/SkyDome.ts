@@ -13,27 +13,85 @@ import { Async } from "./Async";
 export const skyShaderCode = `
 shader_type sky;
 
+group_uniforms Textures;
 uniform sampler2D starfield_texture : filter_linear, repeat_enable;
 uniform sampler2D gradient_lut : filter_linear, repeat_enable;
+uniform sampler2D moon_texture : filter_linear, repeat_disable;
+uniform sampler2D glow_texture : filter_linear, repeat_disable;
 
+group_uniforms CelestialOrb;
+// Direction towards the orb (facing forward and slightly elevated above horizon)
+uniform vec3 orb_direction = vec3(0.0, 0.15, -1.0);
+uniform float moon_size : hint_range(0.01, 0.3) = 0.075;
+uniform float glow_size : hint_range(0.05, 1.0) = 0.35;
+
+group_uniforms TimeAndAtmosphere;
+// 0.0 = Midnight, 0.5 = Dawn, 0.75 = Midday, 0.9 = Sunset
 uniform float time_of_day : hint_range(0.0, 1.0) = 0.0;
 uniform float starfield_intensity : hint_range(0.0, 3.0) = 1.0;
 uniform float gradient_intensity : hint_range(0.0, 3.0) = 1.0;
 
+const float PI = 3.14159265358979323846;
+
 void sky() {
-    // 1. Equirectangular UV Projection for Starfield
+    // ---------------------------------------------------------
+    // 1. Starfield (Equirectangular)
+    // ---------------------------------------------------------
     vec2 star_uv;
     star_uv.x = atan(EYEDIR.x, -EYEDIR.z) / (2.0 * PI) + 0.5;
     star_uv.y = acos(clamp(EYEDIR.y, -1.0, 1.0)) / PI;
     vec3 stars = texture(starfield_texture, star_uv).rgb * starfield_intensity;
 
-    // 2. Time-of-Day LUT Sampling
+    // ---------------------------------------------------------
+    // 2. Day/Night Atmosphere LUT Gradient
+    // ---------------------------------------------------------
     float altitude = clamp(EYEDIR.y, 0.0, 1.0);
     vec2 lut_uv = vec2(time_of_day, 1.0 - altitude);
     vec3 sky_gradient = texture(gradient_lut, lut_uv).rgb * gradient_intensity;
 
-    // 3. Additive Blending
-    COLOR = stars + sky_gradient;
+    // ---------------------------------------------------------
+    // 3. Sun & Moon Celestial Orb
+    // ---------------------------------------------------------
+    vec3 norm_orb = normalize(orb_direction);
+    vec3 orb_emission = vec3(0.0);
+
+    // Only compute if looking towards the orb hemisphere
+    if (dot(EYEDIR, norm_orb) > 0.0) {
+        // Construct tangent projection basis
+        vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), norm_orb));
+        vec3 up = cross(norm_orb, right);
+        vec3 diff = EYEDIR - norm_orb;
+
+        // Day factor: 0.0 at night (U=0.0-0.4), 1.0 at peak day (U=0.75)
+        float day_factor = clamp((sin((time_of_day - 0.5) * 2.0 * PI) + 1.0) * 0.5, 0.0, 1.0);
+        float night_factor = 1.0 - day_factor;
+
+        // Dynamic Glow Tint: Cool Silver-White (Moon) -> Fiery Golden Sun
+        vec3 moon_glow_tint = vec3(0.9, 0.95, 1.0);
+        vec3 sun_glow_tint  = vec3(1.6, 0.85, 0.2);
+        vec3 current_glow_tint = mix(moon_glow_tint, sun_glow_tint, day_factor);
+
+        // Sample Glow Aura
+        vec2 glow_uv = vec2(dot(diff, right), dot(diff, up)) / (2.0 * glow_size) + vec2(0.5);
+        if (glow_uv.x >= 0.0 && glow_uv.x <= 1.0 && glow_uv.y >= 0.0 && glow_uv.y <= 1.0) {
+            float glow_alpha = texture(glow_texture, glow_uv).a;
+            orb_emission += current_glow_tint * glow_alpha;
+        }
+
+        // Sample Moon Disc (faded by night_factor)
+        if (night_factor > 0.01) {
+            vec2 moon_uv = vec2(dot(diff, right), dot(diff, up)) / (2.0 * moon_size) + vec2(0.5);
+            if (moon_uv.x >= 0.0 && moon_uv.x <= 1.0 && moon_uv.y >= 0.0 && moon_uv.y <= 1.0) {
+                vec4 moon_sample = texture(moon_texture, moon_uv);
+                orb_emission += moon_sample.rgb * moon_sample.a * night_factor;
+            }
+        }
+    }
+
+    // ---------------------------------------------------------
+    // 4. Final Additive Composition
+    // ---------------------------------------------------------
+    COLOR = stars + sky_gradient + orb_emission;
 }
 `;
 
@@ -48,9 +106,19 @@ export const spatialSkyShaderCode = `
 shader_type spatial;
 render_mode unshaded, cull_disabled;
 
+group_uniforms Textures;
 uniform sampler2D starfield_texture : filter_linear, repeat_enable;
 uniform sampler2D gradient_lut : filter_linear, repeat_enable;
+uniform sampler2D moon_texture : filter_linear, repeat_disable;
+uniform sampler2D glow_texture : filter_linear, repeat_disable;
 
+group_uniforms CelestialOrb;
+// Direction towards the orb (facing forward and slightly elevated above horizon)
+uniform vec3 orb_direction = vec3(0.0, 0.15, -1.0);
+uniform float moon_size : hint_range(0.01, 0.3) = 0.075;
+uniform float glow_size : hint_range(0.05, 1.0) = 0.35;
+
+group_uniforms TimeAndAtmosphere;
 uniform float time_of_day : hint_range(0.0, 1.0) = 0.0;
 uniform float starfield_intensity : hint_range(0.0, 3.0) = 1.0;
 uniform float gradient_intensity : hint_range(0.0, 3.0) = 1.0;
@@ -122,6 +190,39 @@ vec3 sample_procedural_stars(vec2 uv, float tod) {
     return vec3(star) * day_fade;
 }
 
+// Procedural Glow & Disc Fallback when textures are not bound
+vec3 sample_procedural_orb(vec3 eye_dir, float tod) {
+    vec3 norm_orb = normalize(orb_direction);
+    vec3 emission = vec3(0.0);
+
+    if (dot(eye_dir, norm_orb) > 0.0) {
+        vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), norm_orb));
+        vec3 up = cross(norm_orb, right);
+        vec3 diff = eye_dir - norm_orb;
+
+        float day_factor = clamp((sin((tod - 0.5) * 2.0 * PI) + 1.0) * 0.5, 0.0, 1.0);
+        float night_factor = 1.0 - day_factor;
+
+        vec3 moon_glow_tint = vec3(0.9, 0.95, 1.0);
+        vec3 sun_glow_tint  = vec3(1.6, 0.85, 0.2);
+        vec3 current_glow_tint = mix(moon_glow_tint, sun_glow_tint, day_factor);
+
+        vec2 orb_coords = vec2(dot(diff, right), dot(diff, up));
+        float dist = length(orb_coords);
+
+        // Procedural radial glow aura
+        float glow = exp(-dist / (glow_size * 0.45));
+        emission += current_glow_tint * glow * 0.8;
+
+        // Procedural moon disc
+        if (night_factor > 0.01) {
+            float disc = smoothstep(moon_size, moon_size * 0.92, dist);
+            emission += vec3(0.95, 0.97, 1.0) * disc * night_factor;
+        }
+    }
+    return emission;
+}
+
 void fragment() {
     // In view space, VERTEX is the direction from camera to surface point.
     // Multiplying with INV_VIEW_MATRIX calculates the world ray direction (identical to EYEDIR).
@@ -149,8 +250,45 @@ void fragment() {
         sky_gradient = texture(gradient_lut, lut_uv).rgb * gradient_intensity;
     }
 
-    // 3. Additive Blending
-    ALBEDO = stars + sky_gradient;
+    // 3. Sun & Moon Celestial Orb (Texture or Procedural Fallback)
+    vec3 orb_emission = vec3(0.0);
+    vec3 norm_orb = normalize(orb_direction);
+
+    if (dot(eye_dir, norm_orb) > 0.0) {
+        vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), norm_orb));
+        vec3 up = cross(norm_orb, right);
+        vec3 diff = eye_dir - norm_orb;
+
+        float day_factor = clamp((sin((time_of_day - 0.5) * 2.0 * PI) + 1.0) * 0.5, 0.0, 1.0);
+        float night_factor = 1.0 - day_factor;
+
+        vec3 moon_glow_tint = vec3(0.9, 0.95, 1.0);
+        vec3 sun_glow_tint  = vec3(1.6, 0.85, 0.2);
+        vec3 current_glow_tint = mix(moon_glow_tint, sun_glow_tint, day_factor);
+
+        if (use_procedural_fallback > 0.5) {
+            orb_emission = sample_procedural_orb(eye_dir, time_of_day);
+        } else {
+            // Sample Glow Aura
+            vec2 glow_uv = vec2(dot(diff, right), dot(diff, up)) / (2.0 * glow_size) + vec2(0.5);
+            if (glow_uv.x >= 0.0 && glow_uv.x <= 1.0 && glow_uv.y >= 0.0 && glow_uv.y <= 1.0) {
+                float glow_alpha = texture(glow_texture, glow_uv).a;
+                orb_emission += current_glow_tint * glow_alpha;
+            }
+
+            // Sample Moon Disc
+            if (night_factor > 0.01) {
+                vec2 moon_uv = vec2(dot(diff, right), dot(diff, up)) / (2.0 * moon_size) + vec2(0.5);
+                if (moon_uv.x >= 0.0 && moon_uv.x <= 1.0 && moon_uv.y >= 0.0 && moon_uv.y <= 1.0) {
+                    vec4 moon_sample = texture(moon_texture, moon_uv);
+                    orb_emission += moon_sample.rgb * moon_sample.a * night_factor;
+                }
+            }
+        }
+    }
+
+    // 4. Additive Blending
+    ALBEDO = stars + sky_gradient + orb_emission;
 }
 `;
 
@@ -175,6 +313,14 @@ export interface SkyDomeOptions {
    * Size radius of stars (default: 0.14 - increase for larger stars, decrease for smaller)
    */
   starSize?: number;
+  /**
+   * Moon disc size in UV space (default: 0.075)
+   */
+  moonSize?: number;
+  /**
+   * Glow aura size in UV space (default: 0.35)
+   */
+  glowSize?: number;
   /**
    * Use mathematical procedural LUT & starfield if external textures are not bound (default: true)
    */
@@ -225,6 +371,8 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
     activeSkyDomeEntity.mesh.shader.updateNumber("starfield_intensity", options.starfieldIntensity ?? 1.0);
     activeSkyDomeEntity.mesh.shader.updateNumber("gradient_intensity", options.gradientIntensity ?? 1.0);
     activeSkyDomeEntity.mesh.shader.updateNumber("star_size", options.starSize ?? 0.14);
+    activeSkyDomeEntity.mesh.shader.updateNumber("moon_size", options.moonSize ?? 0.075);
+    activeSkyDomeEntity.mesh.shader.updateNumber("glow_size", options.glowSize ?? 0.35);
     activeSkyDomeEntity.mesh.shader.updateNumber(
       "use_procedural_fallback",
       (options.useProceduralFallback ?? true) ? 1.0 : 0.0
@@ -284,6 +432,18 @@ function setGradientIntensity(val: number) {
 function setStarSize(size: number) {
   if (activeSkyDomeEntity?.mesh.nodeID) {
     activeSkyDomeEntity.mesh.shader.updateNumber("star_size", size);
+  }
+}
+
+function setMoonSize(size: number) {
+  if (activeSkyDomeEntity?.mesh.nodeID) {
+    activeSkyDomeEntity.mesh.shader.updateNumber("moon_size", size);
+  }
+}
+
+function setGlowSize(size: number) {
+  if (activeSkyDomeEntity?.mesh.nodeID) {
+    activeSkyDomeEntity.mesh.shader.updateNumber("glow_size", size);
   }
 }
 
@@ -383,6 +543,8 @@ export const SkyDome = {
     setStarfieldIntensity,
     setGradientIntensity,
     setStarSize,
+    setMoonSize,
+    setGlowSize,
     setUseProceduralFallback,
     startDayNightCycle,
     stopDayNightCycle,
