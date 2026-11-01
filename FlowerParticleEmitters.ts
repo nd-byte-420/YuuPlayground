@@ -22,12 +22,15 @@ export const FlowerParticleEmitters = {
   // Particle property getters
   getRampFlowerStreamProperties,
   getHexFlowerShooterProperties,
+  getOarPaddleSplashProperties,
   getExplosionBurstProperties,
 
   // Spawners & triggers
   triggerExplosion,
   spawnRampFlowerStream,
   spawnHexFlowerShooters,
+  spawnOarPaddleSplashes,
+  startOarPaddleSplashLoop,
   spawnAllEmitters,
 
   // Positions from Blender export (converted to Godot Y-Up coords: X, Z, -Y)
@@ -35,6 +38,8 @@ export const FlowerParticleEmitters = {
     rampFlowerStream: new Vector3(0.0000, 25.2000, 120.3200),
     hexTowerLeft: new Vector3(-53.6900, 18.1100, 90.4200),
     hexTowerRight: new Vector3(53.7600, 18.1100, 90.4300),
+    oarPaddleSplashRight: new Vector3(14.0800, 2.4800, 28.8000),
+    oarPaddleSplashLeft: new Vector3(-14.0800, 2.4800, 28.8000),
   },
 };
 
@@ -206,6 +211,69 @@ function getHexFlowerShooterProperties(type: FlowerParticleType = 'pink', count?
 }
 
 /**
+ * oarflowersplash (Oar Paddle Water Entry Splashes)
+ * Bursts flower petals upward and back when the rotating oar paddle strikes the water.
+ *
+ * Parameters based on Blender emitter config:
+ * - Amount: ~150 total (Pink: ~75, Red: ~45, Leaf: ~30)
+ * - Lifetime: 2.1s (50 frames at 24fps)
+ * - Explosiveness: 1.0 (burst mode)
+ * - Initial Velocity: Vector3(0.0, 6.5, 2.5) in Godot coordinates (Blender: (0.0, -2.5, 6.5))
+ * - Gravity: Vector3(0.0, -7.0, 0.0)
+ * - Random velocity: 3.0
+ * - Scale: 0.5 - 1.0
+ */
+function getOarPaddleSplashProperties(
+  type: FlowerParticleType = 'pink',
+  count?: number,
+  isOneShot: boolean = true
+): Partial<ParticlesProperties> {
+  const meshEntity = getCachedPlaneMesh(type);
+
+  const defaultCount = type === 'pink' ? 75 : (type === 'red' ? 45 : 30);
+  const amount = count ?? defaultCount;
+
+  // Blender: (0.0, -2.5, 6.5) -> Godot (X, Z, -Y): (0.0, 6.5, 2.5)
+  const dir = new Vector3(0.0, 6.5, 2.5).normalize();
+
+  return {
+    meshNodeID: meshEntity.mesh.nodeID ?? -1,
+
+    isEmitting: true,
+    isOneShot,
+    randomness: 0.8,
+    explosiveness: 1.0,
+
+    amount,
+    lifetimeInSeconds: 2.1,
+    speedScale: 1.0,
+    scaleMin: 0.5,
+    scaleMax: 1.0,
+
+    emissionShape: 'Box',
+    emissionShapeProperties: {
+      boxExtents: new Vector3(1.0, 0.5, 1.0),
+    },
+
+    direction: dir,
+    spread: 35.0,
+    initialVelocityMin: 5.5,
+    initialVelocityMax: 8.5,
+
+    gravity: new Vector3(0.0, -7.0, 0.0),
+
+    initialRotationMin: Vector3.zero,
+    initialRotationMax: new Vector3(360, 360, 360),
+    rotationVelocityMin: new Vector3(-180, -180, -180),
+    rotationVelocityMax: new Vector3(180, 180, 180),
+
+    transformAlign: {
+      type: 'Disabled',
+    },
+  };
+}
+
+/**
  * Explosion Burst Properties (Spherical Apple Burst or Upward Hex Fountain Burst)
  * Follows 3-phase physics: violent burst (explosiveness 1.0) -> apex stall -> buoyant drift (-3.0 m/s^2).
  */
@@ -352,16 +420,72 @@ function spawnHexFlowerShooters(): { left: Entity[]; right: Entity[] } {
 }
 
 /**
- * Spawns all flower particle emitters defined in particle-emitter-summary.md.
+ * Spawns one-shot or continuous oar paddle flower splashes at left and right paddle water impact points.
  */
-function spawnAllEmitters(): { rampStream: Entity[]; hexLeft: Entity[]; hexRight: Entity[] } {
+function spawnOarPaddleSplashes(isOneShot: boolean = false): { left: Entity[]; right: Entity[] } {
+  const leftEntities: Entity[] = [];
+  const rightEntities: Entity[] = [];
+
+  const types: FlowerParticleType[] = ['pink', 'red', 'leaf'];
+
+  // Left paddle splash
+  for (const t of types) {
+    try {
+      const props = getOarPaddleSplashProperties(t, undefined, isOneShot);
+      const emitter = new Entity(FlowerParticleEmitters.LOCATIONS.oarPaddleSplashLeft, Quaternion.one, Vector3.one, undefined, 'Static');
+      emitter.particles.setParticlesProperties(props);
+      emitter.particles.play();
+      leftEntities.push(emitter);
+    } catch (err: any) {
+      console.error(`spawnOarPaddleSplashes: Error creating left splash emitter for '${t}':`, err?.message || err);
+    }
+  }
+
+  // Right paddle splash
+  for (const t of types) {
+    try {
+      const props = getOarPaddleSplashProperties(t, undefined, isOneShot);
+      const emitter = new Entity(FlowerParticleEmitters.LOCATIONS.oarPaddleSplashRight, Quaternion.one, Vector3.one, undefined, 'Static');
+      emitter.particles.setParticlesProperties(props);
+      emitter.particles.play();
+      rightEntities.push(emitter);
+    } catch (err: any) {
+      console.error(`spawnOarPaddleSplashes: Error creating right splash emitter for '${t}':`, err?.message || err);
+    }
+  }
+
+  return { left: leftEntities, right: rightEntities };
+}
+
+/**
+ * Starts timed burst cycles for oar paddle splashes matching the paddle rotation cycle.
+ * Rotates every 69 frames (~2.875s at 24fps).
+ */
+function startOarPaddleSplashLoop(intervalSeconds: number = 2.875): () => void {
+  // Trigger initial splash
+  spawnOarPaddleSplashes(true);
+
+  const timer = setInterval(() => {
+    spawnOarPaddleSplashes(true);
+  }, intervalSeconds * 1000);
+
+  return () => clearInterval(timer);
+}
+
+/**
+ * Spawns all flower particle emitters defined in particle-emitter-summary.md and Blender scene.
+ */
+function spawnAllEmitters(): { rampStream: Entity[]; hexLeft: Entity[]; hexRight: Entity[]; oarSplashLeft: Entity[]; oarSplashRight: Entity[] } {
   const rampStream = spawnRampFlowerStream();
   const hex = spawnHexFlowerShooters();
+  const oar = spawnOarPaddleSplashes();
 
   return {
     rampStream,
     hexLeft: hex.left,
     hexRight: hex.right,
+    oarSplashLeft: oar.left,
+    oarSplashRight: oar.right,
   };
 }
 
