@@ -105,7 +105,7 @@ float star_hash(vec2 p) {
 
 vec3 sample_procedural_stars(vec2 uv, float tod) {
     // Layer 1: Fine pinpoint stars
-    vec2 grid_uv1 = uv * 1100.0;
+    vec2 grid_uv1 = uv * 640.0;
     vec2 id1 = floor(grid_uv1);
     vec2 gv1 = fract(grid_uv1) - 0.5;
     float n1 = star_hash(id1);
@@ -116,7 +116,7 @@ vec3 sample_procedural_stars(vec2 uv, float tod) {
     }
 
     // Layer 2: Subtle medium stars
-    vec2 grid_uv2 = uv * 650.0;
+    vec2 grid_uv2 = uv * 250.0;
     vec2 id2 = floor(grid_uv2 + 17.3);
     vec2 gv2 = fract(grid_uv2 + 17.3) - 0.5;
     float n2 = star_hash(id2);
