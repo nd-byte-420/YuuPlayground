@@ -141,7 +141,7 @@ function getRampFlowerStreamProperties(type: FlowerParticleType = 'pink', count?
     rotationVelocityMax: new Vector3(120, 120, 120),
 
     transformAlign: {
-      type: 'Billboard',
+      type: 'Disabled',
     },
   };
 }
@@ -201,7 +201,7 @@ function getHexFlowerShooterProperties(type: FlowerParticleType = 'pink', count?
     rotationVelocityMax: new Vector3(220, 220, 220),
 
     transformAlign: {
-      type: 'Billboard',
+      type: 'Disabled',
     },
   };
 }
@@ -251,7 +251,7 @@ function getExplosionBurstProperties(
     rotationVelocityMax: new Vector3(220, 220, 220),
 
     transformAlign: {
-      type: 'Billboard',
+      type: 'Disabled',
     },
   };
 }
