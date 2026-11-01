@@ -55,6 +55,7 @@ uniform float time_of_day : hint_range(0.0, 1.0) = 0.0;
 uniform float starfield_intensity : hint_range(0.0, 3.0) = 1.0;
 uniform float gradient_intensity : hint_range(0.0, 3.0) = 1.0;
 uniform float use_procedural_fallback : hint_range(0.0, 1.0) = 1.0;
+uniform float star_size : hint_range(0.02, 0.4) = 0.14;
 
 // Procedural LUT Fallback: replicates Mazskygrad 2D Time-of-Day atmospheric gradient
 vec3 sample_procedural_sky(float tod, float altitude) {
@@ -104,29 +105,17 @@ float star_hash(vec2 p) {
 }
 
 vec3 sample_procedural_stars(vec2 uv, float tod) {
-    // Layer 1: Fine pinpoint stars
-    vec2 grid_uv1 = uv * 640.0;
-    vec2 id1 = floor(grid_uv1);
-    vec2 gv1 = fract(grid_uv1) - 0.5;
-    float n1 = star_hash(id1);
-    float star1 = 0.0;
-    if (n1 > 0.989) {
-        float d1 = length(gv1);
-        star1 = smoothstep(0.06, 0.001, d1) * (n1 - 0.989) * 150.0;
-    }
+    vec2 grid_uv = uv * 560.0;
+    vec2 id = floor(grid_uv);
+    vec2 gv = fract(grid_uv) - 0.5;
 
-    // Layer 2: Subtle medium stars
-    vec2 grid_uv2 = uv * 250.0;
-    vec2 id2 = floor(grid_uv2 + 17.3);
-    vec2 gv2 = fract(grid_uv2 + 17.3) - 0.5;
-    float n2 = star_hash(id2);
-    float star2 = 0.0;
-    if (n2 > 0.993) {
-        float d2 = length(gv2);
-        star2 = smoothstep(0.08, 0.002, d2) * (n2 - 0.993) * 180.0;
+    float n = star_hash(id);
+    float star = 0.0;
+    if (n > 0.982) {
+        float d = length(gv);
+        float r = star_size * (0.7 + 0.6 * star_hash(id + 11.7));
+        star = smoothstep(r, 0.01, d) * (n - 0.982) * 90.0;
     }
-
-    float star = star1 + star2;
 
     // Stars automatically fade during daylight (between 0.38 and 0.96)
     float day_fade = 1.0 - smoothstep(0.38, 0.52, tod) * (1.0 - smoothstep(0.88, 0.96, tod));
@@ -183,6 +172,10 @@ export interface SkyDomeOptions {
    */
   gradientIntensity?: number;
   /**
+   * Size radius of stars (default: 0.14 - increase for larger stars, decrease for smaller)
+   */
+  starSize?: number;
+  /**
    * Use mathematical procedural LUT & starfield if external textures are not bound (default: true)
    */
   useProceduralFallback?: boolean;
@@ -231,6 +224,7 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
     activeSkyDomeEntity.mesh.shader.updateNumber("time_of_day", currentTimeOfDay);
     activeSkyDomeEntity.mesh.shader.updateNumber("starfield_intensity", options.starfieldIntensity ?? 1.0);
     activeSkyDomeEntity.mesh.shader.updateNumber("gradient_intensity", options.gradientIntensity ?? 1.0);
+    activeSkyDomeEntity.mesh.shader.updateNumber("star_size", options.starSize ?? 0.14);
     activeSkyDomeEntity.mesh.shader.updateNumber(
       "use_procedural_fallback",
       (options.useProceduralFallback ?? true) ? 1.0 : 0.0
@@ -284,6 +278,12 @@ function setStarfieldIntensity(val: number) {
 function setGradientIntensity(val: number) {
   if (activeSkyDomeEntity?.mesh.nodeID) {
     activeSkyDomeEntity.mesh.shader.updateNumber("gradient_intensity", val);
+  }
+}
+
+function setStarSize(size: number) {
+  if (activeSkyDomeEntity?.mesh.nodeID) {
+    activeSkyDomeEntity.mesh.shader.updateNumber("star_size", size);
   }
 }
 
@@ -382,6 +382,7 @@ export const SkyDome = {
     getTimeOfDay,
     setStarfieldIntensity,
     setGradientIntensity,
+    setStarSize,
     setUseProceduralFallback,
     startDayNightCycle,
     stopDayNightCycle,

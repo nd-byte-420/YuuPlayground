@@ -14,6 +14,7 @@ function updateSkydome() {
     timeOfDay: 0.0,
     starfieldIntensity: 1.0,
     gradientIntensity: 1.0,
+    starSize: 0.14,
     useProceduralFallback: true,
     followPlayer: true,
     autoRotateStars: true,
