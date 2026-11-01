@@ -29,10 +29,11 @@ export const FlowerParticleEmitters = {
   spawnAllEmitters,
 
   // Positions from particle-emitter-summary.md (Godot Y-Up coords)
+  // put close to origin
   LOCATIONS: {
-    rampFlowerStream: new Vector3(0.0, 135.20, 120.32),
-    hexTowerLeft: new Vector3(-53.69, 128.11, 90.42),
-    hexTowerRight: new Vector3(53.76, 128.11, 90.43),
+    rampFlowerStream: new Vector3(0.0, 0, 0),
+    hexTowerLeft: new Vector3(-6, 0, 5),
+    hexTowerRight: new Vector3(6, 0, 5),
   },
 };
 
