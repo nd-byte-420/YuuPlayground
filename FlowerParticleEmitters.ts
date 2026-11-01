@@ -22,8 +22,10 @@ export const FlowerParticleEmitters = {
   // Particle property getters
   getRampFlowerStreamProperties,
   getHexFlowerShooterProperties,
+  getExplosionBurstProperties,
 
-  // Spawners at exact coordinates
+  // Spawners & triggers
+  triggerExplosion,
   spawnRampFlowerStream,
   spawnHexFlowerShooters,
   spawnAllEmitters,
@@ -148,16 +150,17 @@ function getRampFlowerStreamProperties(type: FlowerParticleType = 'pink', count?
  * hexflowershooter (Hex Pillar Cannons)
  * Upward fountains bursting petals into the air atop the two hex towers beside the ramp.
  *
- * Parameters based on particle-emitter-summary.md:
- * - Amount: ~150-250 (Pink: ~100, Red: ~60, Leaf: ~40)
+ * Parameters based on burst sequence physics:
+ * - Amount: ~120-150 (Pink: ~100, Red: ~60, Leaf: ~40)
  * - Lifetime: 3.5s
- * - Emission Shape: Ring (radius: 1.2m)
- * - Direction: Vector3(0.0, 1.0, 0.0)
- * - Spread: 25.0 deg
+ * - Explosiveness: 1.0 (burst mode: all particles emit simultaneously in frame 0)
+ * - Emission Shape: Sphere (R ≈ 0.3m)
+ * - Direction: Vector3.up (conical spread 30°)
+ * - Spread: 30.0 deg
  * - Initial Velocity: 18.0 - 24.0 m/s
- * - Gravity: Vector3(0.0, -9.8, 0.0)
- * - Rotation / Tumbling: -180 to 180 deg/s
- * - Scale: 0.8 - 1.3
+ * - Gravity: Vector3(0.0, -3.0, 0.0) (buoyant drift descent)
+ * - Rotation / Tumbling: -220 to 220 deg/s
+ * - Scale: 0.6 - 1.2
  */
 function getHexFlowerShooterProperties(type: FlowerParticleType = 'pink', count?: number): Partial<ParticlesProperties> {
   const meshEntity = getCachedPlaneMesh(type);
@@ -171,40 +174,121 @@ function getHexFlowerShooterProperties(type: FlowerParticleType = 'pink', count?
     isEmitting: true,
     isOneShot: false,
     randomness: 0.9,
-    explosiveness: 0.0,
+    explosiveness: 1.0,
 
     amount,
     lifetimeInSeconds: 3.5,
     speedScale: 1.0,
-    scaleMin: 0.8,
-    scaleMax: 1.3,
+    scaleMin: 0.6,
+    scaleMax: 1.2,
 
-    emissionShape: 'Ring',
+    emissionShape: 'Sphere',
     emissionShapeProperties: {
-      ring: {
-        radius: 1.2,
-        innerRadius: 0.0,
-        height: 0.2,
-        axis: Vector3.up,
-      },
+      sphereRadius: 0.3,
     },
 
     direction: Vector3.up,
-    spread: 25.0,
+    spread: 30.0,
     initialVelocityMin: 18.0,
     initialVelocityMax: 24.0,
 
-    gravity: new Vector3(0.0, -9.8, 0.0),
+    // Buoyant gravity: low mass & high air drag petals drift gently down
+    gravity: new Vector3(0.0, -3.0, 0.0),
 
     initialRotationMin: Vector3.zero,
     initialRotationMax: new Vector3(360, 360, 360),
-    rotationVelocityMin: new Vector3(-180, -180, -180),
-    rotationVelocityMax: new Vector3(180, 180, 180),
+    rotationVelocityMin: new Vector3(-220, -220, -220),
+    rotationVelocityMax: new Vector3(220, 220, 220),
 
     transformAlign: {
       type: 'Billboard',
     },
   };
+}
+
+/**
+ * Explosion Burst Properties (Spherical Apple Burst or Upward Hex Fountain Burst)
+ * Follows 3-phase physics: violent burst (explosiveness 1.0) -> apex stall -> buoyant drift (-3.0 m/s^2).
+ */
+function getExplosionBurstProperties(
+  type: FlowerParticleType = 'pink',
+  isFountain: boolean = false,
+  count: number = 120
+): Partial<ParticlesProperties> {
+  const meshEntity = getCachedPlaneMesh(type);
+
+  return {
+    meshNodeID: meshEntity.mesh.nodeID ?? -1,
+
+    isEmitting: true,
+    isOneShot: true,
+    randomness: 1.0,
+    explosiveness: 1.0,
+
+    amount: count,
+    lifetimeInSeconds: 3.5,
+    speedScale: 1.0,
+    scaleMin: 0.6,
+    scaleMax: 1.2,
+
+    emissionShape: 'Sphere',
+    emissionShapeProperties: {
+      sphereRadius: 0.3,
+    },
+
+    direction: isFountain ? Vector3.up : Vector3.zero,
+    spread: isFountain ? 30.0 : 180.0,
+    initialVelocityMin: isFountain ? 18.0 : 14.0,
+    initialVelocityMax: isFountain ? 24.0 : 22.0,
+
+    // Buoyant gravity (gentle petal drift)
+    gravity: new Vector3(0.0, -3.0, 0.0),
+
+    // Multi-axis spin & tumbling
+    initialRotationMin: Vector3.zero,
+    initialRotationMax: new Vector3(360, 360, 360),
+    rotationVelocityMin: new Vector3(-220, -220, -220),
+    rotationVelocityMax: new Vector3(220, 220, 220),
+
+    transformAlign: {
+      type: 'Billboard',
+    },
+  };
+}
+
+/**
+ * Triggers a one-shot particle explosion burst at spawnPos and automatically cleans up.
+ * @param spawnPos Center of the explosion
+ * @param isFountain If true, emits upward conical fountain burst; if false, 360-degree spherical burst.
+ * @param types The particle types to include (defaults to all: pink, red, leaf)
+ */
+function triggerExplosion(
+  spawnPos: Vector3,
+  isFountain: boolean = false,
+  types: FlowerParticleType[] = ['pink', 'red', 'leaf']
+): Entity[] {
+  const emitters: Entity[] = [];
+
+  for (const t of types) {
+    try {
+      const count = t === 'pink' ? 60 : (t === 'red' ? 35 : 25);
+      const props = getExplosionBurstProperties(t, isFountain, count);
+      const emitter = new Entity(spawnPos, Quaternion.one, Vector3.one, undefined, 'Static');
+      emitter.particles.setParticlesProperties(props);
+      emitter.particles.play();
+      emitters.push(emitter);
+
+      // Auto-free when finished (lifetime 3.5s + 0.5s padding)
+      const lifetimeMs = ((props.lifetimeInSeconds ?? 3.5) + 0.5) * 1000;
+      setTimeout(() => {
+        emitter.destroy();
+      }, lifetimeMs);
+    } catch (err: any) {
+      console.error(`triggerExplosion: Error creating emitter for '${t}':`, err?.message || err);
+    }
+  }
+
+  return emitters;
 }
 
 /**
