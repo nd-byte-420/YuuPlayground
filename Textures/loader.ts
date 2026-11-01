@@ -3,6 +3,7 @@ import { Entity } from "../Yuu API/Entity";
 import { Vector2 } from "../Yuu API/Basic Types/Vector2";
 import { Color } from "../Yuu API/Basic Types/Color";
 import { PNGDecoder, hexToBytes } from "./pngDecoder";
+import { Events } from "../Yuu API/Events";
 
 export type LoadablePNG = {
   base: string;
@@ -251,73 +252,153 @@ export function applyTextureToEntity(
 }
 
 /**
- * Shader for scrolling flowerriver texture based on Source VMT:
- * "LightmappedGeneric" {
- *   "$basetexture" "surreal/flowerriver"
- *   "$nocull" "1"
- *   Proxies {
- *     TextureScroll {
- *       texturescrollvar $basetexturetransform
- *       texturescrollrate 1.25
- *       texturescrollangle 270 (downward along V axis: vec2(0.0, 1.25))
- *     }
- *   }
- * }
+ * Texture scroller state for dynamic UV/image scrolling.
  */
-export const flowerRiverScrollingShader = `
-shader_type spatial;
-render_mode cull_disabled;
-
-uniform vec2 scroll_velocity = vec2(0.0, 1.25);
-
-void vertex() {
-    UV += scroll_velocity * TIME;
+interface ScrollingTextureState {
+  sourceTexture: Texture;
+  activeTexture: Texture;
+  scrollRate: number; // Texture cycles per second
+  scrollAngleDegrees: number;
+  currentOffset: number; // In pixels (along scroll axis)
+  lastUpdatedMs: number;
 }
-`;
+
+const scrollingTextureRegistry = new Map<string, ScrollingTextureState>();
+let isScrollingLoopActive = false;
+
+function ensureScrollingLoopRunning() {
+  if (isScrollingLoopActive) return;
+  isScrollingLoopActive = true;
+
+  try {
+    Events.onUpdate((delta: number) => {
+      // Delta may occasionally be 0 or abnormal, clamp safely
+      const dt = typeof delta === 'number' && delta > 0 && delta < 0.5 ? delta : 0.016;
+
+      for (const [name, state] of scrollingTextureRegistry.entries()) {
+        const h = state.sourceTexture.height;
+        const w = state.sourceTexture.width;
+        if (h <= 0 || w <= 0) continue;
+
+        // Rate is in full UV loops per second (e.g. 1.25)
+        // Pixels per second: rate * height
+        const pixelSpeed = state.scrollRate * h;
+        state.currentOffset = (state.currentOffset + pixelSpeed * dt) % h;
+        const offsetY = Math.floor(state.currentOffset);
+
+        if (offsetY === 0) {
+          // Exactly aligned
+          state.activeTexture.fillRectWithImage(
+            Vector2.zero,
+            state.sourceTexture,
+            Vector2.zero,
+            new Vector2(w, h)
+          );
+        } else {
+          // In Source engine VMT 270 deg scroll (downward along V axis):
+          // Slice 1: top part shifted downward to (0, offsetY)
+          state.activeTexture.fillRectWithImage(
+            new Vector2(0, offsetY),
+            state.sourceTexture,
+            Vector2.zero,
+            new Vector2(w, h - offsetY)
+          );
+          // Slice 2: bottom part wrapped up to (0, 0)
+          state.activeTexture.fillRectWithImage(
+            Vector2.zero,
+            state.sourceTexture,
+            new Vector2(0, h - offsetY),
+            new Vector2(w, offsetY)
+          );
+        }
+
+        state.activeTexture.updateTexture();
+      }
+    });
+  } catch (err: any) {
+    console.log("Failed to start scrolling texture loop:", err?.message || err);
+  }
+}
 
 /**
- * Applies the flowerriver texture with scrolling UV animation to an Entity.
- * Also sets cull_disabled ($nocull "1") and texturescrollrate 1.25 at angle 270.
+ * Gets or creates an animated scrolling texture.
+ */
+export function getOrCreateScrollingTexture(
+  textureName: string,
+  scrollRate: number = 1.25,
+  scrollAngleDegrees: number = 270
+): Texture | undefined {
+  const cleanName = textureName.replace(/\.png$/i, '').replace(/_png$/i, '');
+  const existing = scrollingTextureRegistry.get(cleanName);
+  if (existing) {
+    return existing.activeTexture;
+  }
+
+  // Load the pristine source texture from file/cache
+  const sourceTexture = loadTextureByName(cleanName);
+  if (!sourceTexture) {
+    console.log(`getOrCreateScrollingTexture: Could not load source texture '${cleanName}'`);
+    return undefined;
+  }
+
+  // Create active display texture with identical dimensions
+  const activeTexture = new Texture(sourceTexture.width, sourceTexture.height);
+  activeTexture.fillRectWithImage(
+    Vector2.zero,
+    sourceTexture,
+    Vector2.zero,
+    new Vector2(sourceTexture.width, sourceTexture.height)
+  );
+  activeTexture.updateTexture();
+
+  const state: ScrollingTextureState = {
+    sourceTexture,
+    activeTexture,
+    scrollRate,
+    scrollAngleDegrees,
+    currentOffset: 0,
+    lastUpdatedMs: Date.now(),
+  };
+
+  scrollingTextureRegistry.set(cleanName, state);
+  ensureScrollingLoopRunning();
+
+  return activeTexture;
+}
+
+/**
+ * Applies the flowerriver texture with scrolling animation to an Entity.
+ * Uses real-time buffer scrolling for full original color fidelity and distance clarity.
  */
 export function applyScrollingTextureToEntity(
   entity: Entity,
   textureName: string = 'flowerriver',
   scrollRate: number = 1.25,
   scrollAngleDegrees: number = 270,
-  noCull: boolean = true
+  _noCull: boolean = true
 ): Texture | undefined {
-  // Apply base texture without mipmaps so it stays clear and visible at all distances
-  const tex = applyTextureToEntity(entity, textureName, false);
-  if (!entity?.mesh?.nodeID) return tex;
-
-  // Convert angle (degrees) and rate into UV velocity:
-  // angle 270 deg -> cos(270) = 0, sin(270) = -1.
-  // In Source engine VMT TextureScroll, 270 scrolls downward along V axis (+V in UV space).
-  const rad = (scrollAngleDegrees * Math.PI) / 180.0;
-  const vx = Math.cos(rad) * scrollRate;
-  const vy = -Math.sin(rad) * scrollRate; // 270 deg -> -sin(270) = -(-1) = +1 -> downward along V
-
-  const cullMode = noCull ? 'render_mode cull_disabled;' : '';
-  const shaderCode = `
-shader_type spatial;
-${cullMode}
-
-// In Godot 4 spatial shaders, texture_albedo is the default sampler uniform for the mesh material's albedo texture
-uniform sampler2D texture_albedo : source_color, filter_linear, repeat_enable;
-
-void fragment() {
-    vec2 scrolled_uv = UV + vec2(${vx.toFixed(4)}, ${vy.toFixed(4)}) * TIME;
-    vec4 albedo_tex = texture(texture_albedo, scrolled_uv);
-    ALBEDO = albedo_tex.rgb;
-    ALPHA = albedo_tex.a;
-}
-`;
-
-  try {
-    entity.mesh.shader.set(shaderCode);
-  } catch (err: any) {
-    console.log(`Failed applying scrolling shader to entity:`, err?.message || err);
+  if (!entity || !entity.mesh) {
+    console.log("applyScrollingTextureToEntity: Entity or entity mesh is undefined");
+    return undefined;
   }
 
-  return tex;
+  // Ensure any previously applied custom shader is removed
+  if (entity.mesh.nodeID) {
+    try {
+      entity.mesh.shader.remove();
+    } catch {
+      // ignore
+    }
+  }
+
+  // Get the shared dynamic animated scrolling texture
+  const scrollingTex = getOrCreateScrollingTexture(textureName, scrollRate, scrollAngleDegrees);
+  if (scrollingTex) {
+    // Set texture with mipmaps disabled to prevent distance dark/grey fading
+    entity.mesh.texture.set(scrollingTex, false);
+    return scrollingTex;
+  }
+
+  // Fallback to static texture if dynamic scroller fails
+  return applyTextureToEntity(entity, textureName, false);
 }
