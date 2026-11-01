@@ -282,19 +282,42 @@ void vertex() {
 export function applyScrollingTextureToEntity(
   entity: Entity,
   textureName: string = 'flowerriver',
-  _scrollRate: number = 1.25,
-  _scrollAngleDegrees: number = 270,
-  _noCull: boolean = true
+  scrollRate: number = 1.25,
+  scrollAngleDegrees: number = 270,
+  noCull: boolean = true
 ): Texture | undefined {
-  // Option A: Clean restore without shader or mipmaps to fix color & distance rendering
-  if (entity?.mesh?.nodeID) {
-    try {
-      entity.mesh.shader.remove();
-    } catch {
-      // ignore
-    }
+  // Apply base texture without mipmaps so it stays clear and visible at all distances
+  const tex = applyTextureToEntity(entity, textureName, false);
+  if (!entity?.mesh?.nodeID) return tex;
+
+  // Convert angle (degrees) and rate into UV velocity:
+  // angle 270 deg -> cos(270) = 0, sin(270) = -1.
+  // In Source engine VMT TextureScroll, 270 scrolls downward along V axis (+V in UV space).
+  const rad = (scrollAngleDegrees * Math.PI) / 180.0;
+  const vx = Math.cos(rad) * scrollRate;
+  const vy = -Math.sin(rad) * scrollRate; // 270 deg -> -sin(270) = -(-1) = +1 -> downward along V
+
+  const cullMode = noCull ? 'render_mode cull_disabled;' : '';
+  const shaderCode = `
+shader_type spatial;
+${cullMode}
+
+// In Godot 4 spatial shaders, texture_albedo is the default sampler uniform for the mesh material's albedo texture
+uniform sampler2D texture_albedo : source_color, filter_linear, repeat_enable;
+
+void fragment() {
+    vec2 scrolled_uv = UV + vec2(${vx.toFixed(4)}, ${vy.toFixed(4)}) * TIME;
+    vec4 albedo_tex = texture(texture_albedo, scrolled_uv);
+    ALBEDO = albedo_tex.rgb;
+    ALPHA = albedo_tex.a;
+}
+`;
+
+  try {
+    entity.mesh.shader.set(shaderCode);
+  } catch (err: any) {
+    console.log(`Failed applying scrolling shader to entity:`, err?.message || err);
   }
 
-  const tex = applyTextureToEntity(entity, textureName, false);
   return tex;
 }
