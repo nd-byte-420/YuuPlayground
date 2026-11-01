@@ -6,6 +6,7 @@ import { Color } from "./Yuu API/Basic Types/Color";
 import { Controller } from "./Yuu API/Controller";
 import { SkyDome } from "./Yuu API/SkyDome";
 import { spawnPrimitive } from "./Yuu API/SpawnPrimitive";
+import { Billboard } from "./Yuu API/Billboard";
 import { applyTextureToEntity } from "./Textures/loader";
 
 
@@ -31,50 +32,48 @@ function updateSkydome() {
   // SkyDome.skyMaterial.setShader(SkyDome.skyShaderCode);
 }
 
-function spawnMoonPlanes(distance: number = 32) {
-  const spawnCenter = Player.position.get() ?? new Vector3(0, 8, 0);
+function spawnMoonBillboard(distance: number = 32) {
+  const spawnCenter = Player.position.get() ?? new Vector3(0, 13, 0);
 
   // Direction towards the moon/glow (facing forward and slightly elevated)
-  const dir = new Vector3(0, 0.05, -1.0).normalize();
+  const dir = new Vector3(0, 0.15, -1.0).normalize();
   const moonPos = spawnCenter.add(dir.multiply(distance));
-  // // Glow plane placed slightly behind moon along the sightline
-  // const glowPos = moonPos.add(dir.multiply(0.2));
+  // Place glow slightly behind the moon plane along the sightline
+  const glowPos = moonPos.add(dir.multiply(0.2));
 
-  // Orientation: look back towards the player
-  const toPlayer = dir.multiply(-1);
-  const rot = Quaternion.lookAt(toPlayer, Vector3.up);
-
-  // // 1. Glow Plane
-  // const glowScale = new Vector3(14, 14, 1);
-  // const glowPlane = spawnPrimitive.plane(
-  //   'Both',
-  //   glowPos,
-  //   glowScale,
-  //   rot,
-  //   Color.white,
-  //   0.99,
-  //   'None',
-  //   'Static',
-  //   undefined
-  // );
-  // applyTextureToEntity(glowPlane, 'glow');
-
-  // 2. Moon Plane
-  const moonScale = new Vector3(5, 5, 1);
-  const moonPlane = spawnPrimitive.plane(
+  // 1. Glow Billboard plane (rendered with Both sides, transparent)
+  const glowScale = new Vector3(14, 14, 1);
+  const glowPlane = spawnPrimitive.plane(
     'Both',
-    moonPos,
-    moonScale,
-    rot,
+    glowPos,
+    glowScale,
+    Quaternion.one,
     Color.white,
     0.99,
     'None',
     'Static',
     undefined
   );
+  Billboard.start(glowPlane, 'Freely');
+  applyTextureToEntity(glowPlane, 'glow');
+
+  // 2. Moon Billboard plane (rendered with Both sides, transparent)
+  const moonScale = new Vector3(5, 5, 1);
+  const moonPlane = spawnPrimitive.plane(
+    'Both',
+    moonPos,
+    moonScale,
+    Quaternion.one,
+    Color.white,
+    0.99,
+    'None',
+    'Static',
+    undefined
+  );
+  Billboard.start(moonPlane, 'Freely');
   applyTextureToEntity(moonPlane, 'moon');
 
-  return { moonPlane };
+  return { moonPlane, glowPlane };
 }
 
 
@@ -86,8 +85,8 @@ async function start() {
 
   Player.position.set(new Vector3(0, 13, 0));
 
-  spawnMoonPlanes(32);
-  console.log('spawned moon and glow planes');
+  spawnMoonBillboard(32);
+  console.log('spawned moon and glow billboard');
 
   // // if you press right trigger go up 11 units
   // Controller.subscribe('rightTrigger', 'Pressed', () => {

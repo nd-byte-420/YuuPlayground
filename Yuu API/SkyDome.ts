@@ -22,8 +22,9 @@ uniform sampler2D glow_texture : filter_linear, repeat_disable;
 group_uniforms CelestialOrb;
 // Direction towards the orb (facing forward and slightly elevated above horizon)
 uniform vec3 orb_direction = vec3(0.0, 0.15, -1.0);
-uniform float moon_size : hint_range(0.01, 0.3) = 0.075;
-uniform float glow_size : hint_range(0.05, 1.0) = 0.175;
+uniform float moon_size : hint_range(0.0, 0.3) = 0.075;
+uniform float glow_size : hint_range(0.0, 1.0) = 0.175;
+uniform float enable_celestial_orb : hint_range(0.0, 1.0) = 0.0;
 
 group_uniforms TimeAndAtmosphere;
 // 0.0 = Midnight, 0.5 = Dawn, 0.75 = Midday, 0.9 = Sunset
@@ -55,8 +56,8 @@ void sky() {
     vec3 norm_orb = normalize(orb_direction);
     vec3 orb_emission = vec3(0.0);
 
-    // Only compute if looking towards the orb hemisphere
-    if (dot(EYEDIR, norm_orb) > 0.0) {
+    // Only compute if looking towards the orb hemisphere and enabled
+    if (enable_celestial_orb > 0.5 && dot(EYEDIR, norm_orb) > 0.0) {
         // Construct tangent projection basis
         vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), norm_orb));
         vec3 up = cross(norm_orb, right);
@@ -115,8 +116,9 @@ uniform sampler2D glow_texture : filter_linear, repeat_disable;
 group_uniforms CelestialOrb;
 // Direction towards the orb (facing forward and slightly elevated above horizon)
 uniform vec3 orb_direction = vec3(0.0, 0.15, -1.0);
-uniform float moon_size : hint_range(0.01, 0.3) = 0.075;
-uniform float glow_size : hint_range(0.05, 1.0) = 0.175;
+uniform float moon_size : hint_range(0.0, 0.3) = 0.075;
+uniform float glow_size : hint_range(0.0, 1.0) = 0.175;
+uniform float enable_celestial_orb : hint_range(0.0, 1.0) = 0.0;
 
 group_uniforms TimeAndAtmosphere;
 uniform float time_of_day : hint_range(0.0, 1.0) = 0.0;
@@ -254,7 +256,7 @@ void fragment() {
     vec3 orb_emission = vec3(0.0);
     vec3 norm_orb = normalize(orb_direction);
 
-    if (dot(eye_dir, norm_orb) > 0.0) {
+    if (enable_celestial_orb > 0.5 && dot(eye_dir, norm_orb) > 0.0) {
         vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), norm_orb));
         vec3 up = cross(norm_orb, right);
         vec3 diff = eye_dir - norm_orb;
@@ -322,6 +324,10 @@ export interface SkyDomeOptions {
    */
   glowSize?: number;
   /**
+   * Render the celestial orb (sun/moon) directly in the background dome shader (default: false when using billboards)
+   */
+  enableCelestialOrb?: boolean;
+  /**
    * Use mathematical procedural LUT & starfield if external textures are not bound (default: true)
    */
   useProceduralFallback?: boolean;
@@ -373,6 +379,10 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
     activeSkyDomeEntity.mesh.shader.updateNumber("star_size", options.starSize ?? 0.14);
     activeSkyDomeEntity.mesh.shader.updateNumber("moon_size", options.moonSize ?? 0.075);
     activeSkyDomeEntity.mesh.shader.updateNumber("glow_size", options.glowSize ?? 0.175);
+    activeSkyDomeEntity.mesh.shader.updateNumber(
+      "enable_celestial_orb",
+      (options.enableCelestialOrb ?? false) ? 1.0 : 0.0
+    );
     activeSkyDomeEntity.mesh.shader.updateNumber(
       "use_procedural_fallback",
       (options.useProceduralFallback ?? true) ? 1.0 : 0.0
@@ -444,6 +454,12 @@ function setMoonSize(size: number) {
 function setGlowSize(size: number) {
   if (activeSkyDomeEntity?.mesh.nodeID) {
     activeSkyDomeEntity.mesh.shader.updateNumber("glow_size", size);
+  }
+}
+
+function setEnableCelestialOrb(enable: boolean) {
+  if (activeSkyDomeEntity?.mesh.nodeID) {
+    activeSkyDomeEntity.mesh.shader.updateNumber("enable_celestial_orb", enable ? 1.0 : 0.0);
   }
 }
 
@@ -545,6 +561,7 @@ export const SkyDome = {
     setStarSize,
     setMoonSize,
     setGlowSize,
+    setEnableCelestialOrb,
     setUseProceduralFallback,
     startDayNightCycle,
     stopDayNightCycle,
