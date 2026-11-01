@@ -55,10 +55,11 @@ function start(entity: Entity, mode: BillboardMode, options?: BillboardOptions) 
   billboardMap.set(entity, mode);
 
   if (options?.unshaded) {
-    // Enable full self-illumination (emission) with zero roughness so ambient diffuse sky lighting does not tint the texture
-    entity.mesh.material.emissionColor.set(Color.white);
-    entity.mesh.material.emissionStrength.set(1.0);
-    entity.mesh.material.roughness.set(0.0);
+    // Disable diffuse emission blowout; set metallic to 1.0 and roughness to 1.0 so ambient lighting doesn't add specular or diffuse sky shine
+    entity.mesh.material.emissionColor.set(Color.black);
+    entity.mesh.material.emissionStrength.set(0.0);
+    entity.mesh.material.metallic.set(1.0);
+    entity.mesh.material.roughness.set(1.0);
   }
 }
 

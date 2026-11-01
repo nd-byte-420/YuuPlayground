@@ -42,7 +42,7 @@ function spawnMoonBillboard(distance: number = 32) {
   const glowPos = moonPos.add(dir.multiply(0.2));
 
   // 1. Glow Billboard plane (rendered with Both sides, transparent)
-  const glowScale = new Vector3(14, 14, 1);
+  const glowScale = new Vector3(7, 7, 1);
   const glowPlane = spawnPrimitive.plane(
     'Both',
     glowPos,
