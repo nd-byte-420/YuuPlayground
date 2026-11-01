@@ -36,7 +36,7 @@ function spawnMoonBillboard(distance: number = 32) {
   const spawnCenter = Player.position.get() ?? new Vector3(0, 13, 0);
 
   // Direction towards the moon/glow (facing forward and slightly elevated)
-  const dir = new Vector3(0, 0.10, -1.0).normalize();
+  const dir = new Vector3(0, 0.05, -1.0).normalize();
   const moonPos = spawnCenter.add(dir.multiply(distance));
   // Place glow slightly behind the moon plane along the sightline
   // const glowPos = moonPos.add(dir.multiply(0.2));
