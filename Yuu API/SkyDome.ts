@@ -23,7 +23,7 @@ group_uniforms CelestialOrb;
 // Direction towards the orb (facing forward and slightly elevated above horizon)
 uniform vec3 orb_direction = vec3(0.0, 0.15, -1.0);
 uniform float moon_size : hint_range(0.01, 0.3) = 0.075;
-uniform float glow_size : hint_range(0.05, 1.0) = 0.35;
+uniform float glow_size : hint_range(0.05, 1.0) = 0.175;
 
 group_uniforms TimeAndAtmosphere;
 // 0.0 = Midnight, 0.5 = Dawn, 0.75 = Midday, 0.9 = Sunset
@@ -116,7 +116,7 @@ group_uniforms CelestialOrb;
 // Direction towards the orb (facing forward and slightly elevated above horizon)
 uniform vec3 orb_direction = vec3(0.0, 0.15, -1.0);
 uniform float moon_size : hint_range(0.01, 0.3) = 0.075;
-uniform float glow_size : hint_range(0.05, 1.0) = 0.35;
+uniform float glow_size : hint_range(0.05, 1.0) = 0.175;
 
 group_uniforms TimeAndAtmosphere;
 uniform float time_of_day : hint_range(0.0, 1.0) = 0.0;
@@ -318,7 +318,7 @@ export interface SkyDomeOptions {
    */
   moonSize?: number;
   /**
-   * Glow aura size in UV space (default: 0.35)
+   * Glow aura size in UV space (default: 0.175)
    */
   glowSize?: number;
   /**
@@ -372,7 +372,7 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
     activeSkyDomeEntity.mesh.shader.updateNumber("gradient_intensity", options.gradientIntensity ?? 1.0);
     activeSkyDomeEntity.mesh.shader.updateNumber("star_size", options.starSize ?? 0.14);
     activeSkyDomeEntity.mesh.shader.updateNumber("moon_size", options.moonSize ?? 0.075);
-    activeSkyDomeEntity.mesh.shader.updateNumber("glow_size", options.glowSize ?? 0.35);
+    activeSkyDomeEntity.mesh.shader.updateNumber("glow_size", options.glowSize ?? 0.175);
     activeSkyDomeEntity.mesh.shader.updateNumber(
       "use_procedural_fallback",
       (options.useProceduralFallback ?? true) ? 1.0 : 0.0
