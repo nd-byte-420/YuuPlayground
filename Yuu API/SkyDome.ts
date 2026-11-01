@@ -20,8 +20,6 @@ uniform float time_of_day : hint_range(0.0, 1.0) = 0.0;
 uniform float starfield_intensity : hint_range(0.0, 3.0) = 1.0;
 uniform float gradient_intensity : hint_range(0.0, 3.0) = 1.0;
 
-const float PI = 3.14159265358979323846;
-
 void sky() {
     // 1. Equirectangular UV Projection for Starfield
     vec2 star_uv;
@@ -57,8 +55,6 @@ uniform float time_of_day : hint_range(0.0, 1.0) = 0.0;
 uniform float starfield_intensity : hint_range(0.0, 3.0) = 1.0;
 uniform float gradient_intensity : hint_range(0.0, 3.0) = 1.0;
 uniform float use_procedural_fallback : hint_range(0.0, 1.0) = 1.0;
-
-const float PI = 3.14159265358979323846;
 
 // Procedural LUT Fallback: replicates Mazskygrad 2D Time-of-Day atmospheric gradient
 vec3 sample_procedural_sky(float tod, float altitude) {
