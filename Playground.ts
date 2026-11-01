@@ -3,6 +3,7 @@ import { Player } from "./Yuu API/Player";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { SkyDome } from "./Yuu API/SkyDome";
 import { FlowerParticleEmitters } from "./FlowerParticleEmitters";
+import { scene } from "./Scene";
 
 function updateSkydome() {
   SkyDome.ambientLight.skyColorContribution.set(0.98);
@@ -36,6 +37,8 @@ async function start() {
   // Spawn flower particle emitters from particle-emitter-summary
   FlowerParticleEmitters.spawnAllEmitters();
   console.log('spawned flower particle emitters');
+
+  scene.spawnScene()
 }
 
 
