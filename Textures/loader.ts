@@ -283,7 +283,7 @@ function ensureScrollingLoopRunning() {
         // Rate is in full UV loops per second (e.g. 1.25)
         // Pixels per second: rate * height
         const pixelSpeed = state.scrollRate * h;
-        state.currentOffset = (state.currentOffset + pixelSpeed * dt) % h;
+        state.currentOffset = ((state.currentOffset + pixelSpeed * dt) % h + h) % h;
         const offsetY = Math.floor(state.currentOffset);
 
         if (offsetY === 0) {
@@ -325,7 +325,7 @@ function ensureScrollingLoopRunning() {
  */
 export function getOrCreateScrollingTexture(
   textureName: string,
-  scrollRate: number = 1.25,
+  scrollRate: number = -1.25,
   scrollAngleDegrees: number = 270
 ): Texture | undefined {
   const cleanName = textureName.replace(/\.png$/i, '').replace(/_png$/i, '');
@@ -373,7 +373,7 @@ export function getOrCreateScrollingTexture(
 export function applyScrollingTextureToEntity(
   entity: Entity,
   textureName: string = 'flowerriver',
-  scrollRate: number = 1.25,
+  scrollRate: number = -1.25,
   scrollAngleDegrees: number = 270,
   _noCull: boolean = true
 ): Texture | undefined {
