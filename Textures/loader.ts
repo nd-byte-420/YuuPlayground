@@ -268,14 +268,10 @@ export const flowerRiverScrollingShader = `
 shader_type spatial;
 render_mode cull_disabled;
 
-uniform sampler2D albedo_texture : source_color, filter_linear_mipmap, repeat_enable;
 uniform vec2 scroll_velocity = vec2(0.0, 1.25);
 
-void fragment() {
-    vec2 scrolled_uv = UV + scroll_velocity * TIME;
-    vec4 tex_color = texture(albedo_texture, scrolled_uv);
-    ALBEDO = tex_color.rgb;
-    ALPHA = tex_color.a;
+void vertex() {
+    UV += scroll_velocity * TIME;
 }
 `;
 
@@ -296,7 +292,6 @@ export function applyScrollingTextureToEntity(
   // Convert angle (degrees) and rate into UV velocity:
   // angle 270 deg -> cos(270) = 0, sin(270) = -1.
   // In Source engine VMT TextureScroll, 270 scrolls downward along V axis (+V in UV space).
-  // vec2(cos(rad), -sin(rad)) or direct math:
   const rad = (scrollAngleDegrees * Math.PI) / 180.0;
   const vx = Math.cos(rad) * scrollRate;
   const vy = -Math.sin(rad) * scrollRate; // 270 deg -> -sin(270) = -(-1) = +1 -> downward along V
@@ -306,18 +301,17 @@ export function applyScrollingTextureToEntity(
 shader_type spatial;
 ${cullMode}
 
-uniform sampler2D albedo_texture : source_color, filter_linear_mipmap, repeat_enable;
-
-void fragment() {
-    vec2 scrolled_uv = UV + vec2(${vx.toFixed(4)}, ${vy.toFixed(4)}) * TIME;
-    vec4 tex_color = texture(albedo_texture, scrolled_uv);
-    ALBEDO = tex_color.rgb;
-    ALPHA = tex_color.a;
+void vertex() {
+    UV += vec2(${vx.toFixed(4)}, ${vy.toFixed(4)}) * TIME;
 }
 `;
 
   try {
     entity.mesh.shader.set(shaderCode);
+    // Re-apply texture in case setting the shader reset the material/texture binding
+    if (tex && entity.mesh.nodeID) {
+      Godot.image.applyAsTextureToMesh(entity.mesh.nodeID, tex.imageID);
+    }
   } catch (err: any) {
     console.log(`Failed applying scrolling shader to entity:`, err?.message || err);
   }
