@@ -3796,7 +3796,7 @@ export async function spawnScene() {
   // Location: (0.0, -25.6, 115.44) in Source/Blender coordinates (Godot Y-up: Y=113.454994, Z=25.599998)
   // Driven by continuous spin along X-axis: expression (frame - 1) * -0.091061 rad (phys_motor speed 125 deg/s = -2.1855 rad/s)
   const oarPaddlePivot = new Entity(
-    new Vector3(0.000000, 113.454994, 25.599998),
+    new Vector3(0.000000, 5.44, 25.599998),
     Quaternion.one,
     Vector3.one,
     undefined,
