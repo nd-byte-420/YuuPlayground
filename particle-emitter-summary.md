@@ -1,15 +1,14 @@
 1. Overview & Visual Roles
 
-There are particle emitters configured across the map:
+There are two distinct emitters at the start of the map:
 
-Emitter	Effect in Source Map	Location (Blender)	Location (Godot Y-Up)
+Emitter	Effect in Source Map	Location (Blender)	Location (Godot 
+𝑌
+Y-Up)
 rampflowerstream	Continuous river of flower petals and leaves cascading down the Stage 1 start ramp.	(0, -120.32, 135.20)	Vector3(0.0, 135.20, 120.32)
 hexflowershooter	Upward fountains bursting petals into the air atop the two hex towers beside the ramp.	Left: (-53.69, -90.42, 128.11)
 Right: (53.76, -90.43, 128.11)	Left: Vector3(-53.69, 128.11, 90.42)
 Right: Vector3(53.76, 128.11, 90.43)
-oarflowersplash	Flower petal splashes upward & back when the rotating oar paddle strikes the water.	Left: (-14.08, -28.80, 112.48)
-Right: (14.08, -28.80, 112.48)	Left: Vector3(-14.08, 112.48, 28.80)
-Right: Vector3(14.08, 112.48, 28.80)
 
 NOTE
 
