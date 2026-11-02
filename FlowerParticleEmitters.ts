@@ -38,6 +38,8 @@ export const FlowerParticleEmitters = {
     rampFlowerStream: new Vector3(0.0000, 25.2000, 120.3200),
     hexTowerLeft: new Vector3(-53.6900, 18.1100, 90.4200),
     hexTowerRight: new Vector3(53.7600, 18.1100, 90.4300),
+    hexShooterProp55851: new Vector3(36.4000, 5.2800, -32.0800),
+    hexShooterProp55854: new Vector3(-36.4000, 5.2800, -32.0800),
     oarPaddleSplashRight: new Vector3(14.0800, 2.4800, 28.8000),
     oarPaddleSplashLeft: new Vector3(-14.0800, 2.4800, 28.8000),
   },
@@ -382,11 +384,13 @@ function spawnRampFlowerStream(pos: Vector3 = FlowerParticleEmitters.LOCATIONS.r
 }
 
 /**
- * Spawns the hex tower flower shooter fountains at both tower locations (left & right).
+ * Spawns the hex tower flower shooter fountains at tower locations and props (left, right, prop55851, prop55854).
  */
-function spawnHexFlowerShooters(): { left: Entity[]; right: Entity[] } {
+function spawnHexFlowerShooters(): { left: Entity[]; right: Entity[]; prop55851: Entity[]; prop55854: Entity[] } {
   const leftEntities: Entity[] = [];
   const rightEntities: Entity[] = [];
+  const prop55851Entities: Entity[] = [];
+  const prop55854Entities: Entity[] = [];
 
   const types: FlowerParticleType[] = ['pink', 'red', 'leaf'];
 
@@ -416,7 +420,33 @@ function spawnHexFlowerShooters(): { left: Entity[]; right: Entity[] } {
     }
   }
 
-  return { left: leftEntities, right: rightEntities };
+  // Hex shooter at prop_static_55851
+  for (const t of types) {
+    try {
+      const props = getHexFlowerShooterProperties(t);
+      const emitter = new Entity(FlowerParticleEmitters.LOCATIONS.hexShooterProp55851, Quaternion.one, Vector3.one, undefined, 'Static');
+      emitter.particles.setParticlesProperties(props);
+      emitter.particles.play();
+      prop55851Entities.push(emitter);
+    } catch (err: any) {
+      console.error(`spawnHexFlowerShooters: Error creating prop55851 emitter for '${t}':`, err?.message || err);
+    }
+  }
+
+  // Hex shooter at prop_static_55854
+  for (const t of types) {
+    try {
+      const props = getHexFlowerShooterProperties(t);
+      const emitter = new Entity(FlowerParticleEmitters.LOCATIONS.hexShooterProp55854, Quaternion.one, Vector3.one, undefined, 'Static');
+      emitter.particles.setParticlesProperties(props);
+      emitter.particles.play();
+      prop55854Entities.push(emitter);
+    } catch (err: any) {
+      console.error(`spawnHexFlowerShooters: Error creating prop55854 emitter for '${t}':`, err?.message || err);
+    }
+  }
+
+  return { left: leftEntities, right: rightEntities, prop55851: prop55851Entities, prop55854: prop55854Entities };
 }
 
 /**
@@ -475,7 +505,15 @@ function startOarPaddleSplashLoop(intervalSeconds: number = 2.875): () => void {
 /**
  * Spawns all flower particle emitters defined in particle-emitter-summary.md and Blender scene.
  */
-function spawnAllEmitters(): { rampStream: Entity[]; hexLeft: Entity[]; hexRight: Entity[]; oarSplashLeft: Entity[]; oarSplashRight: Entity[] } {
+function spawnAllEmitters(): {
+  rampStream: Entity[];
+  hexLeft: Entity[];
+  hexRight: Entity[];
+  hexProp55851: Entity[];
+  hexProp55854: Entity[];
+  oarSplashLeft: Entity[];
+  oarSplashRight: Entity[];
+} {
   const rampStream = spawnRampFlowerStream();
   const hex = spawnHexFlowerShooters();
   const oar = spawnOarPaddleSplashes();
@@ -484,6 +522,8 @@ function spawnAllEmitters(): { rampStream: Entity[]; hexLeft: Entity[]; hexRight
     rampStream,
     hexLeft: hex.left,
     hexRight: hex.right,
+    hexProp55851: hex.prop55851,
+    hexProp55854: hex.prop55854,
     oarSplashLeft: oar.left,
     oarSplashRight: oar.right,
   };
