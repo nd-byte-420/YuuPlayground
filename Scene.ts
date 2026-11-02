@@ -366,9 +366,19 @@ import { getPropStatic55873 } from "./Yuu API/propStatic55873Model";
 import { getPropStatic56206 } from "./Yuu API/propStatic56206Model";
 import { getPropDynamic1233080 } from "./Yuu API/propDynamic1233080Model";
 import { getPropDynamic1233084 } from "./Yuu API/propDynamic1233084Model";
+import { Streetlight } from "./Streetlight";
+
+let funcIllusionary128836018189Entity: Entity | undefined;
+let funcIllusionary128836018208Entity: Entity | undefined;
+let propStatic55602Entity: Entity | undefined;
 
 export const scene = {
   spawnScene,
+  getStreetlightEntities: () => ({
+    cone: funcIllusionary128836018189Entity,
+    puddle: funcIllusionary128836018208Entity,
+    pole: propStatic55602Entity,
+  }),
 }
 
 function spawnModel(
@@ -473,25 +483,33 @@ export async function spawnScene() {
 
   applyTextureToEntity(funcDetail2768327684, 'func_detail_27683_27684_atlas');
 
-  // Spawn func_illusionary_1288360_18189
+  // Spawn func_illusionary_1288360_18189 (Volumetric Streetlight Light Cone)
   const funcIllusionary128836018189 = spawnModel(
     getFuncIllusionary128836018189,
     new Vector3(-0.995740, 78.445129, 144.320648),
     new Vector3(0.010000, 0.010000, 0.010000),
-    new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
+    new Quaternion(0.000000, 0.000000, 0.000000, 1.000000),
+    new Color(1, 1, 1),
+    0.45,
+    false
   );
 
   applyTextureToEntity(funcIllusionary128836018189, 'func_illusionary_1288360_18189_atlas');
+  funcIllusionary128836018189Entity = funcIllusionary128836018189;
 
-  // Spawn func_illusionary_1288360_18208
+  // Spawn func_illusionary_1288360_18208 (Ground Streetlight Light Disc)
   const funcIllusionary128836018208 = spawnModel(
     getFuncIllusionary128836018208,
     new Vector3(-0.995740, 76.857620, 144.320648),
     new Vector3(0.010000, 0.010000, 0.010000),
-    new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
+    new Quaternion(0.000000, 0.000000, 0.000000, 1.000000),
+    new Color(1, 1, 1),
+    0.35,
+    false
   );
 
   applyTextureToEntity(funcIllusionary128836018208, 'func_illusionary_1288360_18208_atlas');
+  funcIllusionary128836018208Entity = funcIllusionary128836018208;
 
   // Spawn func_detail_53265_53266
   const funcDetail5326553266 = spawnModel(
@@ -3485,7 +3503,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  // Spawn prop_static_55602
+  // Spawn prop_static_55602 (Stage 1 Streetlight Pole & Lantern)
   const propStatic55602 = spawnModel(
     getPropStatic55602,
     new Vector3(-0.195740, 78.450119, 145.120636),
@@ -3494,6 +3512,7 @@ export async function spawnScene() {
   );
 
   applyTextureToEntity(propStatic55602, 'prop_static_55602_atlas');
+  propStatic55602Entity = propStatic55602;
 
   // Spawn prop_static_55603
   const propStatic55603 = spawnModel(
@@ -3984,6 +4003,15 @@ export async function spawnScene() {
   );
 
   applyTextureToEntity(propDynamic1233084, 'prop_dynamic_1233826_atlas');
+
+  // Register streetlight with Day/Night cycle
+  if (propStatic55602Entity || funcIllusionary128836018189Entity) {
+    Streetlight.register({
+      pole: propStatic55602Entity,
+      cone: funcIllusionary128836018189Entity,
+      puddle: funcIllusionary128836018208Entity,
+    });
+  }
 }
 
 const chamberShader = `
