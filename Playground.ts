@@ -3,7 +3,7 @@ import { Player } from "./Yuu API/Player";
 import { Vector3 } from "./Yuu API/Basic Types/Vector3";
 import { SkyDome } from "./Yuu API/SkyDome";
 import { FlowerParticleEmitters } from "./FlowerParticleEmitters";
-import { scene } from "./Scene";
+import { scene } from "./Scene-2";
 import { Controller } from "./Yuu API/Controller";
 
 function updateSkydome() {

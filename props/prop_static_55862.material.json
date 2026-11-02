@@ -1,0 +1,32 @@
+{
+    "object": "prop_static_55862",
+    "primary_material": "materials/models/surreal/hedgering/contest/hedge",
+    "primary_png": "hedge.png",
+    "primary_png_path": "props/hedge.png",
+    "textures": [
+        "hedge.png"
+    ],
+    "materials": [
+        {
+            "name": "materials/models/surreal/hedgering/contest/hedge",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 0.8999999761581421,
+            "metallic": 0.0,
+            "textures": [
+                {
+                    "name": "materials/contest/hedge.png",
+                    "filename": "hedge.png",
+                    "path": "props/hedge.png",
+                    "role": "diffuse",
+                    "width": 1024,
+                    "height": 1024
+                }
+            ]
+        }
+    ]
+}

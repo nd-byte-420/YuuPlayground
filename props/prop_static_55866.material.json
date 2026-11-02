@@ -1,0 +1,98 @@
+{
+    "object": "prop_static_55866",
+    "primary_material": "materials/models/props/de_inferno/flower_barrel",
+    "primary_png": "flower_barrel.png",
+    "primary_png_path": "props/flower_barrel.png",
+    "textures": [
+        "flower_barrel.png",
+        "flowerbed2.png",
+        "plant_potdirt.png",
+        "plant_foliage.png"
+    ],
+    "materials": [
+        {
+            "name": "materials/models/props/de_inferno/flower_barrel",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 0.8999999761581421,
+            "metallic": 0.0,
+            "textures": [
+                {
+                    "name": "materials/models/props/de_inferno/flower_barrel.png",
+                    "filename": "flower_barrel.png",
+                    "path": "props/flower_barrel.png",
+                    "role": "diffuse",
+                    "width": 512,
+                    "height": 512
+                }
+            ]
+        },
+        {
+            "name": "materials/models/props/de_inferno/flowerbed2",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 0.8999999761581421,
+            "metallic": 0.0,
+            "textures": [
+                {
+                    "name": "materials/models/props/de_tides/flowerbed2.png",
+                    "filename": "flowerbed2.png",
+                    "path": "props/flowerbed2.png",
+                    "role": "diffuse",
+                    "width": 512,
+                    "height": 512
+                }
+            ]
+        },
+        {
+            "name": "materials/models/props/de_inferno/plant_potdirt",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 0.8999999761581421,
+            "metallic": 0.0,
+            "textures": [
+                {
+                    "name": "materials/models/props/de_inferno/plant_potdirt.png",
+                    "filename": "plant_potdirt.png",
+                    "path": "props/plant_potdirt.png",
+                    "role": "diffuse",
+                    "width": 128,
+                    "height": 128
+                }
+            ]
+        },
+        {
+            "name": "materials/models/props/de_inferno/plant_foliage",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 0.8999999761581421,
+            "metallic": 0.0,
+            "textures": [
+                {
+                    "name": "materials/models/props/de_inferno/plant_foliage.png",
+                    "filename": "plant_foliage.png",
+                    "path": "props/plant_foliage.png",
+                    "role": "diffuse",
+                    "width": 256,
+                    "height": 256
+                }
+            ]
+        }
+    ]
+}

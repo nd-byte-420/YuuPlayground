@@ -1,0 +1,66 @@
+{
+    "object": "func_illusionary_1288360_18189",
+    "primary_material": "materials/surreal/streetlightglow",
+    "primary_png": "glowyellow.png",
+    "primary_png_path": "brushes/glowyellow.png",
+    "textures": [
+        "glowyellow.png",
+        "gradient.png"
+    ],
+    "materials": [
+        {
+            "name": "materials/tools/toolsnodraw",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 0.5,
+            "metallic": 0.0,
+            "textures": []
+        },
+        {
+            "name": "materials/surreal/streetlightglow",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 1.0,
+            "metallic": 0.0,
+            "textures": [
+                {
+                    "name": "materials/surreal/glowyellow.png",
+                    "filename": "glowyellow.png",
+                    "path": "brushes/glowyellow.png",
+                    "role": "base_color",
+                    "width": 1024,
+                    "height": 1024
+                }
+            ]
+        },
+        {
+            "name": "materials/surreal/streetlightglowgrad",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 1.0,
+            "metallic": 0.0,
+            "textures": [
+                {
+                    "name": "materials/maz/gradient.png",
+                    "filename": "gradient.png",
+                    "path": "brushes/gradient.png",
+                    "role": "diffuse",
+                    "width": 512,
+                    "height": 512
+                }
+            ]
+        }
+    ]
+}

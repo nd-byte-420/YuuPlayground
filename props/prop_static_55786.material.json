@@ -1,0 +1,32 @@
+{
+    "object": "prop_static_55786",
+    "primary_material": "materials/models/surreal/paintsig/surreal/umbrellared",
+    "primary_png": "white.png",
+    "primary_png_path": "props/white.png",
+    "textures": [
+        "white.png"
+    ],
+    "materials": [
+        {
+            "name": "materials/models/surreal/paintsig/surreal/umbrellared",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 0.6556000113487244,
+            "metallic": 0.0,
+            "textures": [
+                {
+                    "name": "materials/cs_havana/white.png",
+                    "filename": "white.png",
+                    "path": "props/white.png",
+                    "role": "diffuse",
+                    "width": 32,
+                    "height": 32
+                }
+            ]
+        }
+    ]
+}

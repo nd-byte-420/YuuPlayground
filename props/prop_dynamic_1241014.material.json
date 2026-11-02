@@ -1,0 +1,41 @@
+{
+    "object": "prop_dynamic_1241014",
+    "primary_material": "materials/models/surreal/boatrampoar/surreal/boatwood",
+    "primary_png": "boatwood.png",
+    "primary_png_path": "props/boatwood.png",
+    "textures": [
+        "boatwood.png",
+        "boatwood_n.png"
+    ],
+    "materials": [
+        {
+            "name": "materials/models/surreal/boatrampoar/surreal/boatwood",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 0.6556000113487244,
+            "metallic": 0.0,
+            "textures": [
+                {
+                    "name": "materials/surreal/boatwood.png",
+                    "filename": "boatwood.png",
+                    "path": "props/boatwood.png",
+                    "role": "diffuse",
+                    "width": 1024,
+                    "height": 1024
+                },
+                {
+                    "name": "materials/surreal/boatwood_n.png",
+                    "filename": "boatwood_n.png",
+                    "path": "props/boatwood_n.png",
+                    "role": "normal",
+                    "width": 1024,
+                    "height": 1024
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "object": "worldspawn_1_9580",
+    "primary_material": "materials/surreal/cobbles_seamless_scale",
+    "primary_png": "cobbles.png",
+    "primary_png_path": "brushes/cobbles.png",
+    "textures": [
+        "cobbles.png",
+        "cobbles_n.png"
+    ],
+    "materials": [
+        {
+            "name": "materials/surreal/cobbles_seamless_scale",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 0.6556000113487244,
+            "metallic": 0.0,
+            "textures": [
+                {
+                    "name": "materials/surreal/cobbles.png",
+                    "filename": "cobbles.png",
+                    "path": "brushes/cobbles.png",
+                    "role": "base_color",
+                    "width": 1024,
+                    "height": 1024
+                },
+                {
+                    "name": "materials/surreal/cobbles_n.png",
+                    "filename": "cobbles_n.png",
+                    "path": "brushes/cobbles_n.png",
+                    "role": "normal",
+                    "width": 1024,
+                    "height": 1024
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,72 @@
+{
+    "object": "prop_static_55844",
+    "primary_material": "materials/models/surreal/boatramp/surreal/boatwoodalt",
+    "primary_png": "boatwoodalt.png",
+    "primary_png_path": "props/boatwoodalt.png",
+    "textures": [
+        "boatwoodalt.png",
+        "boatwoodalt_n.png",
+        "boatwood.png",
+        "boatwood_n.png"
+    ],
+    "materials": [
+        {
+            "name": "materials/models/surreal/boatramp/surreal/boatwoodalt",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 0.6556000113487244,
+            "metallic": 0.0,
+            "textures": [
+                {
+                    "name": "materials/surreal/boatwoodalt.png",
+                    "filename": "boatwoodalt.png",
+                    "path": "props/boatwoodalt.png",
+                    "role": "diffuse",
+                    "width": 1024,
+                    "height": 1024
+                },
+                {
+                    "name": "materials/surreal/boatwoodalt_n.png",
+                    "filename": "boatwoodalt_n.png",
+                    "path": "props/boatwoodalt_n.png",
+                    "role": "normal",
+                    "width": 1024,
+                    "height": 1024
+                }
+            ]
+        },
+        {
+            "name": "materials/models/surreal/boatramp/surreal/boatwood",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 0.6556000113487244,
+            "metallic": 0.0,
+            "textures": [
+                {
+                    "name": "materials/surreal/boatwood.png",
+                    "filename": "boatwood.png",
+                    "path": "props/boatwood.png",
+                    "role": "diffuse",
+                    "width": 1024,
+                    "height": 1024
+                },
+                {
+                    "name": "materials/surreal/boatwood_n.png",
+                    "filename": "boatwood_n.png",
+                    "path": "props/boatwood_n.png",
+                    "role": "normal",
+                    "width": 1024,
+                    "height": 1024
+                }
+            ]
+        }
+    ]
+}

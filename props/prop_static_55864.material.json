@@ -1,0 +1,50 @@
+{
+    "object": "prop_static_55864",
+    "primary_material": "materials/models/surreal/easel/outback/oakwoodveneer",
+    "primary_png": "oakwoodveneer.png",
+    "primary_png_path": "props/oakwoodveneer.png",
+    "textures": [
+        "metal_detail_01.png",
+        "oakwoodveneer.png",
+        "generic_bump.png"
+    ],
+    "materials": [
+        {
+            "name": "materials/models/surreal/easel/outback/oakwoodveneer",
+            "base_color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "roughness": 0.6556000113487244,
+            "metallic": 0.0,
+            "textures": [
+                {
+                    "name": "materials/detail/metal_detail_01.png",
+                    "filename": "metal_detail_01.png",
+                    "path": "props/metal_detail_01.png",
+                    "role": "detail",
+                    "width": 512,
+                    "height": 512
+                },
+                {
+                    "name": "materials/outback/oakwoodveneer.png",
+                    "filename": "oakwoodveneer.png",
+                    "path": "props/oakwoodveneer.png",
+                    "role": "diffuse",
+                    "width": 1024,
+                    "height": 1024
+                },
+                {
+                    "name": "materials/outback/generic_bump.png",
+                    "filename": "generic_bump.png",
+                    "path": "props/generic_bump.png",
+                    "role": "normal",
+                    "width": 128,
+                    "height": 128
+                }
+            ]
+        }
+    ]
+}
