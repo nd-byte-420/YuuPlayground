@@ -1,61 +1,30 @@
 {
     "object": "prop_static_55865",
-    "primary_material": "materials/models/surreal/parkbench/surreal/boatwood",
-    "primary_png": "boatwood.png",
-    "primary_png_path": "props/boatwood.png",
+    "primary_material": "prop_static_55865_atlas_mat",
+    "primary_png": "prop_static_55865_atlas.png",
+    "primary_png_path": "props/prop_static_55865_atlas.png",
     "textures": [
-        "chrome_metal.png",
-        "boatwood.png",
-        "boatwood_n.png"
+        "prop_static_55865_atlas.png"
     ],
     "materials": [
         {
-            "name": "materials/models/surreal/parkbench/metal/chrome_metal",
+            "name": "prop_static_55865_atlas_mat",
             "base_color": [
-                1.0,
-                1.0,
-                1.0,
+                0.800000011920929,
+                0.800000011920929,
+                0.800000011920929,
                 1.0
             ],
-            "roughness": 0.8999999761581421,
+            "roughness": 0.5,
             "metallic": 0.0,
             "textures": [
                 {
-                    "name": "materials/metal/chrome_metal.png",
-                    "filename": "chrome_metal.png",
-                    "path": "props/chrome_metal.png",
-                    "role": "diffuse",
-                    "width": 4,
-                    "height": 4
-                }
-            ]
-        },
-        {
-            "name": "materials/models/surreal/parkbench/surreal/boatwood",
-            "base_color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "roughness": 0.6556000113487244,
-            "metallic": 0.0,
-            "textures": [
-                {
-                    "name": "materials/surreal/boatwood.png",
-                    "filename": "boatwood.png",
-                    "path": "props/boatwood.png",
-                    "role": "diffuse",
-                    "width": 1024,
-                    "height": 1024
-                },
-                {
-                    "name": "materials/surreal/boatwood_n.png",
-                    "filename": "boatwood_n.png",
-                    "path": "props/boatwood_n.png",
-                    "role": "normal",
-                    "width": 1024,
-                    "height": 1024
+                    "name": "prop_static_55865_atlas.png",
+                    "filename": "prop_static_55865_atlas.png",
+                    "path": "props/prop_static_55865_atlas.png",
+                    "role": "base_color",
+                    "width": 256,
+                    "height": 256
                 }
             ]
         }

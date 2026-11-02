@@ -14,9 +14,9 @@
         {
             "name": "materials/surreal/grass_browndirt_blend",
             "base_color": [
-                1.0,
-                1.0,
-                1.0,
+                0.800000011920929,
+                0.800000011920929,
+                0.800000011920929,
                 1.0
             ],
             "roughness": 0.8999999761581421,
@@ -26,7 +26,7 @@
                     "name": "materials/castle/blend02.png",
                     "filename": "blend02.png",
                     "path": "brushes/blend02.png",
-                    "role": "diffuse",
+                    "role": "base_color",
                     "width": 1024,
                     "height": 1024
                 },
@@ -34,7 +34,7 @@
                     "name": "materials/outback/browndirt.png",
                     "filename": "browndirt.png",
                     "path": "brushes/browndirt.png",
-                    "role": "diffuse",
+                    "role": "unknown",
                     "width": 1024,
                     "height": 1024
                 },
@@ -42,7 +42,7 @@
                     "name": "materials/surreal/grass.png",
                     "filename": "grass.png",
                     "path": "brushes/grass.png",
-                    "role": "diffuse",
+                    "role": "unknown",
                     "width": 1024,
                     "height": 1024
                 },
@@ -50,7 +50,7 @@
                     "name": "materials/castle/gravel01n.png",
                     "filename": "gravel01n.png",
                     "path": "brushes/gravel01n.png",
-                    "role": "normal",
+                    "role": "unknown",
                     "width": 1024,
                     "height": 1024
                 },
@@ -58,7 +58,7 @@
                     "name": "materials/surreal/grass_n.png",
                     "filename": "grass_n.png",
                     "path": "brushes/grass_n.png",
-                    "role": "normal",
+                    "role": "unknown",
                     "width": 1024,
                     "height": 1024
                 }

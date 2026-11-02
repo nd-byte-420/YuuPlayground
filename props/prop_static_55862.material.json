@@ -10,9 +10,9 @@
         {
             "name": "materials/models/surreal/hedgering/contest/hedge",
             "base_color": [
-                1.0,
-                1.0,
-                1.0,
+                0.800000011920929,
+                0.800000011920929,
+                0.800000011920929,
                 1.0
             ],
             "roughness": 0.8999999761581421,
@@ -22,7 +22,7 @@
                     "name": "materials/contest/hedge.png",
                     "filename": "hedge.png",
                     "path": "props/hedge.png",
-                    "role": "diffuse",
+                    "role": "unknown",
                     "width": 1024,
                     "height": 1024
                 }

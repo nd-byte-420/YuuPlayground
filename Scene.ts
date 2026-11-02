@@ -130,7 +130,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(funcIllusionary128836018189, 'glowyellow');
+  applyTextureToEntity(funcIllusionary128836018189, 'func_illusionary_1288360_18189_atlas');
 
   // Spawn func_illusionary_1288360_18208
   const funcIllusionary128836018208 = spawnModel(
@@ -140,7 +140,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(funcIllusionary128836018208, 'glowyellow');
+  applyTextureToEntity(funcIllusionary128836018208, 'func_illusionary_1288360_18208_atlas');
 
   // Spawn worldspawn_1_8943
   const worldspawn18943 = spawnModel(
@@ -210,7 +210,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19531, 'cobbles');
+  applyTextureToEntity(worldspawn19531, 'cobbles_n');
 
   // Spawn worldspawn_1_9538
   const worldspawn19538 = spawnModel(
@@ -340,7 +340,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19622, 'cobbles');
+  applyTextureToEntity(worldspawn19622, 'cobbles_n');
 
   // Spawn worldspawn_1_9629
   const worldspawn19629 = spawnModel(
@@ -470,7 +470,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19713, 'cobbles');
+  applyTextureToEntity(worldspawn19713, 'cobbles_n');
 
   // Spawn worldspawn_1_9720
   const worldspawn19720 = spawnModel(
@@ -640,7 +640,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn19832, 'cobbles');
+  applyTextureToEntity(worldspawn19832, 'cobbles_n');
 
   // Spawn worldspawn_1_9839
   const worldspawn19839 = spawnModel(
@@ -730,7 +730,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(worldspawn110231, 'cobbles');
+  applyTextureToEntity(worldspawn110231, 'cobbles_n');
 
   // Spawn worldspawn_1_10238
   const worldspawn110238 = spawnModel(
@@ -920,7 +920,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.382683, 0.000000, 0.923880)
   );
 
-  applyTextureToEntity(propStatic55602, 'black');
+  applyTextureToEntity(propStatic55602, 'prop_static_55602_atlas');
 
   // Spawn prop_static_55844
   const propStatic55844 = spawnModel(
@@ -930,7 +930,7 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(propStatic55844, 'boatwoodalt');
+  applyTextureToEntity(propStatic55844, 'prop_static_55844_atlas');
 
   // Spawn prop_static_55850
   const propStatic55850 = spawnModel(
@@ -940,24 +940,24 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(propStatic55850, 'boatwood');
+  applyTextureToEntity(propStatic55850, 'boatwood_n');
 
   // Spawn prop_static_55785
   const propStatic55785 = spawnModel(
     getPropStatic55785,
     new Vector3(1.722110, 50.076363, 34.784161),
     new Vector3(0.010000, 0.010000, 0.010000),
-    new Quaternion(0.120590, 0.379410, 0.049950, -0.915976)
+    new Quaternion(-0.120591, -0.379410, -0.049950, 0.915976)
   );
 
-  applyTextureToEntity(propStatic55785, 'oakwoodveneer');
+  applyTextureToEntity(propStatic55785, 'prop_static_55785_atlas');
 
   // Spawn prop_static_55786
   const propStatic55786 = spawnModel(
     getPropStatic55786,
     new Vector3(1.921040, 49.840370, 35.094173),
     new Vector3(0.010000, 0.010000, 0.010000),
-    new Quaternion(0.120590, 0.379410, 0.049950, -0.915976)
+    new Quaternion(-0.120591, -0.379410, -0.049950, 0.915976)
   );
 
   applyTextureToEntity(propStatic55786, 'white');
@@ -980,17 +980,17 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, -0.195090, 0.980785)
   );
 
-  applyTextureToEntity(propDynamic1240861, 'boatwood');
+  applyTextureToEntity(propDynamic1240861, 'boatwood_n');
 
   // Spawn prop_dynamic_1241014
   const propDynamic1241014 = spawnModel(
     getPropDynamic1241014,
     new Vector3(-9.399699, 10.607231, 26.691082),
     new Vector3(0.010000, 0.010000, 0.010000),
-    new Quaternion(-0.195090, 0.980785, 0.000000, -0.000000)
+    new Quaternion(0.195090, -0.980785, -0.000000, 0.000000)
   );
 
-  applyTextureToEntity(propDynamic1241014, 'boatwood');
+  applyTextureToEntity(propDynamic1241014, 'boatwood_n');
 
   // Spawn prop_static_55863
   const propStatic55863 = spawnModel(
@@ -1000,17 +1000,17 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(propStatic55863, 'footpath');
+  applyTextureToEntity(propStatic55863, 'footpath_n');
 
   // Spawn prop_static_55864
   const propStatic55864 = spawnModel(
     getPropStatic55864,
     new Vector3(1.840000, 49.948372, 34.666164),
     new Vector3(0.010000, 0.010000, 0.010000),
-    new Quaternion(0.120590, 0.379410, 0.049950, -0.915976)
+    new Quaternion(-0.120591, -0.379410, -0.049950, 0.915976)
   );
 
-  applyTextureToEntity(propStatic55864, 'oakwoodveneer');
+  applyTextureToEntity(propStatic55864, 'generic_bump');
 
   // Spawn prop_static_55865
   const propStatic55865 = spawnModel(
@@ -1020,17 +1020,17 @@ export async function spawnScene() {
     new Quaternion(0.000000, 0.000000, 0.000000, 1.000000)
   );
 
-  applyTextureToEntity(propStatic55865, 'boatwood');
+  applyTextureToEntity(propStatic55865, 'prop_static_55865_atlas');
 
   // Spawn prop_static_55866
   const propStatic55866 = spawnModel(
     getPropStatic55866,
     new Vector3(-1.779810, 49.706367, 34.832165),
     new Vector3(0.010000, 0.010000, 0.010000),
-    new Quaternion(0.000000, 0.963630, 0.000000, -0.267238)
+    new Quaternion(0.000000, -0.963630, -0.000000, 0.267238)
   );
 
-  applyTextureToEntity(propStatic55866, 'flower_barrel');
+  applyTextureToEntity(propStatic55866, 'prop_static_55866_atlas');
 }
 
 const chamberShader = `

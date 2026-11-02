@@ -1,42 +1,30 @@
 {
     "object": "func_illusionary_1288360_18208",
-    "primary_material": "materials/surreal/streetlightglow",
-    "primary_png": "glowyellow.png",
-    "primary_png_path": "brushes/glowyellow.png",
+    "primary_material": "func_illusionary_1288360_18208_atlas_mat",
+    "primary_png": "func_illusionary_1288360_18208_atlas.png",
+    "primary_png_path": "brushes/func_illusionary_1288360_18208_atlas.png",
     "textures": [
-        "glowyellow.png"
+        "func_illusionary_1288360_18208_atlas.png"
     ],
     "materials": [
         {
-            "name": "materials/tools/toolsnodraw",
+            "name": "func_illusionary_1288360_18208_atlas_mat",
             "base_color": [
-                1.0,
-                1.0,
-                1.0,
+                0.800000011920929,
+                0.800000011920929,
+                0.800000011920929,
                 1.0
             ],
             "roughness": 0.5,
             "metallic": 0.0,
-            "textures": []
-        },
-        {
-            "name": "materials/surreal/streetlightglow",
-            "base_color": [
-                1.0,
-                1.0,
-                1.0,
-                1.0
-            ],
-            "roughness": 1.0,
-            "metallic": 0.0,
             "textures": [
                 {
-                    "name": "materials/surreal/glowyellow.png",
-                    "filename": "glowyellow.png",
-                    "path": "brushes/glowyellow.png",
+                    "name": "func_illusionary_1288360_18208_atlas.png",
+                    "filename": "func_illusionary_1288360_18208_atlas.png",
+                    "path": "brushes/func_illusionary_1288360_18208_atlas.png",
                     "role": "base_color",
-                    "width": 1024,
-                    "height": 1024
+                    "width": 256,
+                    "height": 256
                 }
             ]
         }

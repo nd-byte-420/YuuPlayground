@@ -10,9 +10,9 @@
         {
             "name": "materials/surreal/streetlightglow",
             "base_color": [
-                1.0,
-                1.0,
-                1.0,
+                0.800000011920929,
+                0.800000011920929,
+                0.800000011920929,
                 1.0
             ],
             "roughness": 1.0,

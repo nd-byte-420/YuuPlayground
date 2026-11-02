@@ -10,9 +10,9 @@
         {
             "name": "materials/models/surreal/paintsig/surreal/umbrellared",
             "base_color": [
-                1.0,
-                1.0,
-                1.0,
+                0.800000011920929,
+                0.800000011920929,
+                0.800000011920929,
                 1.0
             ],
             "roughness": 0.6556000113487244,
@@ -22,7 +22,7 @@
                     "name": "materials/cs_havana/white.png",
                     "filename": "white.png",
                     "path": "props/white.png",
-                    "role": "diffuse",
+                    "role": "unknown",
                     "width": 32,
                     "height": 32
                 }
