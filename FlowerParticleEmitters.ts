@@ -35,13 +35,13 @@ export const FlowerParticleEmitters = {
 
   // Positions from Blender export (converted to Godot Y-Up coords: X, Z, -Y)
   LOCATIONS: {
-    rampFlowerStream: new Vector3(0.0000, 135.2000, 120.3200),
-    hexTowerLeft: new Vector3(-53.6900, 128.1100, 90.4200),
-    hexTowerRight: new Vector3(53.7600, 128.1100, 90.4300),
-    hexShooterProp55851: new Vector3(36.4000, 115.2800, -32.0800),
-    hexShooterProp55854: new Vector3(-36.4000, 115.2800, -32.0800),
-    oarPaddleSplashRight: new Vector3(14.0800, 112.4800, 28.8000),
-    oarPaddleSplashLeft: new Vector3(-14.0800, 112.4800, 28.8000),
+    rampFlowerStream: new Vector3(-0.9957, 58.4551, 108.4806),
+    hexTowerLeft: new Vector3(-54.6857, 51.3651, 78.5806),
+    hexTowerRight: new Vector3(52.7643, 51.3651, 78.5906),
+    hexShooterProp55851: new Vector3(35.4043, 38.5351, -43.9194),
+    hexShooterProp55854: new Vector3(-37.3957, 38.5351, -43.9194),
+    oarPaddleSplashRight: new Vector3(13.0843, 35.7351, 16.9606),
+    oarPaddleSplashLeft: new Vector3(-15.0757, 35.7351, 16.9606),
   },
 };
 
