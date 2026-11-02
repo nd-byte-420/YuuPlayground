@@ -95,56 +95,57 @@ function getCachedPlaneMesh(type: FlowerParticleType): Entity {
  * rampflowerstream (The Ramp Petal River)
  * Continuous river of flower petals and leaves cascading down the Stage 1 start ramp.
  *
- * Parameters based on particle-emitter-summary.md:
- * - Amount: ~200-400 total (Pink: ~150, Red: ~100, Leaf: ~80)
- * - Lifetime: 4.0s
- * - Emission Shape: Box (extents: Vector3(2.5, 0.5, 2.5))
- * - Direction: Vector3(0.0, -0.25, -1.0).normalize()
- * - Spread: 15.0 deg
- * - Initial Velocity: 12.0 - 16.0 m/s
- * - Gravity: Vector3(0.0, -2.5, 0.0)
- * - Rotation / Tumbling: -120 to 120 deg/s
- * - Scale: 0.7 - 1.2
+ * Parameters based on Blender emitter config:
+ * - Amount: 600 total (Pink: ~250, Red: ~200, Leaf: ~150)
+ * - Lifetime: 1.25s (30 frames @ 24fps)
+ * - Lifetime Randomness: 0.0 (fixed 1.25s)
+ * - Explosiveness: 0.0 (continuous stream)
+ * - Emission Shape: Sphere (R ≈ 0.05m, point emission)
+ * - Direction: Blender init_velocity (0.0, 8.75, 1.5) -> Godot (X, Z, -Y): (0.0, 1.5, -8.75).normalize()
+ * - Initial Velocity: ~8.88 m/s (magnitude of [0, 8.75, 1.5])
+ * - Spread: ~27.0 deg (random_velocity 4.5 spread)
+ * - Gravity: Vector3(0.0, -9.8, 0.0) (Blender gravity 1.0 = standard 9.8 m/s^2)
+ * - Scale: 0.51 - 0.77 (size: 0.64m, random: 0.2)
  */
 function getRampFlowerStreamProperties(type: FlowerParticleType = 'pink', count?: number): Partial<ParticlesProperties> {
   const meshEntity = getCachedPlaneMesh(type);
 
-  const defaultCount = type === 'pink' ? 150 : (type === 'red' ? 100 : 80);
+  const defaultCount = type === 'pink' ? 250 : (type === 'red' ? 200 : 150);
   const amount = count ?? defaultCount;
 
-  // Normalized direction down the ramp slope
-  const dir = new Vector3(0.0, -0.25, -1.0).normalize();
+  // Blender: (0.0, 8.75, 1.5) -> Godot (X, Z, -Y): (0.0, 1.5, -8.75)
+  const dir = new Vector3(0.0, 1.5, -8.75).normalize();
 
   return {
     meshNodeID: meshEntity.mesh.nodeID ?? -1,
 
     isEmitting: true,
     isOneShot: false,
-    randomness: 0.8,
+    randomness: 0.0,
     explosiveness: 0.0,
 
     amount,
-    lifetimeInSeconds: 4.0,
+    lifetimeInSeconds: 1.25,
     speedScale: 1.0,
-    scaleMin: 0.7,
-    scaleMax: 1.2,
+    scaleMin: 0.51,
+    scaleMax: 0.77,
 
-    emissionShape: 'Box',
+    emissionShape: 'Sphere',
     emissionShapeProperties: {
-      boxExtents: new Vector3(2.5, 0.5, 2.5),
+      sphereRadius: 0.05,
     },
 
     direction: dir,
-    spread: 15.0,
-    initialVelocityMin: 12.0,
-    initialVelocityMax: 16.0,
+    spread: 27.0,
+    initialVelocityMin: 7.5,
+    initialVelocityMax: 10.5,
 
-    gravity: new Vector3(0.0, -2.5, 0.0),
+    gravity: new Vector3(0.0, -9.8, 0.0),
 
     initialRotationMin: Vector3.zero,
     initialRotationMax: new Vector3(360, 360, 360),
-    rotationVelocityMin: new Vector3(-120, -120, -120),
-    rotationVelocityMax: new Vector3(120, 120, 120),
+    rotationVelocityMin: new Vector3(-140, -140, -140),
+    rotationVelocityMax: new Vector3(140, 140, 140),
 
     transformAlign: {
       type: 'Disabled',
@@ -213,16 +214,19 @@ function getHexFlowerShooterProperties(type: FlowerParticleType = 'pink', count?
 
 /**
  * oarflowersplash (Oar Paddle Water Entry Splashes)
- * Bursts flower petals upward and back when the rotating oar paddle strikes the water.
+ * Bursts flower petals upward when the rotating oar paddle strikes the water.
  *
  * Parameters based on Blender emitter config:
- * - Amount: ~150 total (Pink: ~75, Red: ~45, Leaf: ~30)
- * - Lifetime: 2.1s (50 frames at 24fps)
- * - Explosiveness: 1.0 (burst mode)
- * - Initial Velocity: Vector3(0.0, 6.5, 2.5) in Godot coordinates (Blender: (0.0, -2.5, 6.5))
- * - Gravity: Vector3(0.0, -7.0, 0.0)
- * - Random velocity: 3.0
- * - Scale: 0.5 - 1.0
+ * - Amount: 42 per burst across children (Pink: 16, Red: 13, Leaf: 13)
+ * - Lifetime: 3.0s (72 frames @ 24fps)
+ * - Lifetime Randomness: 0.0 (fixed 3.0s)
+ * - Explosiveness: 1.0 (burst mode fired on impact)
+ * - Emission Shape: Sphere (R ≈ 1.28m, Blender scale 2.56)
+ * - Direction: Blender init_velocity (0.0, 0.0, 14.0) -> Godot (X, Z, -Y): Vector3.up (0, 1, 0)
+ * - Initial Velocity: ~14.0 m/s
+ * - Spread: ~8.0 deg (random_velocity 2.0 vs init_velocity 14.0)
+ * - Gravity: Vector3(0.0, -7.84, 0.0) (Blender gravity 0.8 * 9.8 m/s^2)
+ * - Scale: 0.51 - 0.77 (size: 0.64m, random: 0.2)
  */
 function getOarPaddleSplashProperties(
   type: FlowerParticleType = 'pink',
@@ -231,42 +235,39 @@ function getOarPaddleSplashProperties(
 ): Partial<ParticlesProperties> {
   const meshEntity = getCachedPlaneMesh(type);
 
-  const defaultCount = type === 'pink' ? 75 : (type === 'red' ? 45 : 30);
+  const defaultCount = type === 'pink' ? 16 : 13;
   const amount = count ?? defaultCount;
-
-  // Blender: (0.0, -2.5, 6.5) -> Godot (X, Z, -Y): (0.0, 6.5, 2.5)
-  const dir = new Vector3(0.0, 6.5, 2.5).normalize();
 
   return {
     meshNodeID: meshEntity.mesh.nodeID ?? -1,
 
     isEmitting: true,
     isOneShot,
-    randomness: 0.8,
+    randomness: 0.0,
     explosiveness: 1.0,
 
     amount,
-    lifetimeInSeconds: 2.1,
+    lifetimeInSeconds: 3.0,
     speedScale: 1.0,
-    scaleMin: 0.5,
-    scaleMax: 1.0,
+    scaleMin: 0.51,
+    scaleMax: 0.77,
 
-    emissionShape: 'Box',
+    emissionShape: 'Sphere',
     emissionShapeProperties: {
-      boxExtents: new Vector3(1.0, 0.5, 1.0),
+      sphereRadius: 1.28,
     },
 
-    direction: dir,
-    spread: 35.0,
-    initialVelocityMin: 5.5,
-    initialVelocityMax: 8.5,
+    direction: Vector3.up,
+    spread: 8.0,
+    initialVelocityMin: 13.0,
+    initialVelocityMax: 15.0,
 
-    gravity: new Vector3(0.0, -7.0, 0.0),
+    gravity: new Vector3(0.0, -7.84, 0.0),
 
     initialRotationMin: Vector3.zero,
     initialRotationMax: new Vector3(360, 360, 360),
-    rotationVelocityMin: new Vector3(-180, -180, -180),
-    rotationVelocityMax: new Vector3(180, 180, 180),
+    rotationVelocityMin: new Vector3(-140, -140, -140),
+    rotationVelocityMax: new Vector3(140, 140, 140),
 
     transformAlign: {
       type: 'Disabled',
