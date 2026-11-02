@@ -35,13 +35,13 @@ export const FlowerParticleEmitters = {
 
   // Positions from Blender export (converted to Godot Y-Up coords: X, Z, -Y)
   LOCATIONS: {
-    rampFlowerStream: new Vector3(0.0000, 25.2000, 120.3200),
-    hexTowerLeft: new Vector3(-53.6900, 18.1100, 90.4200),
-    hexTowerRight: new Vector3(53.7600, 18.1100, 90.4300),
-    hexShooterProp55851: new Vector3(36.4000, 5.2800, -32.0800),
-    hexShooterProp55854: new Vector3(-36.4000, 5.2800, -32.0800),
-    oarPaddleSplashRight: new Vector3(14.0800, 2.4800, 28.8000),
-    oarPaddleSplashLeft: new Vector3(-14.0800, 2.4800, 28.8000),
+    rampFlowerStream: new Vector3(0.0000, 135.2000, 120.3200),
+    hexTowerLeft: new Vector3(-53.6900, 128.1100, 90.4200),
+    hexTowerRight: new Vector3(53.7600, 128.1100, 90.4300),
+    hexShooterProp55851: new Vector3(36.4000, 115.2800, -32.0800),
+    hexShooterProp55854: new Vector3(-36.4000, 115.2800, -32.0800),
+    oarPaddleSplashRight: new Vector3(14.0800, 112.4800, 28.8000),
+    oarPaddleSplashLeft: new Vector3(-14.0800, 112.4800, 28.8000),
   },
 };
 
@@ -171,7 +171,7 @@ function getRampFlowerStreamProperties(type: FlowerParticleType = 'pink', count?
 function getHexFlowerShooterProperties(type: FlowerParticleType = 'pink', count?: number): Partial<ParticlesProperties> {
   const meshEntity = getCachedPlaneMesh(type);
 
-  const defaultCount = type === 'pink' ? 100 : (type === 'red' ? 60 : 40);
+  const defaultCount = type === 'pink' ? 200 : (type === 'red' ? 175 : 125);
   const amount = count ?? defaultCount;
 
   return {
@@ -179,32 +179,31 @@ function getHexFlowerShooterProperties(type: FlowerParticleType = 'pink', count?
 
     isEmitting: true,
     isOneShot: false,
-    randomness: 0.9,
-    explosiveness: 1.0,
+    randomness: 0.125,
+    explosiveness: 0.0,
 
     amount,
-    lifetimeInSeconds: 3.5,
+    lifetimeInSeconds: 3.75,
     speedScale: 1.0,
-    scaleMin: 0.6,
-    scaleMax: 1.2,
+    scaleMin: 0.51,
+    scaleMax: 0.77,
 
     emissionShape: 'Sphere',
     emissionShapeProperties: {
-      sphereRadius: 0.3,
+      sphereRadius: 0.48,
     },
 
     direction: Vector3.up,
-    spread: 30.0,
-    initialVelocityMin: 18.0,
-    initialVelocityMax: 24.0,
+    spread: 7.0,
+    initialVelocityMin: 20.0,
+    initialVelocityMax: 22.5,
 
-    // Buoyant gravity: low mass & high air drag petals drift gently down
-    gravity: new Vector3(0.0, -3.0, 0.0),
+    gravity: new Vector3(0.0, -7.84, 0.0),
 
     initialRotationMin: Vector3.zero,
     initialRotationMax: new Vector3(360, 360, 360),
-    rotationVelocityMin: new Vector3(-220, -220, -220),
-    rotationVelocityMax: new Vector3(220, 220, 220),
+    rotationVelocityMin: new Vector3(-140, -140, -140),
+    rotationVelocityMax: new Vector3(140, 140, 140),
 
     transformAlign: {
       type: 'Disabled',
