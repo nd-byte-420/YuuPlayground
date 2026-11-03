@@ -37,7 +37,7 @@ let updateListenerId: number | undefined;
 let currentAngle = 0;
 
 /**
- * Registers ramp flower entities and begins continuous local Y-axis rotation.
+ * Registers ramp flower entities and begins continuous local Z-axis rotation.
  */
 export function registerRampFlowers(entities: RampFlowerEntities) {
   flowers = [];
@@ -75,8 +75,8 @@ export function registerRampFlowers(entities: RampFlowerEntities) {
         const theta = flower.direction * currentAngle;
         const half = theta * 0.5;
 
-        // Local rotation around local Y-axis: (0, sin(theta/2), 0, cos(theta/2))
-        const qLocal = new Quaternion(0, Math.sin(half), 0, Math.cos(half));
+        // Local rotation around local Z-axis (normal to the flower face): (0, 0, sin(theta/2), cos(theta/2))
+        const qLocal = new Quaternion(0, 0, Math.sin(half), Math.cos(half));
 
         // Intrinsic rotation: base orientation multiplied by local delta
         flower.entity.rot = flower.baseRot.multiply(qLocal);
