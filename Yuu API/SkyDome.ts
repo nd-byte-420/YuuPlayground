@@ -517,12 +517,16 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
   if (enableCelestial) {
     const radius = diameter / 2;
     const orbDir = new Vector3(0.0, 0.4, -1.0).normalize();
-    const moonPos = orbDir.multiply(radius - 0.3);
-    const glowPos = orbDir.multiply(radius - 0.15);
+    // Position planes inside the dome sphere with sufficient clearance so planar corners
+    // do not intersect the tessellated spherical mesh faces (which caused diagonal cutoffs).
+    const glowDist = radius * 0.90;
+    const moonDist = radius * 0.88;
+    const glowPos = orbDir.multiply(glowDist);
+    const moonPos = orbDir.multiply(moonDist);
     const rot = Quaternion.lookAt(orbDir.negate(), Vector3.up);
 
-    const moonDiscSize = radius * (options.moonSize ?? 0.08) * 2;
-    const glowDiscSize = radius * (options.glowSize ?? 0.22) * 2;
+    const moonDiscSize = moonDist * (options.moonSize ?? 0.08) * 2;
+    const glowDiscSize = glowDist * (options.glowSize ?? 0.22) * 2;
 
     // 1. Glow Aura Plane directly on the dome surface
     activeGlowPlane = spawnPrimitive.plane(

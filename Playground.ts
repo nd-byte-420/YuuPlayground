@@ -36,10 +36,10 @@ async function start() {
   console.log('spawned skydome with textured moon directly on dome');
 
   // Spawn flower particle emitters from particle-emitter-summary
-  FlowerParticleEmitters.spawnAllEmitters();
+  // FlowerParticleEmitters.spawnAllEmitters();
   console.log('spawned flower particle emitters');
 
-  scene.spawnScene()
+  // scene.spawnScene()
 
   Player.position.set(new Vector3(0, 13, 0));
 
