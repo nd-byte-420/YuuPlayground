@@ -3804,7 +3804,7 @@ export async function spawnScene() {
 
   // Spawn Oar_Paddle_Pivot and parented paddle blades (prop_dynamic_1240861 & prop_dynamic_1241014)
   // Continuous X-axis rotation: -2.185464 rad/s (-125.22 deg/s, ~2.875s full cycle)
-  oarPaddleEntities = OarPaddleController.spawn(spawnModel);
+  oarPaddleEntities = OarPaddleController.spawn(spawnModel, propStatic55850);
 
   // Spawn prop_static_55859
   const propStatic55859 = spawnModel(
