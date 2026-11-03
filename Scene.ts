@@ -367,10 +367,16 @@ import { getPropStatic56206 } from "./Yuu API/propStatic56206Model";
 import { getPropDynamic1233080 } from "./Yuu API/propDynamic1233080Model";
 import { getPropDynamic1233084 } from "./Yuu API/propDynamic1233084Model";
 import { Streetlight } from "./Streetlight";
+import { RampFlowerController } from "./RampFlowers";
 
 let funcIllusionary128836018189Entity: Entity | undefined;
 let funcIllusionary128836018208Entity: Entity | undefined;
 let propStatic55602Entity: Entity | undefined;
+
+let propDynamic1233080Entity: Entity | undefined;
+let propDynamic1233084Entity: Entity | undefined;
+let propDynamic1233821Entity: Entity | undefined;
+let propDynamic1233826Entity: Entity | undefined;
 
 export const scene = {
   spawnScene,
@@ -378,6 +384,12 @@ export const scene = {
     cone: funcIllusionary128836018189Entity,
     puddle: funcIllusionary128836018208Entity,
     pole: propStatic55602Entity,
+  }),
+  getRampFlowerEntities: () => ({
+    propDynamic1233080: propDynamic1233080Entity,
+    propDynamic1233084: propDynamic1233084Entity,
+    propDynamic1233821: propDynamic1233821Entity,
+    propDynamic1233826: propDynamic1233826Entity,
   }),
 }
 
@@ -3763,6 +3775,7 @@ export async function spawnScene() {
   );
 
   applyTextureToEntity(propDynamic1233826, 'prop_dynamic_1233826_atlas');
+  propDynamic1233826Entity = propDynamic1233826;
 
   // Spawn prop_static_55862
   const propStatic55862 = spawnModel(
@@ -3783,6 +3796,7 @@ export async function spawnScene() {
   );
 
   applyTextureToEntity(propDynamic1233821, 'generic_bump');
+  propDynamic1233821Entity = propDynamic1233821;
 
   // Spawn prop_dynamic_1240861
   const propDynamic1240861 = spawnModel(
@@ -3993,6 +4007,7 @@ export async function spawnScene() {
   );
 
   applyTextureToEntity(propDynamic1233080, 'generic_bump');
+  propDynamic1233080Entity = propDynamic1233080;
 
   // Spawn prop_dynamic_1233084
   const propDynamic1233084 = spawnModel(
@@ -4003,6 +4018,15 @@ export async function spawnScene() {
   );
 
   applyTextureToEntity(propDynamic1233084, 'prop_dynamic_1233826_atlas');
+  propDynamic1233084Entity = propDynamic1233084;
+
+  // Register ramp flowers for continuous rotation (Speed: 50°/s)
+  RampFlowerController.register({
+    propDynamic1233080: propDynamic1233080Entity,
+    propDynamic1233084: propDynamic1233084Entity,
+    propDynamic1233821: propDynamic1233821Entity,
+    propDynamic1233826: propDynamic1233826Entity,
+  });
 
   // Register streetlight with Day/Night cycle
   if (propStatic55602Entity || funcIllusionary128836018189Entity) {
