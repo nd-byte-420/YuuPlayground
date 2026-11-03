@@ -368,6 +368,7 @@ import { getPropDynamic1233080 } from "./Yuu API/propDynamic1233080Model";
 import { getPropDynamic1233084 } from "./Yuu API/propDynamic1233084Model";
 import { Streetlight } from "./Streetlight";
 import { RampFlowerController } from "./RampFlowers";
+import { OarPaddleController, OarPaddleEntities } from "./OarPaddle";
 
 let funcIllusionary128836018189Entity: Entity | undefined;
 let funcIllusionary128836018208Entity: Entity | undefined;
@@ -377,6 +378,8 @@ let propDynamic1233080Entity: Entity | undefined;
 let propDynamic1233084Entity: Entity | undefined;
 let propDynamic1233821Entity: Entity | undefined;
 let propDynamic1233826Entity: Entity | undefined;
+
+let oarPaddleEntities: OarPaddleEntities | undefined;
 
 export const scene = {
   spawnScene,
@@ -391,6 +394,7 @@ export const scene = {
     propDynamic1233821: propDynamic1233821Entity,
     propDynamic1233826: propDynamic1233826Entity,
   }),
+  getOarPaddleEntities: () => oarPaddleEntities,
 }
 
 function spawnModel(
@@ -3798,15 +3802,9 @@ export async function spawnScene() {
   applyTextureToEntity(propDynamic1233821, 'generic_bump');
   propDynamic1233821Entity = propDynamic1233821;
 
-  // Spawn prop_dynamic_1240861
-  const propDynamic1240861 = spawnModel(
-    getPropDynamic1240861,
-    new Vector3(8.403959, 40.436333, 12.807510),
-    new Vector3(0.010000, 0.010000, 0.010000),
-    new Quaternion(0.950192, 0.189005, -0.048346, 0.243053)
-  );
-
-  applyTextureToEntity(propDynamic1240861, 'boatwood_n');
+  // Spawn Oar_Paddle_Pivot and parented paddle blades (prop_dynamic_1240861 & prop_dynamic_1241014)
+  // Continuous X-axis rotation: -2.185464 rad/s (-125.22 deg/s, ~2.875s full cycle)
+  oarPaddleEntities = OarPaddleController.spawn(spawnModel);
 
   // Spawn prop_static_55859
   const propStatic55859 = spawnModel(
@@ -3817,16 +3815,6 @@ export async function spawnScene() {
   );
 
   applyTextureToEntity(propStatic55859, 'prop_static_55855_atlas');
-
-  // Spawn prop_dynamic_1241014
-  const propDynamic1241014 = spawnModel(
-    getPropDynamic1241014,
-    new Vector3(-10.395439, 40.436333, 12.807510),
-    new Vector3(0.010000, 0.010000, 0.010000),
-    new Quaternion(-0.048346, 0.243053, 0.950192, 0.189005)
-  );
-
-  applyTextureToEntity(propDynamic1241014, 'boatwood_n');
 
   // Spawn prop_static_55858
   const propStatic55858 = spawnModel(
