@@ -513,7 +513,7 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
     console.error("SkyDome: Failed to retrieve meshNodeID for SkyDome entity!");
   }
 
-  // Mount textured moon & glow planes directly on the SkyDome surface
+  // Mount textured moon & glow planes inside the SkyDome
   if (enableCelestial) {
     const radius = diameter / 2;
     const orbDir = new Vector3(0.0, 0.4, -1.0).normalize();
@@ -521,40 +521,40 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
     // do not intersect the tessellated spherical mesh faces (which caused diagonal cutoffs).
     const glowDist = radius * 0.90;
     const moonDist = radius * 0.88;
-    const glowPos = orbDir.multiply(glowDist);
-    const moonPos = orbDir.multiply(moonDist);
+    const glowOffset = orbDir.multiply(glowDist);
+    const moonOffset = orbDir.multiply(moonDist);
     const rot = Quaternion.lookAt(orbDir.negate(), Vector3.up);
 
     const moonDiscSize = moonDist * (options.moonSize ?? 0.08) * 2;
     const glowDiscSize = glowDist * (options.glowSize ?? 0.22) * 2;
 
-    // 1. Glow Aura Plane directly on the dome surface
+    // 1. Glow Aura Plane (spawned in world space, kept unparented so SkyDome star rotation does not rotate the moon)
     activeGlowPlane = spawnPrimitive.plane(
       'Both',
-      glowPos,
+      initialPos.add(glowOffset),
       new Vector3(glowDiscSize, glowDiscSize, 1),
       rot,
       Color.white,
       0.99,
       'None',
       'Static',
-      activeSkyDomeEntity
+      undefined
     );
     activeGlowPlane.mesh.material.emissionColor.set(Color.white);
     activeGlowPlane.mesh.material.emissionStrength.set(0.8);
     applyTextureToEntity(activeGlowPlane, 'glow');
 
-    // 2. Moon Disc Plane directly on the dome surface
+    // 2. Moon Disc Plane (spawned in world space, kept unparented so SkyDome star rotation does not rotate the moon)
     activeMoonPlane = spawnPrimitive.plane(
       'Both',
-      moonPos,
+      initialPos.add(moonOffset),
       new Vector3(moonDiscSize, moonDiscSize, 1),
       rot,
       Color.white,
       0.99,
       'None',
       'Static',
-      activeSkyDomeEntity
+      undefined
     );
     activeMoonPlane.mesh.material.emissionColor.set(Color.white);
     activeMoonPlane.mesh.material.emissionStrength.set(1.0);
@@ -565,6 +565,12 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
   const autoRotate = options.autoRotateStars ?? true;
 
   if (followPlayer || autoRotate) {
+    const orbDir = new Vector3(0.0, 0.4, -1.0).normalize();
+    const glowDist = (diameter / 2) * 0.90;
+    const moonDist = (diameter / 2) * 0.88;
+    const glowOffset = orbDir.multiply(glowDist);
+    const moonOffset = orbDir.multiply(moonDist);
+
     updateListenerId = Godot.events.onUpdate((delta) => {
       if (!activeSkyDomeEntity) return;
 
@@ -572,6 +578,12 @@ function spawnSkyDome(options: SkyDomeOptions = {}): Entity {
         const playerPos = Player.position.get();
         if (playerPos) {
           activeSkyDomeEntity.pos = playerPos;
+          if (activeGlowPlane) {
+            activeGlowPlane.pos = playerPos.add(glowOffset);
+          }
+          if (activeMoonPlane) {
+            activeMoonPlane.pos = playerPos.add(moonOffset);
+          }
         }
       }
 

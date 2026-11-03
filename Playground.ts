@@ -24,8 +24,7 @@ function updateSkydome() {
     autoRotateStars: true,
   });
 
-  // Start 24h day/night cycle (120 seconds per day)
-  SkyDome.customShader.startDayNightCycle(120);
+  SkyDome.customShader.startDayNightCycle(20);
 }
 
 registerStart(start);
@@ -36,12 +35,12 @@ async function start() {
   console.log('spawned skydome with textured moon directly on dome');
 
   // Spawn flower particle emitters from particle-emitter-summary
-  // FlowerParticleEmitters.spawnAllEmitters();
+  FlowerParticleEmitters.spawnAllEmitters();
   console.log('spawned flower particle emitters');
 
-  // scene.spawnScene()
+  scene.spawnScene()
 
-  Player.position.set(new Vector3(0, 13, 0));
+  Player.position.set(new Vector3(0, 30, 0));
 
   // if you press right trigger go up 11 units
 
@@ -49,6 +48,10 @@ async function start() {
     const prevpos = Player.position.get() || new Vector3(0, 0, 0);
     const newPos = new Vector3(prevpos.x, prevpos.y + 11, prevpos.z);
     Player.position.set(newPos);
+  })
+
+  Controller.subscribe('leftTrigger', 'Pressed', () => {
+    console.log('left trigger pressed', Player.position.get());
   })
 }
 
