@@ -13,7 +13,9 @@ import { getPropDynamic1241014 } from "./Yuu API/propDynamic1241014Model";
  * Controls the central water oar paddle wheel located between the two hex towers.
  *
  * Pivot Position (Godot Y-Up):
- * - Center: Vector3(-0.995740, 40.436333, 12.807510)
+ * - Center: Vector3(-0.995740, 38.695127, 13.760647)
+ *   (Directly mounted on oar holder prop_static_55850 at Y=38.775124, Z=13.760647,
+ *    matching particle splash targets at Y=35.7351, Z=16.9606)
  *
  * Child Paddle Blades:
  * - Right Paddle (prop_dynamic_1240861):
@@ -36,12 +38,10 @@ export interface OarPaddleEntities {
 }
 
 const PADDLE_SPIN_SPEED_RAD_PER_SEC = -2.185464;
-// Initial angle matching the Blender / Source world orientation (~151.3°)
-const INITIAL_ANGLE_RAD = 2.6407;
 
 let activeEntities: OarPaddleEntities | undefined;
 let updateListenerId: number | undefined;
-let currentAngle = INITIAL_ANGLE_RAD;
+let currentAngle = 0;
 
 export function spawnOarPaddlePivot(
   spawnModelFn: (
@@ -56,10 +56,10 @@ export function spawnOarPaddlePivot(
     parent?: Entity
   ) => Entity
 ): OarPaddleEntities {
-  // Central pivot entity
+  // Central pivot entity positioned on oar holder mount
   const pivot = new Entity(
-    new Vector3(-0.995740, 40.436333, 12.807510),
-    Quaternion.fromEuler(new Vector3(INITIAL_ANGLE_RAD, 0, 0)),
+    new Vector3(-0.995740, 38.695127, 13.760647),
+    Quaternion.one,
     Vector3.one,
     undefined,
     'Animated'
