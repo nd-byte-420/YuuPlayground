@@ -247,7 +247,7 @@ function getOarPaddleSplashProperties(
     explosiveness: 1.0,
 
     amount,
-    lifetimeInSeconds: 3.0,
+    lifetimeInSeconds: 2.875,
     speedScale: 1.0,
     scaleMin: 0.51,
     scaleMax: 0.77,
